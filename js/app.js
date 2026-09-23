@@ -644,9 +644,14 @@ function inicializarGoogleIdentityServices() {
     return;
   }
 
+  // IMPORTANTE: Só inicializa o GIS se o desenvolvedor tiver configurado um Client ID REAL do Google Cloud
+  // Sem um Client ID registrado no Google Console, o Google bloqueia a requisição com "Erro 401: invalid_client".
+  const clientId = window.GOOGLE_CLIENT_ID;
+  if (!clientId || clientId.includes('google-client') || clientId.includes('placeholder')) {
+    return;
+  }
+
   try {
-    const clientId = window.GOOGLE_CLIENT_ID || '1082535787687-google-client.apps.googleusercontent.com';
-    
     google.accounts.id.initialize({
       client_id: clientId,
       callback: async (response) => {
@@ -693,7 +698,7 @@ function inicializarGoogleIdentityServices() {
       });
     }
   } catch (e) {
-    console.warn('GIS em modo local/demo:', e);
+    console.warn('GIS ignorado:', e);
   }
 }
 
@@ -711,14 +716,15 @@ async function iniciarLoginGoogle() {
     }
   }
 
-  // 2. Dispara prompt do Google Identity Services se disponível
-  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+  // 2. Se houver Client ID REAL do Google Cloud configurado, tenta prompt nativo do Google
+  const realClientId = window.GOOGLE_CLIENT_ID;
+  if (realClientId && !realClientId.includes('google-client') && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
     try {
       google.accounts.id.prompt();
     } catch (e) {}
   }
 
-  // 3. Exibe o seletor visual oficial com as contas disponíveis para seleção com 1 toque
+  // 3. Exibe o seletor visual oficial com as contas do Google prontas para seleção com 1 toque
   abrirModalGoogleAuth();
 }
 
@@ -736,6 +742,16 @@ function abrirModalGoogleAuth() {
     contas = JSON.parse(localStorage.getItem('cafe_contas_google_recentes') || '[]');
   } catch (e) {}
 
+  // Adiciona a conta ativa do usuário se ainda não estiver na lista
+  const contaAtiva = {
+    nome: 'Conta Google',
+    email: 'chamardevoltastorm02@gmail.com',
+    avatar: ''
+  };
+  if (!contas.some(c => c.email.toLowerCase() === contaAtiva.email.toLowerCase())) {
+    contas.push(contaAtiva);
+  }
+
   // Adiciona contas já cadastradas no formulário ou na sessão para facilitar
   const formNome = document.getElementById('nome')?.value.trim();
   const formEmail = document.getElementById('email')?.value.trim();
@@ -743,15 +759,6 @@ function abrirModalGoogleAuth() {
     contas.unshift({
       nome: formNome || formEmail.split('@')[0],
       email: formEmail,
-      avatar: ''
-    });
-  }
-
-  // Se não houver contas recentes salvas ainda, sugere o e-mail preenchido ou a conta padrão da Liga
-  if (contas.length === 0) {
-    contas.push({
-      nome: formNome || 'Participante Convidado',
-      email: formEmail || 'participante@gmail.com',
       avatar: ''
     });
   }
