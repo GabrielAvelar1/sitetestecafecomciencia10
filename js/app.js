@@ -592,9 +592,11 @@ function fecharModalLogin() {
 }
 
 function iniciarLoginGoogle() {
-  const sb = window.LigaDB.getSupabase();
-  // Se o Supabase estiver online com provedor Google OAuth ativo
-  if (sb && sb.auth && typeof sb.auth.signInWithOAuth === 'function' && window.location.protocol.startsWith('http')) {
+  const sb = (window.LigaDB && typeof window.LigaDB.getSupabase === 'function') ? window.LigaDB.getSupabase() : null;
+  const isCustomConfigured = window.LigaDB && typeof window.LigaDB.isSupabaseConfigured === 'function' && window.LigaDB.isSupabaseConfigured();
+
+  // Se o Supabase estiver configurado com credenciais válidas e rodando em servidor HTTP
+  if (isCustomConfigured && sb && sb.auth && typeof sb.auth.signInWithOAuth === 'function' && window.location.protocol.startsWith('http')) {
     try {
       sb.auth.signInWithOAuth({
         provider: 'google',
@@ -604,11 +606,11 @@ function iniciarLoginGoogle() {
       });
       return;
     } catch (e) {
-      console.warn('Fallback para seletor direto Google:', e);
+      console.warn('Fallback para prompt direto do Google:', e);
     }
   }
 
-  // Modal com seletor Google direto (suporta demo local e ambiente web)
+  // Modal com seletor Google direto (suporta testes imediatos, demo local e web)
   fecharModalLogin();
   abrirModalGoogleAuth();
 }
@@ -618,9 +620,19 @@ function abrirModalGoogleAuth() {
   if (modal) {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+
     const inputNome = document.getElementById('googleInputNome');
     const inputEmail = document.getElementById('googleInputEmail');
-    if (inputEmail) inputEmail.focus();
+
+    // Preenche com o que já foi digitado no formulário, se houver
+    const formNome = document.getElementById('nome')?.value.trim();
+    const formEmail = document.getElementById('email')?.value.trim();
+    if (inputNome && !inputNome.value && formNome) inputNome.value = formNome;
+    if (inputEmail && !inputEmail.value && formEmail) inputEmail.value = formEmail;
+
+    if (inputEmail) {
+      setTimeout(() => inputEmail.focus(), 100);
+    }
   }
 }
 
@@ -865,7 +877,11 @@ window.toggleMenuMobile = toggleMenuMobile;
 window.fecharMenuMobile = fecharMenuMobile;
 window.abrirModalLogin = abrirModalLogin;
 window.fecharModalLogin = fecharModalLogin;
-window.executarLoginUsuario = executarLoginUsuario;
+window.iniciarLoginGoogle = iniciarLoginGoogle;
+window.abrirModalGoogleAuth = abrirModalGoogleAuth;
+window.fecharModalGoogleAuth = fecharModalGoogleAuth;
+window.confirmarLoginGooglePrompt = confirmarLoginGooglePrompt;
+window.executarLoginUsuario = iniciarLoginGoogle;
 window.abrirAreaDoAluno = abrirAreaDoAluno;
 window.fecharAreaDoAluno = fecharAreaDoAluno;
 window.abrirModalConsulta = abrirModalConsulta;
