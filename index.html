@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>10° Café com Ciência: Os Direitos dos Pacientes na Odontologia</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Google Fonts: Inter e Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coffee: {
+              50: '#FBF8F5',
+              100: '#F6F0E8',
+              200: '#EADCC9',
+              300: '#D6C0A5',
+              400: '#C69255',
+              500: '#A46F35',
+              600: '#784C28',
+              700: '#5C3A21',
+              800: '#3D2214',
+              900: '#26160F',
+            },
+            dental: {
+              teal: '#0D9488',
+              blue: '#0F4C81',
+              darkBlue: '#0A2D4D'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- HTML5 QR Code Scanner CDN -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- Estilos Personalizados -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-[#FAF7F2] text-stone-800 antialiased selection:bg-coffee-400 selection:text-white">
+
+  <!-- ========================================================================
+       1. NAVBAR DE NAVEGAÇÃO RESPONSIVA
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-coffee-100 shadow-sm transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo e Nome da Liga -->
+      <a href="#" class="flex items-center gap-2.5 sm:gap-3 group">
+        <div class="relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden shadow-sm bg-white p-1 border border-coffee-200 group-hover:scale-105 transition shrink-0">
+          <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
+        </div>
+        <div class="flex flex-col justify-center">
+          <span class="font-extrabold text-lg sm:text-xl text-coffee-950 tracking-tight leading-tight">Café com Ciência</span>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span class="text-[11px] sm:text-xs text-stone-500 font-medium leading-none">Liga Acadêmica de Odontologia</span>
+            <span class="hidden sm:inline-flex px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-md bg-coffee-100 text-coffee-800 border border-coffee-300 leading-none">10ª Edição</span>
+          </div>
+        </div>
+      </a>
+
+      <!-- Links de Navegação Desktop -->
+      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-stone-600">
+        <a href="#palestrante" class="hover:text-coffee-700 transition">A Palestrante</a>
+        <a href="#local" class="hover:text-coffee-700 transition">Data & Local</a>
+        <a href="#inscricao" class="hover:text-coffee-700 transition font-semibold text-coffee-800">Inscrição</a>
+      </nav>
+
+      <!-- Botões de Ação Desktop -->
+      <div class="hidden md:flex items-center gap-2.5">
+        
+        <!-- Área da Conta do Usuário (Desktop) -->
+        <div id="userAreaDesktop"></div>
+
+        <!-- Botão Acesso Organização (Apenas Visível para Organizadores Logados) -->
+        <button id="btnPainelLigaDesktop" onclick="abrirPainelAdmin()" title="Painel da Liga Acadêmica" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded-lg border border-amber-300 transition">
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
+          <span>Painel da Liga</span>
+        </button>
+
+        <!-- CTA Inscrição -->
+        <a href="#inscricao" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white gradient-cta shadow-md hover:shadow-lg transition transform active:scale-95">
+          <span>Garantir Vaga</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Botão Hambúrguer para Mobile -->
+      <div class="flex items-center gap-2 md:hidden">
+        <a href="#inscricao" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white gradient-cta shadow-sm">
+          Inscrever
+        </a>
+        <button 
+          id="btnMenuMobile" 
+          onclick="toggleMenuMobile()" 
+          class="p-2 rounded-xl text-stone-700 hover:text-coffee-950 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition"
+          aria-label="Abrir menu de navegação"
+        >
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Menu Gaveta Mobile (Dropdown / Drawer) -->
+    <div id="menuMobile" class="hidden md:hidden border-t border-coffee-100 bg-white/98 backdrop-blur-xl px-4 py-5 shadow-xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-200">
+      
+      <!-- Navegação Links Mobile -->
+      <div class="flex flex-col space-y-2 text-sm font-semibold text-stone-700">
+        <a href="#palestrante" onclick="fecharMenuMobile()" class="py-2 px-3 rounded-lg hover:bg-coffee-50 transition">
+          A Palestrante
+        </a>
+        <a href="#local" onclick="fecharMenuMobile()" class="py-2 px-3 rounded-lg hover:bg-coffee-50 transition">
+          Data & Local
+        </a>
+        <a href="#inscricao" onclick="fecharMenuMobile()" class="py-2 px-3 rounded-lg hover:bg-coffee-50 text-coffee-800 transition">
+          Inscrição (R$ 10)
+        </a>
+      </div>
+
+      <!-- Área de Conta no Mobile -->
+      <div id="userAreaMobile" class="pt-2 border-t border-stone-100"></div>
+
+      <!-- Painel da Liga no Mobile (Apenas Organizadores) -->
+      <button 
+        id="btnPainelLigaMobile" 
+        onclick="fecharMenuMobile(); abrirPainelAdmin();" 
+        class="hidden w-full py-2.5 px-4 bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
+      >
+        <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
+        <span>Painel da Liga (Organização)</span>
+      </button>
+
+      <!-- Acesso Restrito Organizador (Link Discreto no Rodapé do Menu) -->
+      <div class="pt-2 text-center border-t border-stone-100">
+        <button onclick="fecharMenuMobile(); abrirModalLoginOrganizador();" class="text-[11px] text-stone-400 hover:text-stone-700 underline">
+          Acesso da Comissão da Liga
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. HERO SECTION COM BANNER OFICIAL
+       ======================================================================== -->
+  <section class="relative overflow-hidden gradient-coffee-hero text-white pt-12 pb-20 lg:pt-16 lg:pb-28">
+    <!-- Efeitos de luz no fundo -->
+    <div class="absolute -top-24 -left-24 w-96 h-96 bg-coffee-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-dental-teal/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Texto & Detalhes Principais -->
+        <div class="lg:col-span-6 space-y-6">
+          
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-coffee-200 text-xs font-semibold uppercase tracking-wider">
+            10ª Edição Comemorativa · Presencial
+          </div>
+
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
+            DÉCIMO CAFÉ COM CIÊNCIA: 
+            <span class="block text-transparent bg-clip-text bg-gradient-to-r from-coffee-300 via-coffee-200 to-amber-200 font-serif italic font-normal">
+              Os Direitos dos Pacientes na Odontologia
+            </span>
+          </h1>
+
+          <p class="text-stone-300 text-base sm:text-lg leading-relaxed">
+            Uma palestra essencial sobre segurança jurídica, ética profissional e a autonomia dos pacientes no consultório odontológico. Prepare-se para a prática clínica com excelência e respaldo legal.
+          </p>
+
+          <!-- Badges de Informações do Evento -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
+            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+              <div class="flex items-center gap-2 text-coffee-300 text-xs font-semibold mb-1">
+                <i data-lucide="calendar" class="w-4 h-4"></i> Data
+              </div>
+              <div class="text-white font-bold text-sm">30 de Outubro</div>
+              <div class="text-stone-400 text-xs">Às 15:00 horas</div>
+            </div>
+
+            <div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+              <div class="flex items-center gap-2 text-coffee-300 text-xs font-semibold mb-1">
+                <i data-lucide="map-pin" class="w-4 h-4"></i> Local
+              </div>
+              <div class="text-white font-bold text-sm">UniArnaldo</div>
+              <div class="text-stone-400 text-xs">Campus Anchieta · Sala 202</div>
+            </div>
+
+            <div class="col-span-2 sm:col-span-1 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-3">
+              <div class="flex items-center gap-2 text-coffee-300 text-xs font-semibold mb-1">
+                <i data-lucide="award" class="w-4 h-4"></i> Certificado
+              </div>
+              <div class="text-white font-bold text-sm">Incluso</div>
+              <div class="text-stone-400 text-xs">Horas Complementares</div>
+            </div>
+          </div>
+
+          <!-- Chamada de Ação e Valor -->
+          <div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="#inscricao" class="inline-flex items-center justify-center gap-3 px-7 py-4 rounded-xl text-base font-bold text-white gradient-cta shadow-xl hover:shadow-2xl transition transform active:scale-95 shine-effect">
+              <span>Inscrever-se por apenas R$ 10,00</span>
+              <i data-lucide="arrow-right" class="w-5 h-5"></i>
+            </a>
+
+            <button onclick="abrirModalConsulta()" class="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-xs sm:text-sm font-semibold text-stone-200 bg-white/10 hover:bg-white/15 border border-white/20 transition backdrop-blur-md">
+              <i data-lucide="search" class="w-4 h-4 text-amber-300"></i>
+              <span>Já me inscrevi (Ver Credencial)</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 text-stone-300 text-xs pt-1">
+            <i data-lucide="coffee" class="w-4 h-4 text-coffee-400"></i>
+            <span>Com Coffee Break & Networking</span>
+          </div>
+
+        </div>
+
+        <!-- Banner Oficial em Moldura Destaque -->
+        <div class="lg:col-span-6 flex justify-center">
+          <div class="relative w-full max-w-lg">
+            <!-- Glow decorativo atrás do banner -->
+            <div class="absolute -inset-1.5 bg-gradient-to-r from-coffee-400 to-amber-600 rounded-3xl blur-lg opacity-40 group-hover:opacity-75 transition duration-500"></div>
+            
+            <div class="relative bg-stone-900 rounded-2xl overflow-hidden shadow-2xl border border-white/15">
+              <div class="bg-stone-950/80 px-4 py-2 flex items-center justify-between border-b border-white/10 text-xs text-stone-400">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="font-medium text-stone-300">Banner Oficial do Evento</span>
+                </div>
+                <span class="text-[11px] bg-white/10 px-2 py-0.5 rounded text-stone-300 font-mono">10° Edição</span>
+              </div>
+              
+              <img 
+                src="banner.jpeg" 
+                alt="Banner 10° Café com Ciência: Os Direitos dos Pacientes na Odontologia - Profa. Carolina Diniz" 
+                class="w-full h-auto object-cover hover:scale-[1.02] transition duration-500"
+              />
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       3. PALESTRANTE EM DESTAQUE
+       ======================================================================== -->
+  <section id="palestrante" class="py-20 bg-white border-b border-coffee-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <span class="text-xs font-bold uppercase tracking-wider text-coffee-600 bg-coffee-100 px-3 py-1 rounded-full border border-coffee-200">
+          Palestrante Convidada
+        </span>
+        <h2 class="text-3xl font-extrabold text-coffee-900 mt-3 sm:text-4xl">
+          Profa. Carolina Diniz
+        </h2>
+        <p class="text-stone-600 text-base mt-2">
+          Ampla trajetória profissional dedicada à segurança do cuidado, conformidade regulatória e direitos dos pacientes na saúde.
+        </p>
+      </div>
+
+      <!-- Grid com a Imagem Oficial do Currículo e a Lista Estruturada -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+        
+        <!-- Coluna 1: Imagem Oficial do Cartaz da Palestrante -->
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="w-full max-w-md bg-stone-900 rounded-2xl p-2.5 shadow-xl border border-coffee-200 group">
+            <div class="relative overflow-hidden rounded-xl bg-stone-950">
+              <img 
+                src="palestrante_detalhes.png" 
+                alt="Profa. Carolina Diniz - Os Direitos dos Pacientes na Odontologia - 10° Café com Ciência" 
+                class="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-300"
+              />
+            </div>
+            <div class="pt-2.5 pb-1 px-2 flex items-center justify-between text-xs text-stone-400">
+              <span class="flex items-center gap-1.5 text-stone-300 font-medium">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
+                Currículo & Apresentação
+              </span>
+              <a href="palestrante_detalhes.png" target="_blank" class="text-coffee-300 hover:text-white underline text-[11px]">
+                Ampliar imagem
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna 2: Informações Estruturadas da Palestrante -->
+        <div class="lg:col-span-7 bg-coffee-50/50 rounded-3xl p-6 sm:p-8 border border-coffee-200 shadow-sm space-y-4">
+          
+          <div class="flex items-center gap-3 pb-3 border-b border-coffee-200">
+            <div class="w-10 h-10 rounded-xl bg-coffee-600 text-white flex items-center justify-center shadow-sm">
+              <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-coffee-950">Formação Acadêmica e Atuação Profissional</h3>
+              <p class="text-xs text-stone-500">Conheça as qualificações e especialidades da palestrante</p>
+            </div>
+          </div>
+
+          <ul class="space-y-2.5 text-sm text-stone-700">
+            
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Graduada em Enfermagem;</strong></span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Especialista em Auditoria e Mecanismos de Regulação em Saúde</strong> pela Fundação Unimed;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Acreditação:</strong> qualidade no serviço de saúde pela Faculdade de Ciências Médicas de Minas Gerais;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>MBA em Inovação;</strong></span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Gestão e Serviços de Saúde</strong> pela PUCRS;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>MBA de Gestão Ágil</strong> pela Universidade Mindmaster;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Certificação em Governança Clínica e do Cuidado</strong> pelo CBEXS;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Especialista em Direito do Paciente pelo IBDPAC</strong> e Especialização em Saúde Coletiva com área de concentração em Saúde Digital pela Universidade Federal da Bahia;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Membro do Observatório dos Direitos do Paciente</strong> da UnB;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Associada e Membro do Núcleo de Pesquisa</strong> da SOBRASP;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Enfermeira referência técnica</strong> na Coordenação de Planejamento da Gerência da Rede Ambulatorial Especializada da PBH;</span>
+            </li>
+
+            <li class="flex items-start gap-3 bg-white p-3 rounded-xl border border-coffee-100 shadow-sm">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-coffee-600 shrink-0 mt-0.5"></i>
+              <span><strong>Mentora em Segurança do Paciente.</strong></span>
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       4. LOCALIZAÇÃO E DETALHES
+       ======================================================================== -->
+  <section id="local" class="py-20 bg-white border-y border-coffee-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <div class="lg:col-span-5 space-y-6">
+          <span class="text-xs font-bold uppercase tracking-wider text-coffee-600 bg-coffee-100 px-3 py-1 rounded-full border border-coffee-200">
+            Localização e Horário
+          </span>
+          <h2 class="text-3xl font-extrabold text-coffee-900 sm:text-4xl">
+            Onde e quando vai acontecer?
+          </h2>
+          <p class="text-stone-600 text-sm sm:text-base leading-relaxed">
+            Nosso encontro será presencial nas confortáveis instalações da UniArnaldo, em Belo Horizonte. 
+          </p>
+
+          <div class="space-y-4 pt-2">
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-coffee-50 border border-coffee-200">
+              <div class="w-10 h-10 rounded-lg bg-coffee-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="calendar" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-coffee-700">Data e Horário</span>
+                <p class="font-bold text-coffee-950 text-base">30 de Outubro · 15:00 horas</p>
+                
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-coffee-50 border border-coffee-200">
+              <div class="w-10 h-10 rounded-lg bg-coffee-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <i data-lucide="map-pin" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <span class="text-xs font-semibold uppercase tracking-wider text-coffee-700">Local do Evento</span>
+                <p class="font-bold text-coffee-950 text-base">UniArnaldo - Campus Anchieta</p>
+                <p class="text-sm text-stone-700">Rua Vitório Marçola, 360, Sala 202</p>
+                <p class="text-xs text-stone-500">Bairro Anchieta, Belo Horizonte - MG</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <a 
+              href="https://maps.google.com/?q=UniArnaldo+Campus+Anchieta+Rua+Vitorio+Marcola+360+Belo+Horizonte" 
+              target="_blank" 
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-coffee-400 text-coffee-800 font-semibold text-sm hover:bg-coffee-100 transition"
+            >
+              <i data-lucide="navigation" class="w-4 h-4 text-coffee-600"></i>
+              <span>Abrir rota no Google Maps</span>
+            </a>
+          </div>
+
+        </div>
+
+        <!-- Mapa Embed Google Maps -->
+        <div class="lg:col-span-7">
+          <div class="map-container border border-coffee-200 h-[380px] w-full relative bg-stone-100">
+            <iframe 
+              title="Mapa UniArnaldo Campus Anchieta"
+              src="https://maps.google.com/maps?q=UniArnaldo%20Campus%20Anchieta%20Rua%20Vitorio%20Marcola%20360%20Belo%20Horizonte&t=&z=16&ie=UTF8&iwloc=&output=embed" 
+              class="w-full h-full border-0" 
+              allowfullscreen="" 
+              loading="lazy" 
+              referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       5. ÁREA DE INSCRIÇÃO & PAGAMENTO PIX
+       ======================================================================== -->
+  <section id="inscricao" class="py-20 bg-[#FAF7F2] relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Cabeçalho da Seção -->
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-pix text-xs font-bold mb-3">
+           Inscrição Imediata via PIX
+        </div>
+        <h2 class="text-3xl font-extrabold text-coffee-900 sm:text-4xl">
+          Garanta seu lugar no 10° Café com Ciência
+        </h2>
+        <p class="text-stone-600 text-sm sm:text-base mt-2">
+          Para mantermos a qualidade do evento e o coffee break, solicitamos a contribuição de apenas        <strong>R$ 10,00</strong>.
+          Faça o Pix, anexe o comprovante abaixo e sua vaga estará assegurada!
+        </p>
+      </div>
+
+      <!-- Grid Principal: PIX à Esquerda e Formulário à Direita -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- CARD DO PIX (ESQUERDA) -->
+        <div class="lg:col-span-5 ticket-card border border-coffee-200 p-6 sm:p-8">
+          
+          <div class="flex items-center justify-between pb-5 border-b border-coffee-100">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+                PIX
+              </div>
+              <div>
+                <h3 class="font-bold text-coffee-950 text-sm">Pagamento da Inscrição</h3>
+                <span class="text-xs text-stone-500">10° Café com Ciência</span>
+              </div>
+            </div>
+            
+            <div class="text-right">
+              <span class="text-xs text-stone-400 block uppercase font-semibold">Valor Único</span>
+              <span class="text-2xl font-black text-coffee-900">R$ 10,00</span>
+            </div>
+          </div>
+
+          <!-- QR Code Central -->
+          <div class="py-6 flex flex-col items-center justify-center text-center">
+            <div class="p-3 bg-white rounded-2xl shadow-inner border border-coffee-200 mb-3 relative group">
+              <img 
+                id="pixQrCode" 
+                src="" 
+                alt="QR Code PIX para pagamento de R$ 10,00" 
+                class="w-44 h-44 object-contain rounded-lg"
+              />
+            </div>
+            <p class="text-xs text-stone-500">Aponte a câmera do aplicativo do seu banco para ler o QR Code</p>
+          </div>
+
+          <!-- Chave Pix Copia e Cola -->
+          <div class="space-y-3 pt-2 border-t border-coffee-100">
+            <label class="block text-xs font-bold text-coffee-900 uppercase tracking-wider">
+              Ou pague pela Chave Pix (E-mail):
+            </label>
+
+            <div class="flex items-center gap-2 bg-coffee-50 p-2.5 rounded-xl border border-coffee-200">
+              <i data-lucide="key" class="w-4 h-4 text-coffee-600 shrink-0 ml-1"></i>
+              <span id="chavePixText" class="text-xs sm:text-sm font-mono font-semibold text-coffee-950 truncate select-all flex-1">
+                cafecomciencia.liga@gmail.com
+              </span>
+            </div>
+
+            <button 
+              id="btnCopiarPix" 
+              type="button"
+              class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-coffee-300 bg-white hover:bg-coffee-50 font-bold text-xs sm:text-sm text-coffee-900 transition shadow-sm"
+            >
+              <i data-lucide="copy" class="w-4 h-4 text-coffee-600"></i>
+              <span>Copiar Chave PIX</span>
+            </button>
+          </div>
+
+          <!-- Dados do Titular -->
+          <div class="mt-5 p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs text-stone-600 space-y-1">
+            <div class="flex justify-between">
+              <span class="text-stone-400 font-medium">Titular:</span>
+              <span id="titularPixText" class="font-semibold text-stone-800">Organização Café com Ciência</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-stone-400 font-medium">Finalidade:</span>
+              <span class="font-medium text-stone-800">Inscrição 10° Evento</span>
+            </div>
+          </div>
+
+          <!-- Dica Importante -->
+          <div class="mt-4 flex items-start gap-2.5 text-xs text-amber-800 bg-amber-50/80 p-3 rounded-xl border border-amber-200">
+            <i data-lucide="alert-circle" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+            <span>Após realizar o Pix de <strong>R$ 10,00</strong>, guarde o comprovante em foto ou PDF para anexar ao lado.</span>
+          </div>
+
+        </div>
+
+        <!-- FORMULÁRIO DE INSCRIÇÃO (DIREITA) -->
+        <div class="lg:col-span-7 bg-white rounded-3xl border border-coffee-200 p-6 sm:p-10 shadow-sm">
+          
+          <div class="mb-6">
+            <h3 class="text-xl font-bold text-coffee-950">Formulário de Inscrição Oficial</h3>
+            <p class="text-xs sm:text-sm text-stone-500 mt-1">
+              Preencha seus dados com atenção. Eles serão utilizados para a lista de presença e emissão do certificado.
+            </p>
+          </div>
+
+          <form id="formInscricao" class="space-y-5">
+            
+            <!-- Campo Nome Completo -->
+            <div>
+              <label for="nome" class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                Nome Completo <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                  <i data-lucide="user" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="text" 
+                  id="nome" 
+                  name="nome" 
+                  required 
+                  placeholder="Ex: Maria Clara dos Santos" 
+                  class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 transition outline-none"
+                />
+              </div>
+              <span class="text-[11px] text-stone-400 mt-1 block">Insira como deve constar no certificado de participação.</span>
+            </div>
+
+            <!-- Campo E-mail -->
+            <div>
+              <label for="email" class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                E-mail Institucional ou Pessoal <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                  <i data-lucide="mail" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  required 
+                  placeholder="seuemail@exemplo.com" 
+                  class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 transition outline-none"
+                />
+              </div>
+            </div>
+
+            <!-- Campo WhatsApp -->
+            <div>
+              <label for="telefone" class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                Telefone / WhatsApp <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                  <i data-lucide="phone" class="w-4 h-4"></i>
+                </div>
+                <input 
+                  type="tel" 
+                  id="telefone" 
+                  name="telefone" 
+                  required 
+                  placeholder="(31) 99999-9999" 
+                  maxlength="15"
+                  class="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 transition outline-none"
+                />
+              </div>
+              <span class="text-[11px] text-stone-400 mt-1 block">Para avisos sobre o evento e envio de confirmação.</span>
+            </div>
+
+            <!-- Campo Envio do Comprovante PIX (Obrigatório) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900">
+                  Comprovante do Pix (R$ 10,00) <span class="text-red-500">*</span>
+                </label>
+                <span class="text-[10px] font-bold uppercase tracking-wide bg-red-100 text-red-700 px-2 py-0.5 rounded-full border border-red-200">
+                  Anexo Obrigatório
+                </span>
+              </div>
+              
+              <!-- Input File Invisível com required -->
+              <input 
+                type="file" 
+                id="comprovanteInput" 
+                accept="image/png, image/jpeg, image/jpg, image/webp, application/pdf" 
+                required
+                class="hidden" 
+              />
+
+              <!-- Dropzone Interativo -->
+              <div id="dropzone" class="dropzone-box rounded-2xl p-6 text-center cursor-pointer transition-all">
+                
+                <!-- Estado Vazio -->
+                <div id="uploadEmptyContainer" class="space-y-2">
+                  <div class="w-12 h-12 mx-auto rounded-full bg-coffee-100 text-coffee-800 flex items-center justify-center">
+                    <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <span class="text-sm font-semibold text-coffee-900">Clique para selecionar o comprovante</span>
+                    <span class="text-xs text-stone-500 block">ou arraste e solte o arquivo aqui</span>
+                  </div>
+                  <span class="text-[11px] text-stone-400 block">Formatos aceitos: JPG, PNG ou PDF (máx. 8MB)</span>
+                </div>
+
+                <!-- Estado com Arquivo Selecionado -->
+                <div id="uploadPreviewContainer" class="hidden flex items-center justify-between bg-white p-3 rounded-xl border border-coffee-200">
+                  <div class="flex items-center gap-3 overflow-hidden">
+                    <img id="previewThumb" src="" alt="Miniatura" class="w-10 h-10 rounded-lg object-cover border hidden" />
+                    <div class="text-left truncate">
+                      <span id="previewFileName" class="text-xs font-bold text-coffee-950 block truncate">comprovante.jpg</span>
+                      <span id="previewFileSize" class="text-[11px] text-stone-400">1.2 MB</span>
+                    </div>
+                  </div>
+
+                  <button 
+                    id="btnRemoverArquivo" 
+                    type="button" 
+                    class="p-1.5 text-stone-400 hover:text-red-600 rounded-lg hover:bg-stone-100 transition"
+                    title="Remover arquivo"
+                  >
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Botão de Confirmação -->
+            <div class="pt-2">
+              <button 
+                id="btnSubmitInscricao" 
+                type="submit" 
+                class="w-full py-4 px-6 rounded-xl font-bold text-base text-white gradient-cta shadow-xl hover:shadow-2xl transition transform active:scale-95 flex items-center justify-center gap-2 shine-effect"
+              >
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+                <span>Enviar Inscrição & Comprovante</span>
+              </button>
+            </div>
+
+            <!-- Aviso de Validação -->
+            <p class="text-center text-[11px] text-stone-500 flex items-center justify-center gap-1.5">
+              <i data-lucide="lock" class="w-3.5 h-3.5 text-stone-400"></i>
+              Sua inscrição é validada manualmente pela comissão após o recebimento do comprovante.
+            </p>
+
+          </form>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       6. FOOTER
+       ======================================================================== -->
+  <footer class="bg-coffee-900 text-stone-300 py-12 border-t border-coffee-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-coffee-800">
+        
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-white p-1 border border-coffee-700">
+            <img src="logo.png" alt="Logo Liga" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <span class="font-bold text-white text-base">Café com Ciência</span>
+            <p class="text-xs text-stone-400">Liga Acadêmica de Odontologia · 10ª Edição</p>
+          </div>
+        </div>
+
+        <!-- Informações e Contato -->
+        <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-stone-400">
+          <span>UniArnaldo - Campus Anchieta</span>
+          <span>Belo Horizonte - MG</span>
+          <button onclick="abrirPainelAdmin()" class="text-coffee-300 hover:text-white underline">
+            Acesso da Liga
+          </button>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-3 text-center">
+        <p>© 2026 Liga Odontológica Café com Ciência. Todos os direitos reservados.</p>
+        <p>Desenvolvido para organização e arrecadação direta da 10ª edição.</p>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       MODAL 1: CREDENCIAL DE INSCRIÇÃO OFICIAL COM QR CODE
+       ======================================================================== -->
+  <div id="credencialModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-modal">
+    <div class="max-w-md w-full max-h-[94vh] overflow-y-auto relative rounded-3xl">
+      <!-- Botão de Fechar -->
+      <button onclick="fecharCredencialModal()" class="sticky top-3 float-right mr-3 z-20 p-2 rounded-full bg-stone-900/90 hover:bg-black text-white shadow-lg transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Conteúdo Injetado Dinamicamente pelo js/app.js -->
+      <div id="credencialContent"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 2: CONSULTA DE INSCRIÇÃO & EMISSÃO DE CERTIFICADO
+       ======================================================================== -->
+  <div id="consultaModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-coffee-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-coffee-950">Consultar Inscrição & Certificado</h3>
+            <p class="text-xs text-stone-500">Acesse sua credencial com QR Code ou baixe seu certificado</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalConsulta()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+            E-mail ou Protocolo de Inscrição
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="inputBuscaInscricao" 
+              placeholder="Ex: seuemail@exemplo.com ou CC10-123456" 
+              class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 outline-none"
+              onkeydown="if(event.key === 'Enter') executarBuscaInscricao()"
+            />
+            <button 
+              onclick="executarBuscaInscricao()" 
+              class="px-5 py-3 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-sm rounded-xl transition flex items-center gap-1.5 shrink-0"
+            >
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Área onde o resultado da consulta é exibido -->
+        <div id="resultadoConsultaInscricao" class="hidden"></div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+        <span>Ainda não se inscreveu?</span>
+        <a href="#inscricao" onclick="fecharModalConsulta()" class="font-bold text-coffee-800 hover:underline">
+          Fazer Inscrição Agora (R$ 10)
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: LOGIN DO ALUNO / USUÁRIO (COM GOOGLE)
+       ======================================================================== -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      
+      <!-- Topo -->
+      <div class="flex items-center justify-between pb-4 border-b border-coffee-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200">
+            <i data-lucide="user" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-coffee-950">Acesse sua Conta</h3>
+            <p class="text-xs text-stone-500">Sem senhas · Conexão com Google</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalLogin()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Explicação e Benefícios -->
+      <div class="text-center py-2 space-y-2">
+        <p class="text-sm text-stone-600 leading-relaxed">
+          Você não precisa memorizar nem criar senhas. Entre diretamente com sua <strong>Conta Google</strong> para acessar seu comprovante oficial e baixar seu certificado!
+        </p>
+        <span class="inline-block text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          ✓ Você pode entrar mesmo se ainda não se inscreveu
+        </span>
+      </div>
+
+      <!-- Botão Google Oficial -->
+      <div class="py-4">
+        <button 
+          id="btnGoogleLogin"
+          onclick="iniciarLoginGoogle()" 
+          class="w-full py-3.5 px-4 bg-white hover:bg-stone-50 text-stone-800 font-bold text-sm rounded-2xl border-2 border-stone-200 hover:border-coffee-400 shadow-md hover:shadow-lg transition flex items-center justify-center gap-3 active:scale-98"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continuar com o Google</span>
+        </button>
+      </div>
+
+      <!-- Opção de Consulta por Protocolo sem Login -->
+      <div class="text-center pt-2 pb-1">
+        <button onclick="fecharModalLogin(); abrirModalConsulta();" class="text-xs text-coffee-800 font-semibold hover:underline flex items-center justify-center gap-1.5 mx-auto">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>Já tem protocolo? Consultar comprovante rápido</span>
+        </button>
+      </div>
+
+      <div id="erroLogin" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl mt-3"></div>
+
+      <!-- Rodapé do Modal -->
+      <div class="mt-4 pt-4 border-t border-stone-100 flex flex-col items-center gap-2 text-xs text-stone-500 text-center">
+        <div>
+          <span>Ainda não se inscreveu?</span>
+          <a href="#inscricao" onclick="fecharModalLogin()" class="font-bold text-coffee-800 hover:underline ml-1">
+            Garantir vaga por R$ 10
+          </a>
+        </div>
+        <button onclick="fecharModalLogin(); abrirModalLoginOrganizador();" class="text-[11px] text-stone-400 hover:text-stone-600 underline mt-1">
+          Acesso da Comissão da Liga (Organizadores)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Google Prompt (Para teste local / confirmação de conta Google) -->
+  <div id="modalGoogleAuth" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 relative">
+      <button onclick="fecharModalGoogleAuth()" class="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-3 pb-3 border-b border-stone-100 mb-4">
+        <svg class="w-6 h-6 shrink-0" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <div>
+          <h4 class="font-bold text-stone-900 text-sm">Fazer login com o Google</h4>
+          <span class="text-[11px] text-stone-500">Café com Ciência Odontologia</span>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-stone-700 mb-1">Seu Nome</label>
+          <input type="text" id="googleInputNome" placeholder="Ex: Camila Pereira" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-stone-700 mb-1">Seu E-mail Google</label>
+          <input type="email" id="googleInputEmail" placeholder="nome@gmail.com" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none" />
+        </div>
+
+        <button 
+          id="btnConfirmarGoogle"
+          onclick="confirmarLoginGooglePrompt()" 
+          class="w-full py-2.5 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2"
+        >
+          <span>Conectar Conta</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ÁREA DO ALUNO (MINHA CONTA)
+       ======================================================================== -->
+  <div id="areaAlunoModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      <!-- Botão de Fechar -->
+      <button onclick="fecharAreaDoAluno()" class="absolute top-5 right-5 p-2 text-stone-400 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Conteúdo Injetado Dinamicamente -->
+      <div id="areaAlunoContent"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ACESSO RESTRITO - COMISSÃO DA LIGA
+       ======================================================================== -->
+  <div id="loginOrganizadorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-amber-300 relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-stone-900">Acesso da Liga Acadêmica</h3>
+            <p class="text-xs text-stone-500">Painel de Inscrições, Portaria e Lembretes</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalLoginOrganizador()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+            E-mail do Membro da Liga
+          </label>
+          <input 
+            type="email" 
+            id="inputEmailOrg" 
+            value="cafecomciencia.liga@gmail.com" 
+            class="w-full px-4 py-2.5 text-xs rounded-xl border border-stone-300 bg-stone-50 text-stone-800 focus:border-coffee-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+            Senha do Painel
+          </label>
+          <input 
+            type="password" 
+            id="inputSenhaOrg" 
+            placeholder="Digite a senha da liga (Padrão: cafe2026)" 
+            class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
+            onkeydown="if(event.key === 'Enter') executarLoginOrganizador()"
+          />
+        </div>
+
+        <div id="erroLoginOrg" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl"></div>
+
+        <button 
+          onclick="executarLoginOrganizador()" 
+          class="w-full py-3.5 px-4 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+        >
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span>Entrar no Painel da Liga</span>
+        </button>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-stone-100 text-center text-[11px] text-stone-400">
+        Acesso restrito exclusivamente aos membros da comissão organizadora.
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL 3: PAINEL DA COMISSÃO ORGANIZADORA (ADMIN COM ABAS)
+       ======================================================================== -->
+  <div id="adminModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-2 sm:p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-coffee-200 overflow-hidden">
+      
+      <!-- Topo do Painel com Abas -->
+      <div class="p-5 sm:p-6 bg-coffee-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <i data-lucide="shield-check" class="w-5 h-5 text-amber-300"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold">Painel da Liga · 10° Café com Ciência</h3>
+            <div class="flex items-center gap-3 text-xs text-stone-300 mt-0.5">
+              <span id="adminStatusDb"></span>
+              <span id="adminTotalInscricoes" class="font-semibold text-amber-300">0 inscritos</span>
+              <span class="text-stone-400">·</span>
+              <span id="adminTotalPresencas" class="text-emerald-300 font-semibold">0 presenças</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <!-- Navegação de Abas -->
+          <div class="flex bg-stone-950/40 p-1 rounded-xl text-xs">
+            <button id="tabBtn_inscricoes" onclick="trocarAbaAdmin('inscricoes')" class="px-3 py-1.5 rounded-lg transition">
+              Inscrições
+            </button>
+            <button id="tabBtn_portaria" onclick="trocarAbaAdmin('portaria')" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+              <i data-lucide="scan-line" class="w-3.5 h-3.5 text-amber-400"></i>
+              Portaria (QR)
+            </button>
+            <button id="tabBtn_lembretes" onclick="trocarAbaAdmin('lembretes')" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+              <i data-lucide="bell" class="w-3.5 h-3.5 text-emerald-400"></i>
+              Lembretes
+            </button>
+            <button id="tabBtn_config" onclick="trocarAbaAdmin('config')" class="px-3 py-1.5 rounded-lg transition">
+              Supabase
+            </button>
+          </div>
+
+          <button onclick="fecharPainelAdmin()" class="p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= ABA 1: LISTA DE INSCRIÇÕES ================= -->
+      <div id="tabView_inscricoes" class="flex-1 flex flex-col overflow-hidden">
+        <!-- Barra de Ações Rápidas -->
+        <div class="p-4 bg-stone-50 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-4">
+            <div>
+              <span class="text-stone-500 font-medium">Total Arrecadado:</span>
+              <span id="adminTotalArrecadado" class="font-bold text-emerald-700 text-sm ml-1">R$ 0,00</span>
+            </div>
+            <span class="text-stone-300">|</span>
+            <span class="text-stone-500">Taxa: R$ 10,00</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="carregarInscricoesAdmin()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 font-medium hover:bg-stone-100 transition">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Atualizar
+            </button>
+            
+            <button onclick="exportarParaCSV()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Lista (CSV)
+            </button>
+
+            <button onclick="limparDadosDemo()" title="Limpar dados de teste locais" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition">
+              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela com Scroll -->
+        <div class="flex-1 overflow-auto p-4">
+          <table class="w-full text-left text-sm border-collapse admin-table">
+            <thead>
+              <tr>
+                <th class="px-4 py-3 rounded-l-lg">Aluno / Protocolo</th>
+                <th class="px-4 py-3">E-mail</th>
+                <th class="px-4 py-3">WhatsApp</th>
+                <th class="px-4 py-3 text-center">Pix</th>
+                <th class="px-4 py-3 text-center">Presença</th>
+                <th class="px-4 py-3 text-center">Comprovante</th>
+                <th class="px-4 py-3 text-center">Certificado</th>
+                <th class="px-4 py-3 text-right rounded-r-lg">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="adminInscricoesList">
+              <!-- Injetado dinamicamente por js/admin.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ================= ABA 2: PORTARIA & SCANNER QR CODE ================= -->
+      <div id="tabView_portaria" class="hidden flex-1 overflow-auto p-6 sm:p-8 bg-stone-50">
+        <div class="max-w-2xl mx-auto space-y-6">
+          
+          <div class="text-center">
+            <h4 class="text-xl font-black text-coffee-950">Portaria · Validador de Presença</h4>
+            <p class="text-xs text-stone-600 mt-1">
+              Aponte a câmera para o QR Code da credencial do aluno ou digite o protocolo. O check-in libera o Certificado Oficial na hora!
+            </p>
+          </div>
+
+          <!-- Caixa da Câmera -->
+          <div class="bg-white p-6 rounded-3xl border border-coffee-200 shadow-md text-center">
+            <div id="qrReaderVideoBox" class="w-full max-w-sm aspect-square mx-auto rounded-2xl overflow-hidden bg-stone-900 border-2 border-coffee-300 relative flex items-center justify-center text-white text-xs">
+              <div class="p-6 text-center text-stone-400">
+                <i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 text-stone-500"></i>
+                <span>Câmera desligada. Clique abaixo para iniciar o leitor.</span>
+              </div>
+            </div>
+
+            <div class="mt-4 flex justify-center gap-3">
+              <button 
+                id="btnStartScanner" 
+                onclick="QRScannerPortaria.iniciarLeitorPortaria()" 
+                class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2"
+              >
+                <i data-lucide="video" class="w-4 h-4"></i>
+                <span>Ativar Câmera para Escanear</span>
+              </button>
+
+              <button 
+                id="btnStopScanner" 
+                onclick="QRScannerPortaria.pararLeitorPortaria()" 
+                class="hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2"
+              >
+                <i data-lucide="video-off" class="w-4 h-4"></i>
+                <span>Desativar Câmera</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Alternativa de Digitação Manual -->
+          <div class="bg-white p-5 rounded-2xl border border-coffee-200 shadow-sm space-y-3">
+            <label class="block text-xs font-bold text-coffee-900 uppercase">
+              Digitação Manual de Protocolo (Caso a câmera não seja usada):
+            </label>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="inputCodigoManual" 
+                placeholder="Ex: CC10-123456" 
+                class="w-full px-4 py-2.5 text-sm rounded-xl border border-stone-300 font-mono uppercase focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 outline-none"
+                onkeydown="if(event.key === 'Enter') QRScannerPortaria.validarCodigoManual()"
+              />
+              <button 
+                onclick="QRScannerPortaria.validarCodigoManual()" 
+                class="px-5 py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shrink-0"
+              >
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Validar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Resultado da Leitura -->
+          <div id="qrReaderResult" class="hidden"></div>
+
+        </div>
+      </div>
+
+      <!-- ================= ABA 3: DISPARADOR DE LEMBRETES ================= -->
+      <div id="tabView_lembretes" class="hidden flex-1 overflow-auto p-6 sm:p-8 bg-stone-50">
+        <div class="max-w-3xl mx-auto space-y-6">
+          
+          <div>
+            <h4 class="text-xl font-black text-coffee-950">Disparador de Lembretes Automáticos</h4>
+            <p class="text-xs text-stone-600 mt-1">
+              Envie lembretes com link direto da Credencial e do QR Code para que nenhum aluno esqueça a palestra.
+            </p>
+          </div>
+
+          <!-- Seleção do Modelo -->
+          <div class="bg-white p-6 rounded-2xl border border-coffee-200 shadow-sm space-y-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-2">
+                Selecione o Momento do Lembrete:
+              </label>
+              <select 
+                id="selectTipoLembrete" 
+                onchange="atualizarPreviewMensagemLembrete()" 
+                class="w-full p-3 text-sm rounded-xl border border-stone-300 bg-white font-semibold text-stone-800 focus:border-coffee-500 outline-none"
+              >
+                <option value="7_dias">🗓️ 7 Dias Antes do Evento (Lembrete de Antecedência)</option>
+                <option value="vespera" selected>⏳ Véspera do Evento (Amanhã! Lembrete com QR Code)</option>
+                <option value="hoje_portaria">📍 No Dia do Evento (Portaria Aberta às 15h)</option>
+                <option value="certificado">🎓 Pós-Evento (Seu Certificado Oficial está Disponível)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                Modelo da Mensagem (com tags automáticas):
+              </label>
+              <textarea 
+                id="textareaModeloMensagem" 
+                rows="7" 
+                class="w-full p-3.5 text-xs font-mono text-stone-800 bg-stone-50 rounded-xl border border-stone-300 focus:border-coffee-500 outline-none"
+              ></textarea>
+              <p class="text-[11px] text-stone-500 mt-1">
+                Tags substituídas automaticamente: <code class="bg-stone-200 px-1 rounded">[NOME]</code>, <code class="bg-stone-200 px-1 rounded">[PROTOCOLO]</code>, <code class="bg-stone-200 px-1 rounded">[LINK_CREDENCIAL]</code>, <code class="bg-stone-200 px-1 rounded">[LINK_CERTIFICADO]</code>.
+              </p>
+            </div>
+
+            <!-- Botões de Disparo -->
+            <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <button 
+                onclick="dispararLembretesEmLote()" 
+                class="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Disparar WhatsApp para Todos os Inscritos</span>
+              </button>
+
+              <span class="text-xs text-stone-400">ou envie individualmente na tabela de inscrições.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ================= ABA 4: CONFIGURAÇÕES SUPABASE ================= -->
+      <div id="tabView_config" class="hidden flex-1 overflow-auto p-6 sm:p-8 bg-stone-50">
+        <div class="max-w-2xl mx-auto space-y-6">
+          
+          <div>
+            <h4 class="text-xl font-black text-coffee-950">Conexão com o Supabase</h4>
+            <p class="text-xs text-stone-600 mt-1">
+              Cole as credenciais do seu projeto Supabase para armazenar tudo na nuvem com backup contínuo.
+            </p>
+          </div>
+
+          <div class="bg-white p-6 rounded-2xl border border-coffee-200 shadow-sm space-y-4">
+            <div id="badgeStatusConfigSupabase" class="text-xs pb-2 border-b border-stone-100"></div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                Project URL do Supabase
+              </label>
+              <input 
+                type="text" 
+                id="inputSupabaseUrl" 
+                placeholder="https://xyzproject.supabase.co" 
+                class="w-full px-4 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-coffee-500 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                Project API anon key (Pública)
+              </label>
+              <input 
+                type="password" 
+                id="inputSupabaseAnonKey" 
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." 
+                class="w-full px-4 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-coffee-500 outline-none"
+              />
+            </div>
+
+            <button 
+              onclick="salvarConfiguracoesSupabase()" 
+              class="px-6 py-2.5 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition"
+            >
+              Salvar Credenciais
+            </button>
+          </div>
+
+          <div class="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-2">
+            <h5 class="font-bold flex items-center gap-1.5">
+              <i data-lucide="database" class="w-4 h-4 text-amber-700"></i>
+              Script SQL de Criação das Tabelas:
+            </h5>
+            <p>
+              Abra o arquivo <strong>supabase_schema.sql</strong> gerado na pasta do projeto, copie todo o conteúdo e execute no menu <strong>SQL Editor</strong> do seu painel do Supabase.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Rodapé do Modal Admin -->
+      <div class="p-4 bg-stone-50 border-t border-stone-200 text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span>Sistema de Portaria e Lembretes · 10° Café com Ciência</span>
+        <span class="font-mono">Chave Pix: cafecomciencia.liga@gmail.com</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL VISUALIZADOR DE COMPROVANTE
+       ======================================================================== -->
+  <div id="comprovanteViewerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+        <h4 id="comprovanteViewerTitle" class="font-bold text-stone-900 text-sm">Visualizar Comprovante</h4>
+        <button onclick="fecharVisualizadorComprovante()" class="text-stone-400 hover:text-stone-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      
+      <div id="comprovanteViewerContent">
+        <!-- Imagem ou PDF embed aqui -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts da Aplicação -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/qr-scanner.js"></script>
+  <script src="js/admin.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

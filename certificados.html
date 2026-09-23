@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certificado Oficial - 10° Café com Ciência</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .certificate-page {
+      width: 100%;
+      max-width: 1122px; /* A4 width in pixels */
+      aspect-ratio: 1.414; /* A4 Landscape ratio (297/210) */
+      background-color: white;
+      position: relative;
+      margin: 2rem auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: #000;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0; 
+      }
+
+      body {
+        background-color: white;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .certificate-page {
+        width: 297mm;
+        height: 209mm;
+        max-width: none;
+        margin: 0;
+        box-shadow: none;
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+
+      .certificate-page:last-child {
+        page-break-after: auto;
+      }
+      
+      #certificates-container {
+        padding: 0;
+        margin: 0;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+
+  <!-- BARRA DE CONTROLE SUPERIOR (NÃO APARECE NA IMPRESSÃO) -->
+  <header class="no-print bg-stone-900 text-white py-4 px-6 shadow-md sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="p-2 rounded-lg bg-stone-800 hover:bg-stone-700 transition" title="Voltar para a página do evento">
+          <i data-lucide="arrow-left" class="w-5 h-5"></i>
+        </a>
+        <div>
+          <h1 class="text-base font-bold">Certificado Oficial de Participação</h1>
+          <p class="text-xs text-stone-400">10° Café com Ciência: Os Direitos dos Pacientes na Odontologia</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="window.print()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Imprimir / Salvar PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTAINER DO CERTIFICADO -->
+  <main id="certificates-container" class="w-full px-4 flex flex-col items-center">
+    
+    <div id="loadingCertificado" class="py-20 text-center text-stone-500">
+      <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-blue-600 mx-auto mb-3"></i>
+      <p class="font-medium">Carregando e autenticando declaração...</p>
+    </div>
+
+    <!-- O template será injetado aqui -->
+    <div id="certificateTarget" class="w-full flex justify-center"></div>
+
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (window.lucide) window.lucide.createIcons();
+      await carregarCertificado();
+    });
+
+    function formatarDataPorExtenso(dataStr) {
+      const meses = [
+        "janeiro", "fevereiro", "março", "abril", "maio", "junho", 
+        "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+      ];
+      const data = dataStr ? new Date(dataStr) : new Date(2026, 9, 30);
+      const dia = String(data.getDate()).padStart(2, '0');
+      const mes = meses[data.getMonth()];
+      const ano = data.getFullYear();
+      return `${dia} de ${mes} de ${ano}`;
+    }
+
+    async function carregarCertificado() {
+      const params = new URLSearchParams(window.location.search);
+      const protocolo = params.get('protocolo');
+      const nomeParam = params.get('nome');
+      const loading = document.getElementById('loadingCertificado');
+      const target = document.getElementById('certificateTarget');
+
+      let aluno = null;
+
+      if (protocolo) {
+        try {
+          aluno = await window.LigaDB.buscarInscricao(protocolo);
+        } catch (e) {
+          console.warn('Erro ao buscar inscrição:', e);
+        }
+      }
+
+      const nomeFinal = aluno ? aluno.nome_completo : (nomeParam || 'Participante Oficial');
+      const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-CC10-${Math.floor(100000 + Math.random() * 900000)}`;
+      const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || '2026-10-30');
+
+      loading.classList.add('hidden');
+
+      target.innerHTML = `
+        <div class="certificate-page flex flex-col justify-between">
+          
+          <!-- Forma Geométrica Azul - Canto Superior Esquerdo -->
+          <svg class="absolute top-0 left-0 w-[400px] sm:w-[450px] h-auto" viewBox="0 0 450 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="0,0 450,0 180,150 0,60" fill="#009ce4" />
+          </svg>
+
+          <!-- Logo Oficial Arnaldo no Canto Superior Direito -->
+          <img src="logo_arnaldo.png" alt="Logo UniArnaldo" class="absolute top-8 right-12 h-20 sm:h-24 object-contain" 
+               onerror="this.onerror=null; this.src='certificados-site/logo.png';" />
+
+          <!-- Conteúdo Central da Declaração -->
+          <div class="pt-40 sm:pt-48 px-16 sm:px-24 flex-1 flex flex-col items-center">
+            <h1 class="text-4xl sm:text-5xl font-bold text-black mb-14 tracking-wide uppercase">Declaração</h1>
+
+            <p class="text-lg sm:text-xl text-center text-black leading-relaxed max-w-4xl font-normal">
+              Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da palestra <strong>"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"</strong>, ministrada pela Profa. Carolina Diniz e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de 4 horas.
+            </p>
+
+            <p class="text-base sm:text-lg text-center text-black mt-16 font-normal">
+              Belo Horizonte, ${dataFormatada}.
+            </p>
+          </div>
+
+          <!-- Assinatura Oficial do Coordenador -->
+          <div class="pb-14 w-full flex flex-col items-center z-10 relative">
+            <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
+                 onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+            
+            <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
+            <p class="text-center text-black text-base sm:text-lg font-normal">Gerdal Roberto de Sousa</p>
+            <p class="text-center text-black text-base sm:text-lg font-normal">Coordenador do Curso de Odontologia</p>
+
+            <!-- Código de Validação no Rodapé -->
+            <div class="absolute bottom-4 right-8 text-[11px] text-stone-500 font-mono">
+              Autenticação: ${codigoAutenticidade}
+            </div>
+          </div>
+
+        </div>
+      `;
+
+      if (window.lucide) window.lucide.createIcons();
+    }
+  </script>
+</body>
+</html>
