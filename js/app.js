@@ -12,10 +12,33 @@ document.addEventListener('DOMContentLoaded', () => {
   configurarFormulario();
   checarParametrosUrl();
   atualizarInterfaceUsuario();
+  inicializarGoogleIdentityServices();
 
   window.addEventListener('auth_state_changed', () => {
     atualizarInterfaceUsuario();
   });
+
+  // Listener para retorno de OAuth do Google via Supabase
+  const sb = window.LigaDB?.getSupabase ? window.LigaDB.getSupabase() : null;
+  if (sb && sb.auth) {
+    sb.auth.onAuthStateChange(async (event, session) => {
+      if (session && session.user) {
+        const u = session.user;
+        const dadosGoogle = {
+          email: u.email,
+          name: u.user_metadata?.full_name || u.user_metadata?.name || u.email.split('@')[0],
+          picture: u.user_metadata?.avatar_url || ''
+        };
+        const usuario = await window.LigaDB.fazerLoginComGoogle(dadosGoogle);
+        if (window.location.hash.includes('access_token')) {
+          history.replaceState(null, '', window.location.pathname);
+        }
+        if (usuario.protocolo) {
+          exibirCredencialSucesso(usuario);
+        }
+      }
+    });
+  }
 });
 
 // ============================================================================
@@ -470,16 +493,28 @@ function exibirCredencialSucesso(aluno) {
         <p class="text-xs text-stone-500 mt-1 font-mono">${aluno.email}</p>
       </div>
 
-      <!-- AVISO DE COMPROVANTE EM ANÁLISE (FICA COM O ALUNO) -->
-      <div class="mb-4 p-3.5 bg-amber-50 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1 text-left">
-        <div class="flex items-center gap-1.5 font-bold text-amber-900">
-          <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          <span>Comprovante Pix em Análise Manual</span>
+      <!-- AVISO DE STATUS DO COMPROVANTE -->
+      ${aluno.status_pagamento === 'aprovado' ? `
+        <div class="mb-4 p-3.5 bg-emerald-50 rounded-2xl border border-emerald-300 text-xs text-emerald-950 space-y-1 text-left">
+          <div class="flex items-center gap-1.5 font-bold text-emerald-800">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+            <span>Pagamento Validado pela Liga</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-emerald-900">
+            Seu pagamento Pix foi <strong>conferido e validado com sucesso</strong> pela organização da liga! Sua vaga está 100% garantida. Apresente este QR Code na portaria da palestra.
+          </p>
         </div>
-        <p class="text-[11px] leading-relaxed text-amber-850">
-          Seu comprovante foi recebido pela organização da liga para conferência. <strong>Esta credencial e seu QR Code oficial em tamanho real já estão assegurados com você para o dia da palestra!</strong>
-        </p>
-      </div>
+      ` : `
+        <div class="mb-4 p-3.5 bg-amber-50 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1 text-left">
+          <div class="flex items-center gap-1.5 font-bold text-amber-900">
+            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 shrink-0"></i>
+            <span>Comprovante Pix em Análise Manual</span>
+          </div>
+          <p class="text-[11px] leading-relaxed text-amber-850">
+            Seu comprovante foi recebido pela organização da liga para conferência. <strong>Esta credencial e seu QR Code oficial em tamanho real já estão assegurados com você para o dia da palestra!</strong>
+          </p>
+        </div>
+      `}
 
       <!-- QR Code Oficial em Tamanho Real para Portaria -->
       <div class="bg-coffee-50/80 p-5 sm:p-6 rounded-3xl border border-coffee-200 flex flex-col items-center justify-center text-center my-3">
@@ -591,47 +626,215 @@ function fecharModalLogin() {
   }
 }
 
-function iniciarLoginGoogle() {
-  const sb = (window.LigaDB && typeof window.LigaDB.getSupabase === 'function') ? window.LigaDB.getSupabase() : null;
-  const isCustomConfigured = window.LigaDB && typeof window.LigaDB.isSupabaseConfigured === 'function' && window.LigaDB.isSupabaseConfigured();
+function parseJwtGoogle(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
 
-  // Se o Supabase estiver configurado com credenciais válidas e rodando em servidor HTTP
-  if (isCustomConfigured && sb && sb.auth && typeof sb.auth.signInWithOAuth === 'function' && window.location.protocol.startsWith('http')) {
-    try {
-      sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + window.location.pathname
+function inicializarGoogleIdentityServices() {
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+    return;
+  }
+
+  try {
+    const clientId = window.GOOGLE_CLIENT_ID || '1082535787687-google-client.apps.googleusercontent.com';
+    
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response) => {
+        if (response && response.credential) {
+          const payload = parseJwtGoogle(response.credential);
+          if (payload) {
+            fecharModalGoogleAuth();
+            fecharModalLogin();
+            const usuario = await window.LigaDB.fazerLoginComGoogle({
+              name: payload.name || payload.given_name || 'Participante Google',
+              email: payload.email,
+              picture: payload.picture || ''
+            });
+            window.LigaDB.salvarContaGoogleRecente(payload.name, payload.email, payload.picture);
+            if (usuario.role === 'organizador') {
+              mostrarToast('Bem-vindo, comissão da Liga!');
+              abrirPainelAdmin('inscricoes');
+            } else if (usuario.protocolo) {
+              mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
+              exibirCredencialSucesso(usuario);
+            } else {
+              mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
+              preencherFormularioComUsuario(usuario);
+              const secao = document.getElementById('inscricao');
+              if (secao) secao.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
         }
+      },
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+
+    const gsiContainer = document.getElementById('googleGsiBtnContainer');
+    if (gsiContainer) {
+      google.accounts.id.renderButton(gsiContainer, {
+        theme: 'outline',
+        size: 'large',
+        type: 'standard',
+        text: 'signin_with',
+        shape: 'pill',
+        logo_alignment: 'left',
+        width: 280
       });
-      return;
+    }
+  } catch (e) {
+    console.warn('GIS em modo local/demo:', e);
+  }
+}
+
+async function iniciarLoginGoogle() {
+  fecharModalLogin();
+
+  // 1. Se estiver rodando em servidor HTTP/HTTPS e tiver Supabase configurado, tenta OAuth com select_account
+  const isCustomConfigured = window.LigaDB && typeof window.LigaDB.isSupabaseConfigured === 'function' && window.LigaDB.isSupabaseConfigured();
+  if (isCustomConfigured && window.location.protocol.startsWith('http')) {
+    try {
+      const res = await window.LigaDB.iniciarLoginGoogleOAuth();
+      if (res) return;
     } catch (e) {
-      console.warn('Fallback para prompt direto do Google:', e);
+      console.warn('Supabase OAuth Google fallback:', e);
     }
   }
 
-  // Modal com seletor Google direto (suporta testes imediatos, demo local e web)
-  fecharModalLogin();
+  // 2. Dispara prompt do Google Identity Services se disponível
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    try {
+      google.accounts.id.prompt();
+    } catch (e) {}
+  }
+
+  // 3. Exibe o seletor visual oficial com as contas disponíveis para seleção com 1 toque
   abrirModalGoogleAuth();
 }
 
 function abrirModalGoogleAuth() {
   const modal = document.getElementById('modalGoogleAuth');
-  if (modal) {
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+  if (!modal) return;
 
-    const inputNome = document.getElementById('googleInputNome');
-    const inputEmail = document.getElementById('googleInputEmail');
+  const lista = document.getElementById('listaContasGoogle');
+  const formOutra = document.getElementById('formOutraContaGoogle');
+  if (formOutra) formOutra.classList.add('hidden');
 
-    // Preenche com o que já foi digitado no formulário, se houver
-    const formNome = document.getElementById('nome')?.value.trim();
-    const formEmail = document.getElementById('email')?.value.trim();
-    if (inputNome && !inputNome.value && formNome) inputNome.value = formNome;
-    if (inputEmail && !inputEmail.value && formEmail) inputEmail.value = formEmail;
+  // Coleta contas salvas/recentes
+  let contas = [];
+  try {
+    contas = JSON.parse(localStorage.getItem('cafe_contas_google_recentes') || '[]');
+  } catch (e) {}
 
-    if (inputEmail) {
-      setTimeout(() => inputEmail.focus(), 100);
+  // Adiciona contas já cadastradas no formulário ou na sessão para facilitar
+  const formNome = document.getElementById('nome')?.value.trim();
+  const formEmail = document.getElementById('email')?.value.trim();
+  if (formEmail && formEmail.includes('@') && !contas.some(c => c.email.toLowerCase() === formEmail.toLowerCase())) {
+    contas.unshift({
+      nome: formNome || formEmail.split('@')[0],
+      email: formEmail,
+      avatar: ''
+    });
+  }
+
+  // Se não houver contas recentes salvas ainda, sugere o e-mail preenchido ou a conta padrão da Liga
+  if (contas.length === 0) {
+    contas.push({
+      nome: formNome || 'Participante Convidado',
+      email: formEmail || 'participante@gmail.com',
+      avatar: ''
+    });
+  }
+
+  if (lista) {
+    lista.innerHTML = contas.map((conta, index) => {
+      const inicial = (conta.nome || conta.email || 'G').charAt(0).toUpperCase();
+      const cores = ['bg-blue-600', 'bg-emerald-600', 'bg-purple-600', 'bg-amber-600', 'bg-rose-600'];
+      const corFundo = cores[index % cores.length];
+
+      return `
+        <button 
+          type="button"
+          onclick="selecionarContaGoogleRapida('${conta.nome.replace(/'/g, "\\'")}', '${conta.email.replace(/'/g, "\\'")}', '${conta.avatar || ''}')"
+          class="w-full flex items-center gap-3.5 p-3 rounded-2xl hover:bg-stone-50 active:bg-stone-100 transition text-left group border border-transparent hover:border-stone-200"
+        >
+          ${conta.avatar ? `
+            <img src="${conta.avatar}" alt="${conta.nome}" class="w-10 h-10 rounded-full object-cover shrink-0 border border-stone-200 shadow-sm" />
+          ` : `
+            <div class="w-10 h-10 rounded-full ${corFundo} text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-sm">
+              ${inicial}
+            </div>
+          `}
+          <div class="flex-1 min-w-0">
+            <h5 class="text-xs font-bold text-stone-900 group-hover:text-coffee-950 truncate">${conta.nome}</h5>
+            <p class="text-[11px] text-stone-500 truncate font-mono">${conta.email}</p>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-stone-400 group-hover:text-coffee-800 transition shrink-0"></i>
+        </button>
+      `;
+    }).join('');
+  }
+
+  // Preenche inputs caso o usuário queira usar outra conta
+  const inputNome = document.getElementById('googleInputNome');
+  const inputEmail = document.getElementById('googleInputEmail');
+  if (inputNome && formNome) inputNome.value = formNome;
+  if (inputEmail && formEmail) inputEmail.value = formEmail;
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  if (window.lucide) window.lucide.createIcons();
+}
+
+async function selecionarContaGoogleRapida(nome, email, avatar = '') {
+  try {
+    mostrarToast(`Entrando como ${nome.split(' ')[0]}...`);
+    window.LigaDB.salvarContaGoogleRecente(nome, email, avatar);
+    
+    const usuario = await window.LigaDB.fazerLoginComGoogle({
+      name: nome,
+      email: email,
+      picture: avatar
+    });
+
+    fecharModalGoogleAuth();
+
+    if (usuario.role === 'organizador') {
+      mostrarToast('Bem-vindo, membro da Liga!');
+      abrirPainelAdmin('inscricoes');
+    } else if (usuario.protocolo) {
+      mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
+      exibirCredencialSucesso(usuario);
+    } else {
+      mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
+      preencherFormularioComUsuario(usuario);
+      const secaoInscricao = document.getElementById('inscricao');
+      if (secaoInscricao) {
+        secaoInscricao.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  } catch (err) {
+    alert('Erro ao selecionar conta: ' + err.message);
+  }
+}
+
+function toggleInputOutraContaGoogle() {
+  const formOutra = document.getElementById('formOutraContaGoogle');
+  if (formOutra) {
+    formOutra.classList.toggle('hidden');
+    if (!formOutra.classList.contains('hidden')) {
+      const inputEmail = document.getElementById('googleInputEmail');
+      if (inputEmail) setTimeout(() => inputEmail.focus(), 100);
     }
   }
 }
@@ -880,7 +1083,10 @@ window.fecharModalLogin = fecharModalLogin;
 window.iniciarLoginGoogle = iniciarLoginGoogle;
 window.abrirModalGoogleAuth = abrirModalGoogleAuth;
 window.fecharModalGoogleAuth = fecharModalGoogleAuth;
+window.selecionarContaGoogleRapida = selecionarContaGoogleRapida;
+window.toggleInputOutraContaGoogle = toggleInputOutraContaGoogle;
 window.confirmarLoginGooglePrompt = confirmarLoginGooglePrompt;
+window.inicializarGoogleIdentityServices = inicializarGoogleIdentityServices;
 window.executarLoginUsuario = iniciarLoginGoogle;
 window.abrirAreaDoAluno = abrirAreaDoAluno;
 window.fecharAreaDoAluno = fecharAreaDoAluno;

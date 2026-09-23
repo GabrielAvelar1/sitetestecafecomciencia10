@@ -116,6 +116,40 @@ function isOrganizadorLogado() {
   return user && user.role === 'organizador';
 }
 
+function salvarContaGoogleRecente(nome, email, avatar = '') {
+  try {
+    const contas = JSON.parse(localStorage.getItem('cafe_contas_google_recentes') || '[]');
+    const emailLimpo = (email || '').toLowerCase().trim();
+    if (!emailLimpo) return;
+    const index = contas.findIndex(c => c.email.toLowerCase() === emailLimpo);
+    if (index !== -1) {
+      contas[index] = { nome: nome || contas[index].nome, email: emailLimpo, avatar: avatar || contas[index].avatar };
+    } else {
+      contas.unshift({ nome: nome || emailLimpo.split('@')[0], email: emailLimpo, avatar });
+    }
+    localStorage.setItem('cafe_contas_google_recentes', JSON.stringify(contas.slice(0, 5)));
+  } catch (e) {}
+}
+
+async function iniciarLoginGoogleOAuth() {
+  const sb = getSupabase();
+  if (sb && sb.auth && isSupabaseConfigured() && window.location.protocol.startsWith('http')) {
+    const currentUrl = window.location.origin + window.location.pathname;
+    const { data, error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: currentUrl,
+        queryParams: {
+          prompt: 'select_account'
+        }
+      }
+    });
+    if (error) throw error;
+    return data;
+  }
+  return false;
+}
+
 /**
  * Login com Conta Google
  * Vincula à inscrição existente ou cria conta antecipada de participante
@@ -126,6 +160,8 @@ async function fazerLoginComGoogle(dadosGoogle = {}) {
   const avatarGoogle = dadosGoogle.picture || dadosGoogle.avatar || '';
 
   if (!emailGoogle) throw new Error('E-mail do Google não identificado.');
+
+  salvarContaGoogleRecente(nomeGoogle, emailGoogle, avatarGoogle);
 
   // Verifica se é o e-mail oficial da liga
   const isOrganizador = (emailGoogle === ORGANIZADOR_PADRAO.email);
@@ -544,17 +580,25 @@ async function atualizarStatusPagamento(id, novoStatus) {
       .update({ status_pagamento: novoStatus })
       .eq('id', id);
     if (error) throw error;
-    return true;
   } else {
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
     const index = inscricoes.findIndex(i => i.id === id);
     if (index !== -1) {
       inscricoes[index].status_pagamento = novoStatus;
       localStorage.setItem('cafe_ciencia_inscricoes', JSON.stringify(inscricoes));
-      return true;
     }
-    return false;
   }
+
+  // Se o usuário logado for este mesmo, atualiza também a sessão local
+  try {
+    const usuarioLogado = getUsuarioLogado();
+    if (usuarioLogado && (usuarioLogado.id === id || usuarioLogado.protocolo === id)) {
+      usuarioLogado.status_pagamento = novoStatus;
+      salvarSessaoUsuario(usuarioLogado);
+    }
+  } catch (e) {}
+
+  return true;
 }
 
 async function registrarDisparoLembrete(id, tipoCanal, tipoLembrete) {
@@ -609,6 +653,8 @@ window.LigaDB = {
   isOrganizadorLogado,
   fazerLogin,
   fazerLoginComGoogle,
+  iniciarLoginGoogleOAuth,
+  salvarContaGoogleRecente,
   registrarInscricao,
   buscarInscricao,
   validarPresencaPorQRCode,
