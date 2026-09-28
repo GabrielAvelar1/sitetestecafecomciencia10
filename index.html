@@ -170,16 +170,16 @@
   <!-- ========================================================================
        2. HERO SECTION COM BANNER OFICIAL
        ======================================================================== -->
-  <section class="relative overflow-hidden gradient-coffee-hero text-white pt-12 pb-20 lg:pt-16 lg:pb-28">
+  <section class="relative overflow-hidden gradient-coffee-hero text-white pt-8 pb-16 lg:pt-16 lg:pb-28">
     <!-- Efeitos de luz no fundo -->
     <div class="absolute -top-24 -left-24 w-96 h-96 bg-coffee-500/20 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-dental-teal/20 rounded-full blur-3xl pointer-events-none"></div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
-        <!-- Texto & Detalhes Principais -->
-        <div class="lg:col-span-6 space-y-6">
+        <!-- Texto & Detalhes Principais (Abaixo do Banner no Mobile / À Esquerda no Desktop) -->
+        <div class="lg:col-span-6 space-y-6 order-2 lg:order-1">
           
           <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-coffee-200 text-xs font-semibold uppercase tracking-wider">
             10ª Edição Comemorativa · Presencial
@@ -243,12 +243,11 @@
 
         </div>
 
-        <!-- Banner Oficial em Moldura Destaque -->
-        <!-- Banner Oficial em Destaque Ampliado -->
-        <div class="lg:col-span-6 flex justify-center">
-          <div class="relative w-full max-w-xl group">
+        <!-- Banner Oficial em Destaque no Topo do Mobile / Lado Direito no Desktop -->
+        <div class="lg:col-span-6 flex justify-center order-1 lg:order-2">
+          <div class="relative w-full max-w-sm sm:max-w-md lg:max-w-xl group">
             <!-- Glow decorativo atrás do banner -->
-            <div class="absolute -inset-2 bg-gradient-to-r from-coffee-400 via-amber-500 to-coffee-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></div>
+            <div class="absolute -inset-1.5 sm:-inset-2 bg-gradient-to-r from-coffee-400 via-amber-500 to-coffee-600 rounded-3xl blur-lg sm:blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></div>
             
             <div class="relative bg-stone-900 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20">
               <img 
