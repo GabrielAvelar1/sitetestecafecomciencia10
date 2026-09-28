@@ -75,6 +75,32 @@ function salvarCredenciaisSupabase(url, key) {
   return false;
 }
 
+function getGoogleClientId() {
+  const custom = localStorage.getItem('cafe_google_client_id');
+  if (custom && custom.trim() && !custom.includes('placeholder')) {
+    return custom.trim();
+  }
+  if (window.GOOGLE_CLIENT_ID && !window.GOOGLE_CLIENT_ID.includes('placeholder') && !window.GOOGLE_CLIENT_ID.includes('google-client')) {
+    return window.GOOGLE_CLIENT_ID.trim();
+  }
+  return '';
+}
+
+function salvarGoogleClientId(clientId) {
+  if (clientId && clientId.trim()) {
+    localStorage.setItem('cafe_google_client_id', clientId.trim());
+    return true;
+  } else {
+    localStorage.removeItem('cafe_google_client_id');
+    return false;
+  }
+}
+
+function isGoogleConfigured() {
+  const id = getGoogleClientId();
+  return Boolean(id && id.includes('.apps.googleusercontent.com'));
+}
+
 // ============================================================================
 // 4. SISTEMA DE AUTENTICAÇÃO E SESSÃO COM GOOGLE
 // ============================================================================
@@ -660,5 +686,8 @@ window.LigaDB = {
   validarPresencaPorQRCode,
   listarInscricoes,
   atualizarStatusPagamento,
-  registrarDisparoLembrete
+  registrarDisparoLembrete,
+  getGoogleClientId,
+  salvarGoogleClientId,
+  isGoogleConfigured
 };

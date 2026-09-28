@@ -455,6 +455,22 @@ function carregarConfiguracoesSupabase() {
       badgeStatus.innerHTML = `<span class="text-amber-600 font-bold flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i> Em Modo Demonstração (Local)</span>`;
     }
   }
+
+  // Google OAuth Config
+  const inputGoogleId = document.getElementById('inputGoogleClientId');
+  const badgeGoogle = document.getElementById('badgeStatusConfigGoogle');
+  const googleId = window.LigaDB?.getGoogleClientId ? window.LigaDB.getGoogleClientId() : '';
+
+  if (inputGoogleId) inputGoogleId.value = googleId;
+
+  if (badgeGoogle) {
+    if (window.LigaDB?.isGoogleConfigured && window.LigaDB.isGoogleConfigured()) {
+      badgeGoogle.innerHTML = `<span class="text-emerald-600 font-bold flex items-center gap-1"><i data-lucide="check-circle" class="w-4 h-4"></i> Pop-up Nativo do Google Configurado e Ativo</span>`;
+    } else {
+      badgeGoogle.innerHTML = `<span class="text-amber-600 font-bold flex items-center gap-1"><i data-lucide="alert-circle" class="w-4 h-4"></i> Pop-up do Google não configurado (clique em Tutorial para ativar)</span>`;
+    }
+  }
+
   if (window.lucide) window.lucide.createIcons();
 }
 
@@ -474,6 +490,25 @@ function salvarConfiguracoesSupabase() {
   alert('Configurações salvas com sucesso! Recarregando dados...');
   carregarInscricoesAdmin();
   carregarConfiguracoesSupabase();
+}
+
+function salvarConfiguracaoGoogleAdmin() {
+  const input = document.getElementById('inputGoogleClientId');
+  const val = input?.value.trim() || '';
+  if (val && !val.includes('.apps.googleusercontent.com')) {
+    alert('Atenção: o Google Client ID costuma terminar com .apps.googleusercontent.com');
+  }
+  window.LigaDB.salvarGoogleClientId(val);
+  alert('Google Client ID salvo com sucesso!');
+  carregarConfiguracoesSupabase();
+}
+
+function testarPopupGoogleAdmin() {
+  if (typeof window.loginNativoGooglePopup === 'function') {
+    window.loginNativoGooglePopup();
+  } else {
+    alert('Função de pop-up não encontrada.');
+  }
 }
 
 // Exportar CSV
@@ -514,3 +549,9 @@ function limparDadosDemo() {
     carregarInscricoesAdmin();
   }
 }
+
+window.salvarConfiguracaoGoogleAdmin = salvarConfiguracaoGoogleAdmin;
+window.testarPopupGoogleAdmin = testarPopupGoogleAdmin;
+window.limparDadosDemo = limparDadosDemo;
+window.exportarParaCSV = exportarParaCSV;
+window.salvarConfiguracoesSupabase = salvarConfiguracoesSupabase;

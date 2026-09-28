@@ -702,10 +702,97 @@ function inicializarGoogleIdentityServices() {
   }
 }
 
+// ============================================================================
+// POP-UP NATIVO DO GOOGLE (GOOGLE IDENTITY SERVICES TOKEN CLIENT)
+// ============================================================================
+async function loginNativoGooglePopup() {
+  const clientId = window.LigaDB?.getGoogleClientId ? window.LigaDB.getGoogleClientId() : '';
+  
+  if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+    abrirTutorialGoogleOAuth();
+    return false;
+  }
+
+  if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+    mostrarToast('Carregando biblioteca do Google...');
+    setTimeout(loginNativoGooglePopup, 600);
+    return false;
+  }
+
+  try {
+    mostrarToast('Abrindo janela do Google...');
+    const tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: 'email profile openid',
+      prompt: 'select_account',
+      callback: async (tokenResponse) => {
+        if (tokenResponse && tokenResponse.error) {
+          console.warn('Google popup cancelado ou erro:', tokenResponse.error);
+          return;
+        }
+
+        if (tokenResponse && tokenResponse.access_token) {
+          try {
+            mostrarToast('Conectando sua conta Google...');
+            const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+            });
+
+            if (!res.ok) throw new Error('Não foi possível obter dados do Google.');
+            const profile = await res.json();
+
+            fecharModalLogin();
+            fecharModalGoogleAuth();
+            fecharTutorialGoogleOAuth();
+
+            const usuario = await window.LigaDB.fazerLoginComGoogle({
+              name: profile.name || profile.given_name || profile.email.split('@')[0],
+              email: profile.email,
+              picture: profile.picture || ''
+            });
+
+            window.LigaDB.salvarContaGoogleRecente(profile.name, profile.email, profile.picture);
+
+            if (usuario.role === 'organizador') {
+              mostrarToast('Bem-vindo, membro da Liga!');
+              abrirPainelAdmin('inscricoes');
+            } else if (usuario.protocolo) {
+              mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
+              exibirCredencialSucesso(usuario);
+            } else {
+              mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
+              preencherFormularioComUsuario(usuario);
+              const secao = document.getElementById('inscricao');
+              if (secao) secao.scrollIntoView({ behavior: 'smooth' });
+            }
+          } catch (e) {
+            console.error('Erro ao processar login Google:', e);
+            alert('Erro ao autenticar com Google: ' + e.message);
+          }
+        }
+      }
+    });
+
+    // Dispara a janela pop-up oficial do Google!
+    tokenClient.requestAccessToken({ prompt: 'select_account' });
+    return true;
+  } catch (err) {
+    console.error('Erro ao abrir popup do Google:', err);
+    alert('Erro ao abrir janela do Google: ' + err.message);
+    return false;
+  }
+}
+
 async function iniciarLoginGoogle() {
   fecharModalLogin();
 
-  // 1. Se estiver rodando em servidor HTTP/HTTPS e tiver Supabase configurado, tenta OAuth com select_account
+  // 1. Se houver um Client ID do Google Cloud configurado no site, abre a janela pop-up nativa oficial!
+  if (window.LigaDB && window.LigaDB.isGoogleConfigured && window.LigaDB.isGoogleConfigured()) {
+    const abriu = loginNativoGooglePopup();
+    if (abriu) return;
+  }
+
+  // 2. Se estiver rodando em servidor HTTP/HTTPS e tiver Supabase configurado, tenta OAuth com select_account
   const isCustomConfigured = window.LigaDB && typeof window.LigaDB.isSupabaseConfigured === 'function' && window.LigaDB.isSupabaseConfigured();
   if (isCustomConfigured && window.location.protocol.startsWith('http')) {
     try {
@@ -716,16 +803,46 @@ async function iniciarLoginGoogle() {
     }
   }
 
-  // 2. Se houver Client ID REAL do Google Cloud configurado, tenta prompt nativo do Google
-  const realClientId = window.GOOGLE_CLIENT_ID;
-  if (realClientId && !realClientId.includes('google-client') && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-    try {
-      google.accounts.id.prompt();
-    } catch (e) {}
+  // 3. Caso ainda não tenha o Client ID cadastrado, exibe o seletor visual com botão direto para o tutorial
+  abrirModalGoogleAuth();
+}
+
+function abrirTutorialGoogleOAuth() {
+  const modal = document.getElementById('modalTutorialGoogleOAuth');
+  const input = document.getElementById('inputGoogleClientIdTutorial');
+  if (input && window.LigaDB?.getGoogleClientId) {
+    input.value = window.LigaDB.getGoogleClientId();
+  }
+  if (modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function fecharTutorialGoogleOAuth() {
+  const modal = document.getElementById('modalTutorialGoogleOAuth');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
+function salvarGoogleClientIdFromTutorial() {
+  const input = document.getElementById('inputGoogleClientIdTutorial');
+  const clientId = input?.value.trim();
+
+  if (!clientId || !clientId.includes('.apps.googleusercontent.com')) {
+    alert('Por favor, informe um Google Client ID válido (deve terminar com .apps.googleusercontent.com)');
+    input?.focus();
+    return;
   }
 
-  // 3. Exibe o seletor visual oficial com as contas do Google prontas para seleção com 1 toque
-  abrirModalGoogleAuth();
+  window.LigaDB.salvarGoogleClientId(clientId);
+  mostrarToast('Google Client ID salvo com sucesso! Abrindo pop-up...');
+  fecharTutorialGoogleOAuth();
+  setTimeout(() => {
+    loginNativoGooglePopup();
+  }, 400);
 }
 
 function abrirModalGoogleAuth() {
@@ -1102,3 +1219,7 @@ window.fecharModalConsulta = fecharModalConsulta;
 window.executarBuscaInscricao = executarBuscaInscricao;
 window.fecharCredencialModal = fecharCredencialModal;
 window.abrirCredencialPorProtocolo = abrirCredencialPorProtocolo;
+window.loginNativoGooglePopup = loginNativoGooglePopup;
+window.abrirTutorialGoogleOAuth = abrirTutorialGoogleOAuth;
+window.fecharTutorialGoogleOAuth = fecharTutorialGoogleOAuth;
+window.salvarGoogleClientIdFromTutorial = salvarGoogleClientIdFromTutorial;
