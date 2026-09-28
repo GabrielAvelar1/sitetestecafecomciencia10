@@ -50,9 +50,13 @@ async function iniciarLeitorPortaria() {
     }
 
     const config = {
-      fps: 10,
-      qrbox: { width: 250, height: 250 },
-      aspectRatio: 1.0
+      fps: 15,
+      qrbox: (viewfinderWidth, viewfinderHeight) => {
+        const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+        const edgeSize = Math.max(Math.floor(minEdge * 0.85), 260);
+        return { width: edgeSize, height: edgeSize };
+      },
+      aspectRatio: 1.333333
     };
 
     // Preferência pela câmera traseira (environment)
@@ -106,19 +110,31 @@ async function aoEscanearCodigo(decodedText) {
   await processarCodigoCheckin(decodedText);
 }
 
+// Fecha o modal de validação e retoma a leitura
+function fecharModalValidacao() {
+  const modal = document.getElementById('modalValidacaoPortaria');
+  if (modal) modal.classList.add('hidden');
+  retomarScanner();
+}
+
 // Processa o código (tanto via câmera quanto via digitação manual)
 async function processarCodigoCheckin(codigoBruto) {
+  const modal = document.getElementById('modalValidacaoPortaria');
+  const conteudo = document.getElementById('conteudoValidacaoPortaria');
   const resultDiv = document.getElementById('qrReaderResult');
-  if (!resultDiv) return;
 
-  resultDiv.classList.remove('hidden');
-  resultDiv.innerHTML = `
-    <div class="p-4 bg-stone-100 rounded-xl flex items-center justify-center gap-2 text-stone-700">
-      <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-700"></i>
-      <span>Consultando credencial no banco de dados...</span>
-    </div>
-  `;
-  if (window.lucide) window.lucide.createIcons();
+  // Abre modal centralizado na tela
+  if (modal && conteudo) {
+    modal.classList.remove('hidden');
+    conteudo.innerHTML = `
+      <div class="py-12 text-center text-stone-600 space-y-3">
+        <i data-lucide="loader-2" class="w-10 h-10 animate-spin text-coffee-700 mx-auto"></i>
+        <h4 class="font-bold text-base text-coffee-950">Validando Credencial...</h4>
+        <p class="text-xs text-stone-500 font-mono">${codigoBruto}</p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+  }
 
   try {
     const resposta = await window.LigaDB.validarPresencaPorQRCode(codigoBruto, 'Portaria Oficial');
@@ -130,94 +146,99 @@ async function processarCodigoCheckin(codigoBruto) {
     });
 
     const statusPagamentoBadge = aluno.status_pagamento === 'aprovado'
-      ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">Pagamento Pix Aprovado</span>`
-      : `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">Pagamento Pendente</span>`;
+      ? `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Pix Aprovado</span>`
+      : `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ Pix Pendente</span>`;
 
-    if (resposta.jaConfirmado) {
-      resultDiv.innerHTML = `
-        <div class="p-5 bg-amber-50 border-2 border-amber-400 rounded-2xl space-y-3 animate-pulse-glow">
-          <div class="flex items-center gap-3 text-amber-800">
-            <i data-lucide="alert-triangle" class="w-8 h-8 shrink-0 text-amber-600"></i>
-            <div>
-              <h4 class="font-bold text-base">Check-in Já Realizado!</h4>
-              <p class="text-xs text-amber-700">Este participante já teve sua presença validada na portaria.</p>
-            </div>
-          </div>
+    const htmlResultado = `
+      <div class="space-y-4 text-center">
+        <!-- Ícone Destaque -->
+        <div class="w-16 h-16 rounded-3xl ${resposta.jaConfirmado ? 'bg-amber-100 text-amber-800 border-2 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-2 border-emerald-300'} flex items-center justify-center mx-auto shadow-sm">
+          <i data-lucide="${resposta.jaConfirmado ? 'alert-triangle' : 'check'}" class="w-8 h-8 stroke-[2.5]"></i>
+        </div>
 
-          <div class="bg-white p-3.5 rounded-xl border border-amber-200 text-xs space-y-1">
-            <div class="flex justify-between"><strong>Aluno:</strong> <span>${aluno.nome_completo}</span></div>
-            <div class="flex justify-between"><strong>Protocolo:</strong> <span class="font-mono font-bold">${aluno.protocolo}</span></div>
-            <div class="flex justify-between"><strong>Horário do Check-in:</strong> <span>${dataHoraCheckin}</span></div>
-            <div class="flex justify-between items-center pt-1 border-t border-amber-100">
-              <strong>Status Pix:</strong> ${statusPagamentoBadge}
-            </div>
-          </div>
-
-          <div class="flex gap-2 pt-1">
-            <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="flex-1 text-center py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs transition">
-              Ver Certificado Oficial
-            </a>
-            <button onclick="retomarScanner()" class="py-2.5 px-4 bg-stone-800 hover:bg-stone-900 text-white rounded-xl font-bold text-xs transition">
-              Escanear Próximo
-            </button>
+        <div>
+          <span class="text-xs uppercase tracking-wider text-stone-400 font-bold block mb-1">Check-in de Portaria</span>
+          <h3 class="text-xl sm:text-2xl font-black text-stone-900 leading-tight">${aluno.nome_completo}</h3>
+          <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-coffee-50 border border-coffee-200 rounded-full font-mono text-xs font-bold text-coffee-950">
+            <span>Código:</span> <span>${aluno.protocolo}</span>
           </div>
         </div>
-      `;
-    } else {
-      resultDiv.innerHTML = `
-        <div class="p-5 bg-emerald-50 border-2 border-emerald-500 rounded-2xl space-y-3">
-          <div class="flex items-center gap-3 text-emerald-800">
-            <div class="w-10 h-10 bg-emerald-500 text-white rounded-full flex items-center justify-center shrink-0">
-              <i data-lucide="check" class="w-6 h-6 stroke-[3]"></i>
-            </div>
-            <div>
-              <h4 class="font-black text-lg text-emerald-950">Presença Validada com Sucesso!</h4>
-              <p class="text-xs text-emerald-700">Entrada autorizada e certificado de participação liberado.</p>
-            </div>
-          </div>
 
-          <div class="bg-white p-3.5 rounded-xl border border-emerald-200 text-xs space-y-1.5 text-stone-800">
-            <div class="flex justify-between"><strong>Aluno:</strong> <span class="font-bold text-sm text-stone-950">${aluno.nome_completo}</span></div>
-            <div class="flex justify-between"><strong>Protocolo:</strong> <span class="font-mono font-bold text-coffee-800">${aluno.protocolo}</span></div>
-            <div class="flex justify-between"><strong>E-mail:</strong> <span>${aluno.email}</span></div>
-            <div class="flex justify-between items-center pt-1 border-t border-emerald-100">
-              <strong>Status Pix:</strong> ${statusPagamentoBadge}
-            </div>
+        <div class="p-4 bg-stone-50 rounded-2xl border border-stone-200 text-xs text-left space-y-2">
+          <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+            <span class="text-stone-500 font-medium">Status Pix:</span>
+            ${statusPagamentoBadge}
           </div>
-
-          <div class="flex gap-2 pt-1">
-            <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="flex-1 text-center py-2.5 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-sm">
-              <i data-lucide="award" class="w-4 h-4"></i>
-              <span>Abrir Certificado Oficial</span>
-            </a>
-            <button onclick="retomarScanner()" class="py-2.5 px-4 bg-stone-900 hover:bg-black text-white rounded-xl font-bold text-xs transition">
-              Escanear Próximo
-            </button>
+          <div class="flex justify-between items-center pb-2 border-b border-stone-200">
+            <span class="text-stone-500 font-medium">Presença:</span>
+            <span class="font-bold ${resposta.jaConfirmado ? 'text-amber-800' : 'text-emerald-700'}">
+              ${resposta.jaConfirmado ? `Registrada às ${dataHoraCheckin}` : `✓ Confirmada com Sucesso!`}
+            </span>
+          </div>
+          <div class="flex justify-between items-center text-[11px] text-stone-500">
+            <span>E-mail:</span>
+            <span class="font-mono truncate max-w-[200px]">${aluno.email}</span>
           </div>
         </div>
-      `;
 
-      // Atualiza listagem admin se estiver aberta
-      if (typeof carregarInscricoesAdmin === 'function') {
-        carregarInscricoesAdmin();
-      }
+        <div class="space-y-2 pt-2">
+          <button 
+            onclick="QRScannerPortaria.fecharModalValidacao()" 
+            class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="scan-line" class="w-4 h-4"></i>
+            <span>Escanear Próximo Participante</span>
+          </button>
+
+          ${aluno.comprovante_url ? `
+            <button 
+              onclick="visualizarComprovante('${aluno.id}')" 
+              class="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs rounded-xl transition flex items-center justify-center gap-1.5"
+            >
+              <i data-lucide="file-text" class="w-3.5 h-3.5 text-stone-600"></i>
+              <span>Ver Comprovante Pix Anexado</span>
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    if (conteudo) conteudo.innerHTML = htmlResultado;
+    if (resultDiv) {
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = htmlResultado;
+    }
+
+    // Atualiza listagem admin se estiver aberta
+    if (typeof carregarInscricoesAdmin === 'function') {
+      carregarInscricoesAdmin();
     }
 
     if (window.lucide) window.lucide.createIcons();
 
   } catch (err) {
-    resultDiv.innerHTML = `
-      <div class="p-4 bg-red-50 border border-red-200 rounded-xl space-y-2 text-xs text-red-700">
-        <div class="flex items-center gap-2 font-bold text-sm">
-          <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
-          <span>Código Não Reconhecido</span>
+    const htmlErro = `
+      <div class="space-y-4 text-center">
+        <div class="w-16 h-16 rounded-3xl bg-red-100 text-red-800 border-2 border-red-300 flex items-center justify-center mx-auto">
+          <i data-lucide="x-circle" class="w-8 h-8"></i>
         </div>
-        <p>${err.message || 'Não foi possível validar o código informado.'}</p>
-        <button onclick="retomarScanner()" class="mt-2 py-2 px-3 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition">
+        <div>
+          <h3 class="text-lg font-bold text-red-950">Código Não Reconhecido</h3>
+          <p class="text-xs text-red-700 mt-1">${err.message || 'Credencial não localizada no sistema.'}</p>
+        </div>
+        <button 
+          onclick="QRScannerPortaria.fecharModalValidacao()" 
+          class="w-full py-3 px-4 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl transition"
+        >
           Tentar Novamente
         </button>
       </div>
     `;
+    if (conteudo) conteudo.innerHTML = htmlErro;
+    if (resultDiv) {
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = htmlErro;
+    }
     if (window.lucide) window.lucide.createIcons();
   }
 }
@@ -252,5 +273,6 @@ window.QRScannerPortaria = {
   pararLeitorPortaria,
   processarCodigoCheckin,
   validarCodigoManual,
-  retomarScanner
+  retomarScanner,
+  fecharModalValidacao
 };

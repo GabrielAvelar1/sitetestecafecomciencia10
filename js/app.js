@@ -88,9 +88,9 @@ function atualizarInterfaceUsuario() {
       if (userAreaDesk) {
         userAreaDesk.innerHTML = `
           <div class="flex items-center gap-2">
-            <button onclick="abrirAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-coffee-950 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-300 transition shadow-xs">
-              <i data-lucide="user-check" class="w-4 h-4 text-coffee-700"></i>
-              <span>Olá, ${primeiroNome}</span>
+            <button onclick="abrirAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-coffee-950 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-300 transition shadow-xs" title="Ver minha inscrição e credencial com QR Code">
+              <i data-lucide="qr-code" class="w-4 h-4 text-coffee-700"></i>
+              <span>Minha Inscrição (${primeiroNome})</span>
             </button>
             <button onclick="window.LigaDB.fazerLogout()" title="Sair da conta" class="p-1.5 text-stone-400 hover:text-red-600 rounded-lg hover:bg-stone-100 transition">
               <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -102,8 +102,8 @@ function atualizarInterfaceUsuario() {
         userAreaMob.innerHTML = `
           <div class="flex items-center justify-between p-3 bg-coffee-50 rounded-xl border border-coffee-200">
             <button onclick="fecharMenuMobile(); abrirAreaDoAluno();" class="text-xs font-bold text-coffee-900 flex items-center gap-1.5">
-              <i data-lucide="user-check" class="w-4 h-4 text-coffee-700"></i>
-              <span>Minha Conta (${primeiroNome})</span>
+              <i data-lucide="qr-code" class="w-4 h-4 text-coffee-700"></i>
+              <span>Minha Inscrição / Credencial (${primeiroNome})</span>
             </button>
             <button onclick="window.LigaDB.fazerLogout()" class="text-xs text-red-600 font-semibold hover:underline">Sair</button>
           </div>
@@ -546,12 +546,24 @@ function exibirCredencialSucesso(aluno) {
 
       <!-- Ações: Imprimir / Certificado / Sair -->
       <div class="space-y-2 pt-2">
-        ${aluno.presenca_confirmada ? `
-          <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-            <i data-lucide="award" class="w-5 h-5"></i>
-            <span>Visualizar / Baixar Certificado Oficial (4h)</span>
-          </a>
-        ` : ''}
+        ${aluno.presenca_confirmada ? (
+          (window.LigaDB?.estaoCertificadosLiberados && window.LigaDB.estaoCertificadosLiberados()) ? `
+            <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+              <i data-lucide="award" class="w-5 h-5"></i>
+              <span>Visualizar / Baixar Certificado Oficial (4h)</span>
+            </a>
+          ` : `
+            <div class="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1 text-left">
+              <div class="flex items-center gap-1.5 font-bold text-amber-900">
+                <i data-lucide="clock" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                <span>Presença Confirmada · Certificado em Assinatura</span>
+              </div>
+              <p class="text-[11px] leading-relaxed text-amber-850">
+                Sua presença foi confirmada pela organização! Os certificados oficiais de 4 horas estão em fase de coleta de assinaturas da coordenação e serão liberados em breve aqui no site.
+              </p>
+            </div>
+          `
+        ) : ''}
 
         <button onclick="window.print()" class="w-full py-3 px-4 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
           <i data-lucide="printer" class="w-4 h-4"></i>

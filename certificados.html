@@ -88,7 +88,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button onclick="window.print()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
+        <button id="btnPrintCertificado" onclick="window.print()" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>Imprimir / Salvar PDF</span>
         </button>
@@ -147,6 +147,39 @@
       const nomeFinal = aluno ? aluno.nome_completo : (nomeParam || 'Participante Oficial');
       const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-CC10-${Math.floor(100000 + Math.random() * 900000)}`;
       const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || '2026-10-30');
+
+      // Verifica se a comissão da Liga liberou os certificados
+      const isLiberado = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
+      const isAdminPreview = params.get('admin') === 'true' || (window.LigaDB?.isOrganizadorLogado && window.LigaDB.isOrganizadorLogado());
+
+      if (!isLiberado && !isAdminPreview) {
+        loading.classList.add('hidden');
+        const btnPrint = document.getElementById('btnPrintCertificado');
+        if (btnPrint) btnPrint.classList.add('hidden');
+
+        target.innerHTML = `
+          <div class="max-w-lg w-full mx-auto my-12 bg-white rounded-3xl p-8 border border-stone-200 shadow-xl text-center">
+            <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="clock" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-xl font-bold text-stone-900 mb-2">Certificados em Processo de Emissão</h2>
+            <p class="text-sm text-stone-600 leading-relaxed mb-6">
+              Os certificados oficiais do <strong>10° Café com Ciência</strong> estão em fase de coleta e autenticação de assinaturas pela coordenação acadêmica do UniArnaldo. Assim que a comissão organizadora liberar a emissão no sistema, o download da sua declaração oficial de 4 horas estará disponível nesta página.
+            </p>
+            <div class="p-4 bg-stone-50 rounded-2xl text-xs text-stone-600 mb-6 text-left space-y-1.5 border border-stone-200">
+              <p><strong>Participante:</strong> ${nomeFinal}</p>
+              ${aluno?.protocolo ? `<p><strong>Protocolo:</strong> ${aluno.protocolo}</p>` : ''}
+              <p><strong>Status de Presença:</strong> ${aluno?.presenca_confirmada ? '✅ Presença Confirmada no Evento' : '⏳ Aguardando confirmação no dia da palestra'}</p>
+            </div>
+            <a href="index.html" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>Voltar para a Página do Evento</span>
+            </a>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
 
       loading.classList.add('hidden');
 

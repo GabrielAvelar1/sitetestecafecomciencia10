@@ -4,14 +4,17 @@
  */
 
 // ============================================================================
-// 1. CONFIGURAÇÕES PRINCIPAIS DO SUPABASE
+// 1. CONFIGURAÇÕES PRINCIPAIS DO SUPABASE (PRODUÇÃO)
 // ============================================================================
 const SUPABASE_CONFIG = {
-  url: 'https://SEU_PROJETO.supabase.co',
-  anonKey: 'SUA_CHAVE_ANON_DO_SUPABASE',
+  url: 'https://zcbylqggrxocdevddtlx.supabase.co',
+  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYnlscWdncnhvY2RldmRkdGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxOTM2MzIsImV4cCI6MjEwNTc2OTYzMn0.FS5e7VlodcABs72X4xfTvwVW8eFn-E8JdZ9ZQNNxba0',
   tableName: 'inscricoes',
   bucketName: 'comprovantes'
 };
+
+// Google OAuth 2.0 Client ID Padrão Oficial do Evento
+const GOOGLE_CLIENT_ID_PADRAO = '76820645389-2gg574uebbs4s08jmtoqfp88e8olrcbm.apps.googleusercontent.com';
 
 // ============================================================================
 // 2. CONFIGURAÇÕES DO PIX
@@ -83,7 +86,7 @@ function getGoogleClientId() {
   if (window.GOOGLE_CLIENT_ID && !window.GOOGLE_CLIENT_ID.includes('placeholder') && !window.GOOGLE_CLIENT_ID.includes('google-client')) {
     return window.GOOGLE_CLIENT_ID.trim();
   }
-  return '';
+  return GOOGLE_CLIENT_ID_PADRAO;
 }
 
 function salvarGoogleClientId(clientId) {
@@ -101,12 +104,23 @@ function isGoogleConfigured() {
   return Boolean(id && id.includes('.apps.googleusercontent.com'));
 }
 
+// Controle de Liberação dos Certificados de Participação
+function estaoCertificadosLiberados() {
+  return localStorage.getItem('cafe_certificados_liberados') === 'true';
+}
+
+function alternarLiberacaoCertificados(novoStatus) {
+  localStorage.setItem('cafe_certificados_liberados', novoStatus ? 'true' : 'false');
+  window.dispatchEvent(new CustomEvent('certificados_status_changed', { detail: novoStatus }));
+  return novoStatus;
+}
+
 // ============================================================================
 // 4. SISTEMA DE AUTENTICAÇÃO E SESSÃO COM GOOGLE
 // ============================================================================
 const ORGANIZADOR_PADRAO = {
-  email: 'cafecomciencia.liga@gmail.com',
-  senha: 'cafe2026',
+  email: 'organizacaocafecomciencia@gmail.com',
+  senha: 'cafecomciencia2026@10',
   nome_completo: 'Comissão Organizadora',
   role: 'organizador'
 };
@@ -689,5 +703,7 @@ window.LigaDB = {
   registrarDisparoLembrete,
   getGoogleClientId,
   salvarGoogleClientId,
-  isGoogleConfigured
+  isGoogleConfigured,
+  estaoCertificadosLiberados,
+  alternarLiberacaoCertificados
 };

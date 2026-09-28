@@ -156,13 +156,6 @@
         <span>Painel da Liga (Organização)</span>
       </button>
 
-      <!-- Acesso Restrito Organizador (Link Discreto no Rodapé do Menu) -->
-      <div class="pt-2 text-center border-t border-stone-100">
-        <button onclick="fecharMenuMobile(); abrirModalLoginOrganizador();" class="text-[11px] text-stone-400 hover:text-stone-700 underline">
-          Acesso da Comissão da Liga
-        </button>
-      </div>
-
     </div>
   </header>
 
@@ -243,24 +236,17 @@
         </div>
 
         <!-- Banner Oficial em Moldura Destaque -->
+        <!-- Banner Oficial em Destaque Ampliado -->
         <div class="lg:col-span-6 flex justify-center">
-          <div class="relative w-full max-w-lg">
+          <div class="relative w-full max-w-xl group">
             <!-- Glow decorativo atrás do banner -->
-            <div class="absolute -inset-1.5 bg-gradient-to-r from-coffee-400 to-amber-600 rounded-3xl blur-lg opacity-40 group-hover:opacity-75 transition duration-500"></div>
+            <div class="absolute -inset-2 bg-gradient-to-r from-coffee-400 via-amber-500 to-coffee-600 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition duration-500"></div>
             
-            <div class="relative bg-stone-900 rounded-2xl overflow-hidden shadow-2xl border border-white/15">
-              <div class="bg-stone-950/80 px-4 py-2 flex items-center justify-between border-b border-white/10 text-xs text-stone-400">
-                <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <span class="font-medium text-stone-300">Banner Oficial do Evento</span>
-                </div>
-                <span class="text-[11px] bg-white/10 px-2 py-0.5 rounded text-stone-300 font-mono">10° Edição</span>
-              </div>
-              
+            <div class="relative bg-stone-900 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border-2 border-white/20">
               <img 
                 src="banner.jpeg" 
-                alt="Banner 10° Café com Ciência: Os Direitos dos Pacientes na Odontologia - Profa. Carolina Diniz" 
-                class="w-full h-auto object-cover hover:scale-[1.02] transition duration-500"
+                alt="Banner Oficial 10° Café com Ciência: Os Direitos dos Pacientes na Odontologia - Profa. Carolina Diniz" 
+                class="w-full h-auto object-cover hover:scale-[1.015] transition duration-500 rounded-2xl sm:rounded-3xl"
               />
             </div>
           </div>
@@ -912,9 +898,6 @@
             Garantir vaga por R$ 10
           </a>
         </div>
-        <button onclick="fecharModalLogin(); abrirModalLoginOrganizador();" class="text-[11px] text-stone-400 hover:text-stone-600 underline mt-1">
-          Acesso da Comissão da Liga (Organizadores)
-        </button>
       </div>
 
     </div>
@@ -1174,19 +1157,20 @@
           <input 
             type="email" 
             id="inputEmailOrg" 
-            value="cafecomciencia.liga@gmail.com" 
-            class="w-full px-4 py-2.5 text-xs rounded-xl border border-stone-300 bg-stone-50 text-stone-800 focus:border-coffee-500 outline-none"
+            value="" 
+            placeholder="organizador@email.com"
+            class="w-full px-4 py-2.5 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none"
           />
         </div>
 
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
-            Senha do Painel
+            Senha de Acesso
           </label>
           <input 
             type="password" 
             id="inputSenhaOrg" 
-            placeholder="Digite a senha da liga (Padrão: cafe2026)" 
+            placeholder="Digite sua senha de organizador" 
             class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
             onkeydown="if(event.key === 'Enter') executarLoginOrganizador()"
           />
@@ -1216,43 +1200,49 @@
   <div id="adminModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-2 sm:p-4 backdrop-modal">
     <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-coffee-200 overflow-hidden">
       
-      <!-- Topo do Painel com Abas -->
-      <div class="p-5 sm:p-6 bg-coffee-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-            <i data-lucide="shield-check" class="w-5 h-5 text-amber-300"></i>
-          </div>
-          <div>
-            <h3 class="text-lg font-bold">Painel da Liga · 10° Café com Ciência</h3>
-            <div class="flex items-center gap-3 text-xs text-stone-300 mt-0.5">
-              <span id="adminStatusDb"></span>
-              <span id="adminTotalInscricoes" class="font-semibold text-amber-300">0 inscritos</span>
-              <span class="text-stone-400">·</span>
-              <span id="adminTotalPresencas" class="text-emerald-300 font-semibold">0 presenças</span>
+      <!-- Topo do Painel com Abas Mobile-Friendly -->
+      <div class="p-4 sm:p-6 bg-coffee-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center justify-between w-full sm:w-auto">
+          <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+              <i data-lucide="shield-check" class="w-5 h-5 text-amber-300"></i>
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold leading-tight">Painel da Liga · 10° Café com Ciência</h3>
+              <div class="flex items-center gap-2 text-[11px] sm:text-xs text-stone-300 mt-0.5">
+                <span id="adminStatusDb"></span>
+                <span id="adminTotalInscricoes" class="font-semibold text-amber-300">0 inscritos</span>
+                <span class="text-stone-400">·</span>
+                <span id="adminTotalPresencas" class="text-emerald-300 font-semibold">0 presenças</span>
+              </div>
             </div>
           </div>
+
+          <button onclick="fecharPainelAdmin()" class="sm:hidden p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
         </div>
 
-        <div class="flex items-center gap-2">
-          <!-- Navegação de Abas -->
-          <div class="flex bg-stone-950/40 p-1 rounded-xl text-xs">
-            <button id="tabBtn_inscricoes" onclick="trocarAbaAdmin('inscricoes')" class="px-3 py-1.5 rounded-lg transition">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <!-- Navegação de Abas Touch-Friendly com Scroll Horizontal no Celular -->
+          <div class="flex overflow-x-auto no-scrollbar bg-stone-950/40 p-1 rounded-xl text-xs w-full sm:w-auto">
+            <button id="tabBtn_inscricoes" onclick="trocarAbaAdmin('inscricoes')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition font-medium">
               Inscrições
             </button>
-            <button id="tabBtn_portaria" onclick="trocarAbaAdmin('portaria')" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+            <button id="tabBtn_portaria" onclick="trocarAbaAdmin('portaria')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium">
               <i data-lucide="scan-line" class="w-3.5 h-3.5 text-amber-400"></i>
               Portaria (QR)
             </button>
-            <button id="tabBtn_lembretes" onclick="trocarAbaAdmin('lembretes')" class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+            <button id="tabBtn_lembretes" onclick="trocarAbaAdmin('lembretes')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium">
               <i data-lucide="bell" class="w-3.5 h-3.5 text-emerald-400"></i>
               Lembretes
             </button>
-            <button id="tabBtn_config" onclick="trocarAbaAdmin('config')" class="px-3 py-1.5 rounded-lg transition">
-              Supabase
+            <button id="tabBtn_config" onclick="trocarAbaAdmin('config')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition font-medium">
+              Supabase / Nuvem
             </button>
           </div>
 
-          <button onclick="fecharPainelAdmin()" class="p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+          <button onclick="fecharPainelAdmin()" class="hidden sm:inline-flex p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
             <i data-lucide="x" class="w-6 h-6"></i>
           </button>
         </div>
@@ -1260,6 +1250,27 @@
 
       <!-- ================= ABA 1: LISTA DE INSCRIÇÕES ================= -->
       <div id="tabView_inscricoes" class="flex-1 flex flex-col overflow-hidden">
+        
+        <!-- Banner de Liberação de Certificados de Participação -->
+        <div id="bannerStatusCertificados" class="p-3.5 sm:p-4 bg-amber-50 border-b border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2.5">
+            <div id="iconStatusCertificados" class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+              <i data-lucide="lock" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <div class="font-bold text-stone-900" id="textoStatusCertificados">Certificados de Participação: 🔒 Bloqueados para Assinatura</div>
+              <p class="text-[11px] text-stone-500">As declarações de 4 horas só ficam disponíveis aos participantes quando liberadas pela comissão.</p>
+            </div>
+          </div>
+          <button 
+            id="btnAlternarCertificados"
+            onclick="alternarLiberacaoCertificadosAdmin()"
+            class="w-full sm:w-auto px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shrink-0"
+          >
+            <i data-lucide="unlock" class="w-4 h-4"></i>
+            <span>Liberar Certificados para Participantes</span>
+          </button>
+        </div>
         <!-- Barra de Ações Rápidas -->
         <div class="p-4 bg-stone-50 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-4">
@@ -1319,31 +1330,32 @@
             </p>
           </div>
 
-          <!-- Caixa da Câmera -->
-          <div class="bg-white p-6 rounded-3xl border border-coffee-200 shadow-md text-center">
-            <div id="qrReaderVideoBox" class="w-full max-w-sm aspect-square mx-auto rounded-2xl overflow-hidden bg-stone-900 border-2 border-coffee-300 relative flex items-center justify-center text-white text-xs">
+          <!-- Caixa da Câmera Ampliada para Celulares e Tablets -->
+          <div class="bg-white p-4 sm:p-6 rounded-3xl border border-coffee-200 shadow-md text-center">
+            <div id="qrReaderVideoBox" class="w-full max-w-xl aspect-[4/3] sm:aspect-video mx-auto rounded-3xl overflow-hidden bg-stone-950 border-4 border-coffee-300 relative flex items-center justify-center text-white text-xs shadow-inner min-h-[290px] sm:min-h-[380px]">
               <div class="p-6 text-center text-stone-400">
-                <i data-lucide="camera" class="w-10 h-10 mx-auto mb-2 text-stone-500"></i>
-                <span>Câmera desligada. Clique abaixo para iniciar o leitor.</span>
+                <i data-lucide="camera" class="w-12 h-12 mx-auto mb-2 text-stone-500 animate-pulse"></i>
+                <span class="text-sm font-semibold block text-stone-300">Câmera da Portaria</span>
+                <span class="text-xs text-stone-500 mt-1 block">Toque no botão abaixo para ativar a leitura de QR Code</span>
               </div>
             </div>
 
-            <div class="mt-4 flex justify-center gap-3">
+            <div class="mt-4 flex flex-wrap justify-center gap-3">
               <button 
                 id="btnStartScanner" 
                 onclick="QRScannerPortaria.iniciarLeitorPortaria()" 
-                class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2"
+                class="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2"
               >
-                <i data-lucide="video" class="w-4 h-4"></i>
+                <i data-lucide="video" class="w-5 h-5"></i>
                 <span>Ativar Câmera para Escanear</span>
               </button>
 
               <button 
                 id="btnStopScanner" 
                 onclick="QRScannerPortaria.pararLeitorPortaria()" 
-                class="hidden px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-2"
+                class="hidden w-full sm:w-auto px-6 py-3.5 bg-red-600 hover:bg-red-700 text-white font-bold text-sm rounded-xl shadow transition flex items-center justify-center gap-2"
               >
-                <i data-lucide="video-off" class="w-4 h-4"></i>
+                <i data-lucide="video-off" class="w-5 h-5"></i>
                 <span>Desativar Câmera</span>
               </button>
             </div>
@@ -1565,6 +1577,23 @@
         <span>Sistema de Portaria e Lembretes · 10° Café com Ciência</span>
         <span class="font-mono">Chave Pix: cafecomciencia.liga@gmail.com</span>
       </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL DE VALIDAÇÃO DE ENTRADA NA PORTARIA (CENTRALIZADO NA TELA)
+       ======================================================================== -->
+  <div id="modalValidacaoPortaria" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 backdrop-modal bg-black/75">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border-2 border-emerald-500 relative animate-in fade-in zoom-in duration-150">
+      
+      <!-- Topo com botão fechar -->
+      <button onclick="QRScannerPortaria.fecharModalValidacao()" class="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Conteúdo injetado dinamicamente -->
+      <div id="conteudoValidacaoPortaria"></div>
 
     </div>
   </div>

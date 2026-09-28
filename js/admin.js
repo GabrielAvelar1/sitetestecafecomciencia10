@@ -134,8 +134,62 @@ function trocarAbaAdmin(aba) {
   if (window.lucide) window.lucide.createIcons();
 }
 
+// ============================================================================
+// CONTROLE DE LIBERAÇÃO DE CERTIFICADOS
+// ============================================================================
+function atualizarVisualStatusCertificados() {
+  const isLiberado = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
+  const texto = document.getElementById('textoStatusCertificados');
+  const icon = document.getElementById('iconStatusCertificados');
+  const btn = document.getElementById('btnAlternarCertificados');
+  const banner = document.getElementById('bannerStatusCertificados');
+
+  if (texto && icon && btn && banner) {
+    if (isLiberado) {
+      banner.className = 'p-3.5 sm:p-4 bg-emerald-50 border-b border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs';
+      icon.className = 'w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0';
+      icon.innerHTML = '<i data-lucide="unlock" class="w-4 h-4"></i>';
+      texto.innerHTML = 'Certificados de Participação: <span class="text-emerald-700 font-black">✓ LIBERADOS PARA OS ALUNOS</span>';
+      btn.className = 'w-full sm:w-auto px-4 py-2 bg-stone-800 hover:bg-stone-900 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shrink-0';
+      btn.innerHTML = '<i data-lucide="lock" class="w-4 h-4"></i><span>Bloquear Certificados Novamente</span>';
+    } else {
+      banner.className = 'p-3.5 sm:p-4 bg-amber-50 border-b border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs';
+      icon.className = 'w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0';
+      icon.innerHTML = '<i data-lucide="lock" class="w-4 h-4"></i>';
+      texto.innerHTML = 'Certificados de Participação: <span class="text-amber-900 font-bold">🔒 Bloqueados para Assinatura</span>';
+      btn.className = 'w-full sm:w-auto px-4 py-2 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shrink-0';
+      btn.innerHTML = '<i data-lucide="unlock" class="w-4 h-4"></i><span>Liberar Certificados para Participantes</span>';
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+function alternarLiberacaoCertificadosAdmin() {
+  const atual = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
+  const novo = !atual;
+
+  if (novo) {
+    if (!confirm('Atenção: Deseja realmente LIBERAR as declarações de presença para todos os participantes que tiveram a presença confirmada? Certifique-se de que os certificados já possuem as devidas assinaturas.')) {
+      return;
+    }
+  } else {
+    if (!confirm('Deseja BLOQUEAR temporariamente a emissão dos certificados aos participantes?')) {
+      return;
+    }
+  }
+
+  window.LigaDB.alternarLiberacaoCertificados(novo);
+  atualizarVisualStatusCertificados();
+  carregarInscricoesAdmin();
+  if (typeof mostrarToast === 'function') {
+    mostrarToast(novo ? 'Certificados liberados para os alunos!' : 'Certificados bloqueados.');
+  }
+}
+
 // Carregar Inscrições
 async function carregarInscricoesAdmin() {
+  atualizarVisualStatusCertificados();
+
   const container = document.getElementById('adminInscricoesList');
   const countBadge = document.getElementById('adminTotalInscricoes');
   const totalArrecadado = document.getElementById('adminTotalArrecadado');
@@ -555,3 +609,5 @@ window.testarPopupGoogleAdmin = testarPopupGoogleAdmin;
 window.limparDadosDemo = limparDadosDemo;
 window.exportarParaCSV = exportarParaCSV;
 window.salvarConfiguracoesSupabase = salvarConfiguracoesSupabase;
+window.alternarLiberacaoCertificadosAdmin = alternarLiberacaoCertificadosAdmin;
+window.atualizarVisualStatusCertificados = atualizarVisualStatusCertificados;
