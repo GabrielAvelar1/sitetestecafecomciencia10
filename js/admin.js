@@ -594,18 +594,132 @@ function exportarParaCSV() {
   document.body.removeChild(link);
 }
 
-// Limpar dados demo
-function limparDadosDemo() {
-  if (confirm('Deseja realmente limpar as inscrições salvas no armazenamento local do navegador?')) {
-    localStorage.removeItem('cafe_ciencia_inscricoes');
-    carregarInscricoesAdmin();
+// ============================================================================
+// MODAL DE RESET TOTAL DO BANCO DE DADOS (PROTEGIDO POR SENHA)
+// ============================================================================
+function abrirModalResetarBanco() {
+  const modal = document.getElementById('modalResetBanco');
+  const input = document.getElementById('inputSenhaResetBanco');
+  const erro = document.getElementById('erroResetBanco');
+  const sucesso = document.getElementById('sucessoResetBanco');
+  const btn = document.getElementById('btnConfirmarReset');
+
+  if (erro) {
+    erro.textContent = '';
+    erro.classList.add('hidden');
   }
+  if (sucesso) {
+    sucesso.textContent = '';
+    sucesso.classList.add('hidden');
+  }
+  if (input) {
+    input.value = '';
+  }
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i><span>Confirmar e Apagar Tudo</span>';
+  }
+
+  if (modal) {
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      if (input) input.focus();
+    }, 100);
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function fecharModalResetBanco() {
+  const modal = document.getElementById('modalResetBanco');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+async function confirmarResetBancoDeDados() {
+  const input = document.getElementById('inputSenhaResetBanco');
+  const erro = document.getElementById('erroResetBanco');
+  const sucesso = document.getElementById('sucessoResetBanco');
+  const btn = document.getElementById('btnConfirmarReset');
+
+  const senha = input ? input.value.trim() : '';
+
+  if (!senha) {
+    if (erro) {
+      erro.textContent = 'Por favor, digite a senha cafe2026 para confirmar.';
+      erro.classList.remove('hidden');
+    }
+    if (input) input.focus();
+    return;
+  }
+
+  if (senha !== 'cafe2026') {
+    if (erro) {
+      erro.textContent = 'Senha incorreta! Acesso não autorizado para resetar o banco de dados.';
+      erro.classList.remove('hidden');
+    }
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+    return;
+  }
+
+  if (erro) erro.classList.add('hidden');
+
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Apagando banco e comprovantes...</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  try {
+    const res = await window.LigaDB.resetarBancoDeDados(senha);
+
+    if (sucesso) {
+      sucesso.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-700"></i>
+          <span>Banco limpo com sucesso! ${res.inscricoesApagadas} inscrições e ${res.arquivosApagados} arquivos de comprovantes apagados.</span>
+        </div>
+      `;
+      sucesso.classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // Recarrega lista
+    await carregarInscricoesAdmin();
+
+    setTimeout(() => {
+      fecharModalResetBanco();
+    }, 1800);
+
+  } catch (err) {
+    if (erro) {
+      erro.textContent = err.message || 'Erro ao tentar apagar dados do banco.';
+      erro.classList.remove('hidden');
+    }
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i><span>Tentar Novamente</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+}
+
+// Limpar dados demo / resetar banco
+function limparDadosDemo() {
+  abrirModalResetarBanco();
 }
 
 window.salvarConfiguracaoGoogleAdmin = salvarConfiguracaoGoogleAdmin;
 window.testarPopupGoogleAdmin = testarPopupGoogleAdmin;
 window.limparDadosDemo = limparDadosDemo;
+window.abrirModalResetarBanco = abrirModalResetarBanco;
+window.fecharModalResetBanco = fecharModalResetBanco;
+window.confirmarResetBancoDeDados = confirmarResetBancoDeDados;
 window.exportarParaCSV = exportarParaCSV;
 window.salvarConfiguracoesSupabase = salvarConfiguracoesSupabase;
 window.alternarLiberacaoCertificadosAdmin = alternarLiberacaoCertificadosAdmin;
 window.atualizarVisualStatusCertificados = atualizarVisualStatusCertificados;
+

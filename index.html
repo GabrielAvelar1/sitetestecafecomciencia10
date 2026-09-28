@@ -1216,8 +1216,9 @@
               <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar (CSV)
             </button>
 
-            <button onclick="limparDadosDemo()" title="Limpar dados de teste locais" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition">
-              <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+            <button onclick="abrirModalResetarBanco()" title="Apagar todos os dados do banco (exige senha cafe2026)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition shadow-2xs">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Zerar Banco</span>
             </button>
           </div>
         </div>
@@ -1416,6 +1417,78 @@
       <div id="comprovanteViewerContent">
         <!-- Imagem ou PDF embed aqui -->
       </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: CONFIRMAR LIMPEZA GERAL DO BANCO DE DADOS (PROTEGIDO POR SENHA)
+       ======================================================================== -->
+  <div id="modalResetBanco" class="fixed inset-0 z-[70] hidden flex items-center justify-center p-4 backdrop-modal bg-black/75">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border-2 border-red-500 relative animate-in fade-in zoom-in duration-150">
+      
+      <div class="flex items-start gap-3.5 pb-4 border-b border-stone-100">
+        <div class="w-11 h-11 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
+          <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-stone-900 leading-tight">Apagar Dados do Banco</h3>
+          <p class="text-xs text-stone-500 mt-1">Limpeza total para início oficial do evento</p>
+        </div>
+        <button onclick="fecharModalResetBanco()" class="ml-auto p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 pt-4">
+        <div class="p-3.5 bg-red-50 rounded-2xl border border-red-200 text-xs text-red-900 leading-relaxed space-y-1.5">
+          <p class="font-bold flex items-center gap-1.5 text-red-800">
+            <i data-lucide="shield-alert" class="w-4 h-4 shrink-0"></i>
+            O que será apagado permanentemente:
+          </p>
+          <ul class="list-disc list-inside space-y-1 text-red-700 text-[11px] pl-1">
+            <li>Todas as inscrições e dados dos participantes</li>
+            <li>Fotos e arquivos de comprovantes Pix salvos na nuvem</li>
+            <li>Histórico de presenças, certificados e lembretes</li>
+          </ul>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+            Digite a senha de confirmação da liga:
+          </label>
+          <input 
+            type="password" 
+            id="inputSenhaResetBanco" 
+            placeholder="Digite a senha cafe2026"
+            class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none"
+            onkeydown="if(event.key === 'Enter') confirmarResetBancoDeDados()"
+          />
+        </div>
+
+        <div id="erroResetBanco" class="hidden p-3 bg-red-100 border border-red-300 text-red-800 text-xs rounded-xl font-medium"></div>
+        <div id="sucessoResetBanco" class="hidden p-3 bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs rounded-xl font-medium"></div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button 
+            type="button" 
+            onclick="fecharModalResetBanco()" 
+            class="flex-1 py-3 px-4 rounded-xl border border-stone-300 text-stone-700 font-bold text-xs hover:bg-stone-100 transition"
+          >
+            Cancelar
+          </button>
+
+          <button 
+            id="btnConfirmarReset"
+            type="button" 
+            onclick="confirmarResetBancoDeDados()" 
+            class="flex-1 py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl shadow-lg hover:shadow-red-200 transition flex items-center justify-center gap-1.5"
+          >
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Confirmar e Apagar</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

@@ -678,6 +678,133 @@ async function registrarDisparoLembrete(id, tipoCanal, tipoLembrete) {
   return true;
 }
 
+// ============================================================================
+// 9. LIMPEZA TOTAL DO BANCO DE DADOS E ARMAZENAMENTO (PROTEGIDO POR SENHA)
+// ============================================================================
+async function resetarBancoDeDados(senha) {
+  if (senha !== 'cafe2026') {
+    throw new Error('Senha incorreta! Acesso não autorizado para resetar o banco de dados.');
+  }
+
+  const sb = getSupabase();
+  const resultados = {
+    inscricoesApagadas: 0,
+    arquivosApagados: 0,
+    logsApagados: 0,
+    localLimpo: false
+  };
+
+  if (sb) {
+    // 1. Apagar logs de lembretes vinculados aos inscritos (evita restrições de chave estrangeira)
+    try {
+      const { data: logsDeletados, error: errLogs } = await sb
+        .from('lembretes_logs')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000')
+        .select();
+
+      if (!errLogs && logsDeletados) {
+        resultados.logsApagados = logsDeletados.length;
+      }
+    } catch (errLogs) {
+      console.warn('Aviso ao limpar logs de lembretes:', errLogs);
+    }
+
+    // 2. Apagar fotos e comprovantes do Supabase Storage
+    try {
+      const pathsParaRemover = new Set();
+
+      // a) Lista da pasta comprovantes/
+      const { data: arquivosPasta } = await sb.storage
+        .from(SUPABASE_CONFIG.bucketName)
+        .list('comprovantes', { limit: 1000 });
+
+      if (arquivosPasta && Array.isArray(arquivosPasta)) {
+        arquivosPasta.forEach(item => {
+          if (item.name && item.name !== '.emptyFolderPlaceholder') {
+            pathsParaRemover.add(`comprovantes/${item.name}`);
+          }
+        });
+      }
+
+      // b) Lista da raiz do bucket
+      const { data: arquivosRaiz } = await sb.storage
+        .from(SUPABASE_CONFIG.bucketName)
+        .list('', { limit: 1000 });
+
+      if (arquivosRaiz && Array.isArray(arquivosRaiz)) {
+        arquivosRaiz.forEach(item => {
+          if (item.name && item.name !== 'comprovantes' && item.name !== '.emptyFolderPlaceholder') {
+            pathsParaRemover.add(item.name);
+          }
+        });
+      }
+
+      // c) Extrai caminhos salvos nas inscrições antes de deletá-las
+      const { data: todasInscricoes } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('comprovante_url');
+
+      if (todasInscricoes && Array.isArray(todasInscricoes)) {
+        todasInscricoes.forEach(ins => {
+          if (ins.comprovante_url && ins.comprovante_url.includes('/comprovantes/')) {
+            const partes = ins.comprovante_url.split('/comprovantes/');
+            if (partes.length > 1) {
+              const subpath = partes.slice(1).join('/comprovantes/');
+              if (subpath) pathsParaRemover.add(subpath);
+            }
+          }
+        });
+      }
+
+      const listaRemover = Array.from(pathsParaRemover);
+      if (listaRemover.length > 0) {
+        const { error: errStorage } = await sb.storage
+          .from(SUPABASE_CONFIG.bucketName)
+          .remove(listaRemover);
+
+        if (!errStorage) {
+          resultados.arquivosApagados = listaRemover.length;
+        } else {
+          console.warn('Aviso ao remover arquivos do storage:', errStorage);
+        }
+      }
+    } catch (errStorage) {
+      console.warn('Erro ao limpar arquivos de comprovantes:', errStorage);
+    }
+
+    // 3. Apagar inscrições da tabela 'inscricoes' (preserva apenas a conta do organizador)
+    try {
+      const { data: deletados, error: errDelete } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .delete()
+        .neq('email', ORGANIZADOR_PADRAO.email)
+        .select();
+
+      if (errDelete) {
+        throw new Error('Falha ao apagar inscrições do Supabase: ' + errDelete.message);
+      }
+
+      resultados.inscricoesApagadas = deletados ? deletados.length : 0;
+    } catch (errInscricoes) {
+      console.error('Erro ao deletar inscrições:', errInscricoes);
+      throw errInscricoes;
+    }
+  }
+
+  // 4. Limpar inscrições do localStorage
+  localStorage.removeItem('cafe_ciencia_inscricoes');
+  resultados.localLimpo = true;
+
+  // 5. Se o usuário atualmente logado for um participante de teste, desloga-o
+  const usuarioLogado = getUsuarioLogado();
+  if (usuarioLogado && usuarioLogado.role !== 'organizador') {
+    localStorage.removeItem('cafe_session_user');
+  }
+
+  return resultados;
+}
+
 // Expõe globalmente
 window.LigaDB = {
   SUPABASE_CONFIG,
@@ -701,9 +828,11 @@ window.LigaDB = {
   listarInscricoes,
   atualizarStatusPagamento,
   registrarDisparoLembrete,
+  resetarBancoDeDados,
   getGoogleClientId,
   salvarGoogleClientId,
   isGoogleConfigured,
   estaoCertificadosLiberados,
   alternarLiberacaoCertificados
 };
+
