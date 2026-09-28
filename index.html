@@ -85,10 +85,14 @@
       </a>
 
       <!-- Links de Navegação Desktop -->
-      <nav class="hidden lg:flex items-center gap-7 text-sm font-medium text-stone-600">
+      <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-stone-600">
         <a href="#palestrante" class="hover:text-coffee-700 transition">A Palestrante</a>
         <a href="#local" class="hover:text-coffee-700 transition">Data & Local</a>
         <a href="#inscricao" class="hover:text-coffee-700 transition font-semibold text-coffee-800">Inscrição</a>
+        <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-stone-600 hover:text-pink-600 transition" title="Instagram Oficial da Liga">
+          <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i>
+          <span>Instagram</span>
+        </a>
       </nav>
 
       <!-- Botões de Ação Desktop -->
@@ -140,6 +144,10 @@
         </a>
         <a href="#inscricao" onclick="fecharMenuMobile()" class="py-2 px-3 rounded-lg hover:bg-coffee-50 text-coffee-800 transition">
           Inscrição (R$ 10)
+        </a>
+        <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" onclick="fecharMenuMobile()" class="py-2 px-3 rounded-lg hover:bg-pink-50 transition flex items-center gap-2 text-stone-700 hover:text-pink-600">
+          <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i>
+          <span>Instagram (@cafecomciencia.arnaldobh)</span>
         </a>
       </div>
 
@@ -274,191 +282,27 @@
         </p>
       </div>
 
-      <!-- Grid com a Imagem Oficial do Currículo e a Lista Estruturada Equilibrada -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
-        
-        <!-- Coluna 1: Imagem Oficial do Cartaz da Palestrante -->
-        <div class="lg:col-span-5 flex flex-col justify-between">
-          <div class="w-full bg-stone-900 rounded-3xl p-3 shadow-xl border border-coffee-200 group">
-            <div class="relative overflow-hidden rounded-2xl bg-stone-950">
-              <img 
-                src="palestrante_detalhes.png" 
-                alt="Profa. Carolina Diniz - Os Direitos dos Pacientes na Odontologia - 10° Café com Ciência" 
-                class="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-300"
-              />
-            </div>
-            <div class="pt-3 pb-1 px-2 flex items-center justify-between text-xs text-stone-400">
-              <span class="flex items-center gap-1.5 text-stone-200 font-medium">
-                <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
-                Cartaz Oficial de Apresentação
-              </span>
-              <a href="palestrante_detalhes.png" target="_blank" class="inline-flex items-center gap-1 text-amber-300 hover:text-white font-semibold text-xs transition">
-                <span>Ampliar</span>
-                <i data-lucide="external-link" class="w-3 h-3"></i>
-              </a>
-            </div>
+      <!-- Imagem Oficial da Palestrante em Destaque Centralizado -->
+      <div class="flex justify-center">
+        <div class="w-full max-w-xl bg-stone-900 rounded-3xl p-3 sm:p-4 shadow-2xl border border-coffee-200 group">
+          <div class="relative overflow-hidden rounded-2xl bg-stone-950">
+            <img 
+              src="palestrante_detalhes.png" 
+              alt="Profa. Carolina Diniz - Os Direitos dos Pacientes na Odontologia - 10° Café com Ciência" 
+              class="w-full h-auto object-cover group-hover:scale-[1.01] transition duration-300"
+            />
           </div>
-
-          <!-- Card de Destaque Harmonioso sob a Imagem -->
-          <div class="mt-4 p-4 rounded-2xl bg-gradient-to-r from-coffee-900 to-stone-900 text-white shadow-md border border-coffee-800 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
-              <i data-lucide="sparkles" class="w-5 h-5"></i>
-            </div>
-            <div class="min-w-0">
-              <p class="text-xs font-bold text-amber-300 uppercase tracking-wider">Conferência Exclusiva</p>
-              <p class="text-[11px] text-stone-300 leading-snug">Carga horária de 4 horas com certificação acadêmica oficial.</p>
-            </div>
+          <div class="pt-3 pb-1 px-3 flex items-center justify-between text-xs text-stone-400">
+            <span class="flex items-center gap-1.5 text-stone-200 font-medium">
+              <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+              Apresentação & Currículo Oficial
+            </span>
+            <a href="palestrante_detalhes.png" target="_blank" class="inline-flex items-center gap-1 text-amber-300 hover:text-white font-semibold text-xs transition">
+              <span>Ampliar Imagem</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
           </div>
         </div>
-
-        <!-- Coluna 2: Informações Estruturadas da Palestrante em Grid Harmonioso -->
-        <div class="lg:col-span-7 bg-coffee-50/60 rounded-3xl p-6 sm:p-7 border border-coffee-200 shadow-sm flex flex-col justify-between">
-          
-          <div>
-            <div class="flex items-center gap-3 pb-3 mb-4 border-b border-coffee-200">
-              <div class="w-10 h-10 rounded-xl bg-coffee-700 text-white flex items-center justify-center shadow-sm">
-                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
-              </div>
-              <div>
-                <h3 class="text-lg font-bold text-coffee-950">Formação Acadêmica & Atuação Profissional</h3>
-                <p class="text-xs text-stone-600">Qualificações, especializações e governança em saúde</p>
-              </div>
-            </div>
-
-            <!-- Grade de 2 Colunas para Equilíbrio Visual Perfeito -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Graduada em Enfermagem</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Atuação e cuidado clínico</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="scale" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Direito do Paciente</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Especialista pelo IBDPAC</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Auditoria & Regulação</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Especialista · Fundação Unimed</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="award" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Acreditação & Qualidade</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Faculdade Ciências Médicas MG</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="lightbulb" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">MBA em Inovação</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Práticas e soluções em saúde</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="zap" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">MBA de Gestão Ágil</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Universidade Mindmaster</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="building" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Gestão em Saúde</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Serviços de Saúde pela PUCRS</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="file-check-2" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Governança Clínica</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Certificação pelo CBEXS</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="laptop" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Saúde Digital & Coletiva</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Univ. Federal da Bahia (UFBA)</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Observatório do Paciente</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Membro pela UnB</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="microscope" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Núcleo de Pesquisa</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Associada e Membro SOBRASP</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-3 rounded-xl border border-coffee-100 shadow-xs flex items-start gap-2.5 hover:border-coffee-300 transition">
-                <div class="w-7 h-7 rounded-lg bg-coffee-100 text-coffee-700 flex items-center justify-center shrink-0 mt-0.5">
-                  <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i>
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-xs font-bold text-stone-900 leading-tight">Ref. Técnica PBH & Mentora</h4>
-                  <p class="text-[11px] text-stone-500 mt-0.5 leading-snug">Rede Especializada & Segurança</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Síntese da Temática ao Fim da Coluna -->
-          <div class="mt-4 pt-3 border-t border-coffee-200/80 flex items-center gap-2 text-xs text-stone-600">
-            <i data-lucide="book-open" class="w-4 h-4 text-coffee-700 shrink-0"></i>
-            <span>Palestra focada em casos práticos, termo de consentimento, prontuário e segurança na rotina odontológica.</span>
-          </div>
-
-        </div>
-
       </div>
 
     </div>
@@ -822,6 +666,10 @@
         <div class="flex flex-wrap items-center justify-center gap-6 text-xs text-stone-400">
           <span>UniArnaldo - Campus Anchieta</span>
           <span>Belo Horizonte - MG</span>
+          <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-stone-300 hover:text-pink-400 transition font-medium">
+            <i data-lucide="instagram" class="w-4 h-4 text-pink-400"></i>
+            <span>@cafecomciencia.arnaldobh</span>
+          </a>
           <button onclick="abrirPainelAdmin()" class="text-coffee-300 hover:text-white underline">
             Acesso da Liga
           </button>
@@ -1278,19 +1126,19 @@
   <!-- ========================================================================
        MODAL 3: PAINEL DA COMISSÃO ORGANIZADORA (ADMIN COM ABAS)
        ======================================================================== -->
-  <div id="adminModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-2 sm:p-4 backdrop-modal">
-    <div class="bg-white rounded-3xl max-w-5xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-coffee-200 overflow-hidden">
+  <div id="adminModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-0 sm:p-4 backdrop-modal">
+    <div class="bg-white rounded-none sm:rounded-3xl max-w-5xl w-full h-full sm:h-auto sm:max-h-[92vh] flex flex-col shadow-2xl border-0 sm:border border-coffee-200 overflow-hidden">
       
       <!-- Topo do Painel com Abas Mobile-Friendly -->
-      <div class="p-4 sm:p-6 bg-coffee-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="p-3.5 sm:p-5 bg-coffee-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div class="flex items-center justify-between w-full sm:w-auto">
-          <div class="flex items-center gap-2.5 sm:gap-3">
+          <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
               <i data-lucide="shield-check" class="w-5 h-5 text-amber-300"></i>
             </div>
-            <div>
-              <h3 class="text-base sm:text-lg font-bold leading-tight">Painel da Liga · 10° Café com Ciência</h3>
-              <div class="flex items-center gap-2 text-[11px] sm:text-xs text-stone-300 mt-0.5">
+            <div class="min-w-0">
+              <h3 class="text-sm sm:text-base font-bold leading-tight truncate">Painel da Liga · 10° Café com Ciência</h3>
+              <div class="flex items-center gap-2 text-[11px] text-stone-300 mt-0.5">
                 <span id="adminStatusDb"></span>
                 <span id="adminTotalInscricoes" class="font-semibold text-amber-300">0 inscritos</span>
                 <span class="text-stone-400">·</span>
@@ -1299,28 +1147,28 @@
             </div>
           </div>
 
-          <button onclick="fecharPainelAdmin()" class="sm:hidden p-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+          <button onclick="fecharPainelAdmin()" class="sm:hidden p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition shrink-0" title="Fechar painel">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <div class="flex items-center gap-2 w-full sm:w-auto">
+        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
           <!-- Navegação de Abas Touch-Friendly com Scroll Horizontal no Celular -->
-          <div class="flex overflow-x-auto no-scrollbar bg-stone-950/40 p-1 rounded-xl text-xs w-full sm:w-auto">
-            <button id="tabBtn_inscricoes" onclick="trocarAbaAdmin('inscricoes')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition font-medium">
+          <div class="flex overflow-x-auto no-scrollbar bg-stone-950/40 p-1 rounded-xl text-xs w-full sm:w-auto gap-1">
+            <button id="tabBtn_inscricoes" onclick="trocarAbaAdmin('inscricoes')" class="flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition font-medium">
               Inscrições
             </button>
-            <button id="tabBtn_portaria" onclick="trocarAbaAdmin('portaria')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium">
+            <button id="tabBtn_portaria" onclick="trocarAbaAdmin('portaria')" class="flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 font-medium">
               <i data-lucide="scan-line" class="w-3.5 h-3.5 text-amber-400"></i>
               Portaria (QR)
             </button>
-            <button id="tabBtn_lembretes" onclick="trocarAbaAdmin('lembretes')" class="whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center gap-1.5 font-medium">
+            <button id="tabBtn_lembretes" onclick="trocarAbaAdmin('lembretes')" class="flex-1 sm:flex-initial text-center whitespace-nowrap px-3 py-2 sm:py-1.5 rounded-lg transition flex items-center justify-center gap-1.5 font-medium">
               <i data-lucide="bell" class="w-3.5 h-3.5 text-emerald-400"></i>
               Lembretes
             </button>
           </div>
 
-          <button onclick="fecharPainelAdmin()" class="hidden sm:inline-flex p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+          <button onclick="fecharPainelAdmin()" class="hidden sm:inline-flex p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition shrink-0" title="Fechar painel">
             <i data-lucide="x" class="w-6 h-6"></i>
           </button>
         </div>
@@ -1330,7 +1178,7 @@
       <div id="tabView_inscricoes" class="flex-1 flex flex-col overflow-hidden">
         
         <!-- Banner de Liberação de Certificados de Participação -->
-        <div id="bannerStatusCertificados" class="p-3.5 sm:p-4 bg-amber-50 border-b border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+        <div id="bannerStatusCertificados" class="p-3.5 sm:p-4 bg-amber-50 border-b border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shrink-0">
           <div class="flex items-center gap-2.5">
             <div id="iconStatusCertificados" class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
               <i data-lucide="lock" class="w-4 h-4"></i>
@@ -1350,8 +1198,8 @@
           </button>
         </div>
         <!-- Barra de Ações Rápidas -->
-        <div class="p-4 bg-stone-50 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="flex items-center gap-4">
+        <div class="p-3 sm:p-4 bg-stone-50 border-b border-stone-200 flex flex-wrap items-center justify-between gap-2.5 text-xs shrink-0">
+          <div class="flex items-center gap-3">
             <div>
               <span class="text-stone-500 font-medium">Total Arrecadado:</span>
               <span id="adminTotalArrecadado" class="font-bold text-emerald-700 text-sm ml-1">R$ 0,00</span>
@@ -1361,12 +1209,12 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="carregarInscricoesAdmin()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 font-medium hover:bg-stone-100 transition">
+            <button onclick="carregarInscricoesAdmin()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-stone-300 text-stone-700 font-medium hover:bg-stone-100 transition shadow-2xs">
               <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Atualizar
             </button>
             
-            <button onclick="exportarParaCSV()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Lista (CSV)
+            <button onclick="exportarParaCSV()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition shadow-2xs">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar (CSV)
             </button>
 
             <button onclick="limparDadosDemo()" title="Limpar dados de teste locais" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-stone-400 hover:text-red-600 hover:bg-stone-100 transition">
@@ -1375,9 +1223,9 @@
           </div>
         </div>
 
-        <!-- Tabela com Scroll -->
-        <div class="flex-1 overflow-auto p-4">
-          <table class="w-full text-left text-sm border-collapse admin-table">
+        <!-- Tabela com Scroll Horizontal e Vertical -->
+        <div class="flex-1 overflow-x-auto overflow-y-auto p-2 sm:p-4">
+          <table class="min-w-[720px] w-full text-left text-xs sm:text-sm border-collapse admin-table">
             <thead>
               <tr>
                 <th class="px-4 py-3 rounded-l-lg">Aluno / Protocolo</th>
@@ -1398,7 +1246,7 @@
       </div>
 
       <!-- ================= ABA 2: PORTARIA & SCANNER QR CODE ================= -->
-      <div id="tabView_portaria" class="hidden flex-1 overflow-auto p-6 sm:p-8 bg-stone-50">
+      <div id="tabView_portaria" class="hidden flex-1 overflow-auto p-4 sm:p-8 bg-stone-50">
         <div class="max-w-2xl mx-auto space-y-6">
           
           <div class="text-center">
@@ -1469,7 +1317,7 @@
       </div>
 
       <!-- ================= ABA 3: DISPARADOR DE LEMBRETES ================= -->
-      <div id="tabView_lembretes" class="hidden flex-1 overflow-auto p-6 sm:p-8 bg-stone-50">
+      <div id="tabView_lembretes" class="hidden flex-1 overflow-auto p-4 sm:p-8 bg-stone-50">
         <div class="max-w-3xl mx-auto space-y-6">
           
           <div>
@@ -1528,10 +1376,8 @@
         </div>
       </div>
 
-      </div>
-
       <!-- Rodapé do Modal Admin -->
-      <div class="p-4 bg-stone-50 border-t border-stone-200 text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="p-3 sm:p-4 bg-stone-50 border-t border-stone-200 text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0">
         <span>Sistema de Portaria e Lembretes · 10° Café com Ciência</span>
         <span class="font-mono">Chave Pix: cafecomciencia.liga@gmail.com</span>
       </div>
