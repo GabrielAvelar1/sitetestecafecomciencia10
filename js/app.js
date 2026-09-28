@@ -584,14 +584,6 @@ function exibirCredencialSucesso(aluno) {
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 
-  if (typeof confetti === 'function') {
-    confetti({
-      particleCount: 90,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#C69255', '#4A2E1B', '#0D9488', '#009ce4']
-    });
-  }
 
   if (window.lucide) window.lucide.createIcons();
 }

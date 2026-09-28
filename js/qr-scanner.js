@@ -53,10 +53,11 @@ async function iniciarLeitorPortaria() {
       fps: 15,
       qrbox: (viewfinderWidth, viewfinderHeight) => {
         const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-        const edgeSize = Math.max(Math.floor(minEdge * 0.85), 260);
-        return { width: edgeSize, height: edgeSize };
+        const squareSize = Math.max(160, Math.floor(minEdge * 0.70));
+        const finalEdge = Math.min(squareSize, minEdge - 20);
+        return { width: finalEdge, height: finalEdge };
       },
-      aspectRatio: 1.333333
+      aspectRatio: 1.0
     };
 
     // Preferência pela câmera traseira (environment)
