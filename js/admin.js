@@ -95,7 +95,7 @@ function fecharPainelAdmin() {
 // Trocar Abas no Painel Admin
 function trocarAbaAdmin(aba) {
   abaAtivaAtual = aba;
-  const abas = ['inscricoes', 'portaria', 'lembretes', 'config'];
+  const abas = ['inscricoes', 'portaria', 'lembretes'];
   
   abas.forEach(nome => {
     const btn = document.getElementById(`tabBtn_${nome}`);
@@ -125,8 +125,6 @@ function trocarAbaAdmin(aba) {
       const input = document.getElementById('inputCodigoManual');
       if (input) input.focus();
     }, 100);
-  } else if (aba === 'config') {
-    carregarConfiguracoesSupabase();
   } else if (aba === 'lembretes') {
     atualizarPreviewMensagemLembrete();
   }
