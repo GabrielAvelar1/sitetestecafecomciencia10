@@ -775,10 +775,22 @@ async function resetarBancoDeDados(senha) {
 
     // 3. Apagar inscrições da tabela 'inscricoes' (preserva apenas a conta do organizador)
     try {
+      const emailOrg = 'cafecomciencia.liga@gmail.com';
+
+      // Verifica quantos inscritos existem antes
+      const { data: antesInscritos } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('id')
+        .neq('email', emailOrg)
+        .neq('role', 'organizador');
+
+      const totalParaApagar = antesInscritos ? antesInscritos.length : 0;
+
       const { data: deletados, error: errDelete } = await sb
         .from(SUPABASE_CONFIG.tableName)
         .delete()
-        .neq('email', ORGANIZADOR_PADRAO.email)
+        .neq('email', emailOrg)
+        .neq('role', 'organizador')
         .select();
 
       if (errDelete) {
@@ -786,6 +798,11 @@ async function resetarBancoDeDados(senha) {
       }
 
       resultados.inscricoesApagadas = deletados ? deletados.length : 0;
+
+      // Se havia inscritos cadastrados e o Supabase retornou 0 deletados, RLS bloqueou DELETE
+      if (totalParaApagar > 0 && resultados.inscricoesApagadas === 0) {
+        throw new Error('RLS_DELETE_BLOQUEADO');
+      }
     } catch (errInscricoes) {
       console.error('Erro ao deletar inscrições:', errInscricoes);
       throw errInscricoes;

@@ -696,14 +696,37 @@ async function confirmarResetBancoDeDados() {
 
   } catch (err) {
     if (erro) {
-      erro.textContent = err.message || 'Erro ao tentar apagar dados do banco.';
+      if (err.message === 'RLS_DELETE_BLOQUEADO') {
+        const sqlCodigo = 'CREATE POLICY "Permitir exclusao de inscricoes" ON public.inscricoes FOR DELETE TO anon, authenticated USING (true);\\nCREATE POLICY "Permitir exclusao de comprovantes" ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = \\\'comprovantes\\\');';
+        erro.innerHTML = `
+          <div class="space-y-2 text-left">
+            <p class="font-bold text-red-900 flex items-center gap-1.5">
+              <i data-lucide="shield-alert" class="w-4 h-4 text-red-600 shrink-0"></i>
+              Permissão de exclusão pendente no Supabase (RLS)
+            </p>
+            <p class="text-[11px] text-red-800 leading-relaxed">
+              O Supabase bloqueou a exclusão porque a regra de permissão <strong>DELETE</strong> precisa ser criada uma vez no <strong>SQL Editor</strong> do Supabase.
+            </p>
+            <div class="bg-stone-900 text-stone-200 p-2.5 rounded-xl font-mono text-[10px] space-y-1 select-all break-all">
+              <div>CREATE POLICY "Permitir exclusao de inscricoes" ON public.inscricoes FOR DELETE TO anon, authenticated USING (true);</div>
+              <div>CREATE POLICY "Permitir exclusao de comprovantes" ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'comprovantes');</div>
+            </div>
+            <button type="button" onclick="navigator.clipboard.writeText('${sqlCodigo.replace(/'/g, "\\'")}'); alert('Comando SQL copiado com sucesso! Abra o SQL Editor no painel do Supabase, cole e clique em Run.');" class="w-full py-2 px-3 bg-red-700 hover:bg-red-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copiar Código SQL para o Supabase
+            </button>
+            <p class="text-[10px] text-stone-500 text-center">Após executar no Supabase, basta clicar em "Confirmar e Apagar" novamente.</p>
+          </div>
+        `;
+      } else {
+        erro.textContent = err.message || 'Erro ao tentar apagar dados do banco.';
+      }
       erro.classList.remove('hidden');
     }
     if (btn) {
       btn.disabled = false;
       btn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i><span>Tentar Novamente</span>';
-      if (window.lucide) window.lucide.createIcons();
     }
+    if (window.lucide) window.lucide.createIcons();
   }
 }
 

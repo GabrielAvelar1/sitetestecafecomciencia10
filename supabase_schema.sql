@@ -44,3 +44,22 @@ INSERT INTO public.inscricoes (
     'aprovado'
 ) ON CONFLICT (email) DO UPDATE 
 SET role = 'organizador', senha = 'cafe2026';
+
+-- 6. Habilitar permissão de exclusão (DELETE) para a comissão zerar o banco quando necessário
+DROP POLICY IF EXISTS "Permitir exclusao de inscricoes" ON public.inscricoes;
+CREATE POLICY "Permitir exclusao de inscricoes" 
+ON public.inscricoes FOR DELETE TO anon, authenticated USING (true);
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'lembretes_logs') THEN
+        DROP POLICY IF EXISTS "Permitir exclusao de lembretes" ON public.lembretes_logs;
+        CREATE POLICY "Permitir exclusao de lembretes" 
+        ON public.lembretes_logs FOR DELETE TO anon, authenticated USING (true);
+    END IF;
+END $$;
+
+DROP POLICY IF EXISTS "Permitir exclusao de comprovantes" ON storage.objects;
+CREATE POLICY "Permitir exclusao de comprovantes" 
+ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'comprovantes');
+
