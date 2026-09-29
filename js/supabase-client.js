@@ -29,6 +29,73 @@ const PIX_CONFIG = {
 };
 
 // ============================================================================
+// GERADOR DE PAYLOAD PIX PADRÃO BANCO CENTRAL (BR CODE / EMVCo)
+// Permite que qualquer aplicativo bancário reconheça o QR Code e o Pix Copia e Cola
+// ============================================================================
+function formatarCampoEMV(id, valor) {
+  const len = String(valor.length).padStart(2, '0');
+  return id + len + valor;
+}
+
+function calcularCRC16(str) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < str.length; i++) {
+    crc ^= (str.charCodeAt(i) << 8);
+    for (let j = 0; j < 8; j++) {
+      if ((crc & 0x8000) !== 0) {
+        crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+      } else {
+        crc = (crc << 1) & 0xFFFF;
+      }
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function normalizarParaEMV(str, maxLen) {
+  if (!str) return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remove acentos
+    .replace(/[^a-zA-Z0-9 ]/g, '') // somente caracteres alfanumericos e espacos
+    .trim()
+    .toUpperCase()
+    .slice(0, maxLen);
+}
+
+function gerarPayloadPix(dados = {}) {
+  const chave = (dados.chave || PIX_CONFIG.chave).trim();
+  const nome = normalizarParaEMV(dados.titular || PIX_CONFIG.titular, 25) || 'CAFE COM CIENCIA';
+  const cidade = normalizarParaEMV(dados.cidade || PIX_CONFIG.cidade, 15) || 'BELO HORIZONTE';
+  const valor = dados.valor || PIX_CONFIG.valor;
+  const txid = normalizarParaEMV(dados.txid || '***', 25) || '***';
+
+  const gui = formatarCampoEMV('00', 'br.gov.bcb.pix');
+  const chavePix = formatarCampoEMV('01', chave);
+  const merchantAccountInfo = formatarCampoEMV('26', gui + chavePix);
+
+  let payload = '';
+  payload += formatarCampoEMV('00', '01'); // Versao do Payload
+  payload += formatarCampoEMV('01', '12'); // QR Code Estatico Reutilizavel
+  payload += merchantAccountInfo;
+  payload += formatarCampoEMV('52', '0000'); // Merchant Category Code
+  payload += formatarCampoEMV('53', '986');  // Moeda Real (BRL)
+
+  if (valor && parseFloat(valor) > 0) {
+    const valorFormatado = parseFloat(valor).toFixed(2);
+    payload += formatarCampoEMV('54', valorFormatado);
+  }
+
+  payload += formatarCampoEMV('58', 'BR'); // Pais
+  payload += formatarCampoEMV('59', nome); // Nome do Recebedor
+  payload += formatarCampoEMV('60', cidade); // Cidade
+  payload += formatarCampoEMV('62', formatarCampoEMV('05', txid)); // TXID / Referencia
+  payload += '6304'; // Inicio da Tag de Checksum
+
+  return payload + calcularCRC16(payload);
+}
+
+// ============================================================================
 // 3. INICIALIZAÇÃO DINÂMICA DO CLIENTE SUPABASE
 // ============================================================================
 let supabaseClient = null;
@@ -846,6 +913,7 @@ window.LigaDB = {
   atualizarStatusPagamento,
   registrarDisparoLembrete,
   resetarBancoDeDados,
+  gerarPayloadPix,
   getGoogleClientId,
   salvarGoogleClientId,
   isGoogleConfigured,

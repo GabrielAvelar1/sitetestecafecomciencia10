@@ -193,42 +193,81 @@ function checarParametrosUrl() {
 }
 
 // ============================================================================
-// CONFIGURAÇÃO DO PIX
+// CONFIGURAÇÃO DO PIX (PADRÃO BANCO CENTRAL - BR CODE / EMVCo)
 // ============================================================================
 function configurarPix() {
   const chavePixEl = document.getElementById('chavePixText');
   const titularPixEl = document.getElementById('titularPixText');
   const btnCopiarPix = document.getElementById('btnCopiarPix');
+  const btnCopiarCopiaECola = document.getElementById('btnCopiarCopiaECola');
   const qrCodeImg = document.getElementById('pixQrCode');
 
   const config = window.LigaDB?.PIX_CONFIG || {
     chave: 'cadumancia@gmail.com',
     titular: 'Organização Café com Ciência',
+    cidade: 'Belo Horizonte',
     valor: '10.00'
   };
+
+  const payloadPix = window.LigaDB?.gerarPayloadPix 
+    ? window.LigaDB.gerarPayloadPix(config) 
+    : '00020101021226420014br.gov.bcb.pix0120cadumancia@gmail.com520400005303986540510.005802BR5916CAFE COM CIENCIA6014BELO HORIZONTE62070503***63044319';
 
   if (chavePixEl) chavePixEl.textContent = config.chave;
   if (titularPixEl) titularPixEl.textContent = `${config.titular} (R$ ${config.valor})`;
 
   if (qrCodeImg) {
-    const qrData = encodeURIComponent(config.chave);
-    qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${qrData}&color=2B1810&bgcolor=FFFFFF&margin=1`;
+    // Agora o QR Code contém o payload oficial BR Code reconhecido por qualquer app de banco
+    const qrData = encodeURIComponent(payloadPix);
+    qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${qrData}&color=2B1810&bgcolor=FFFFFF&margin=2`;
   }
 
+  // Botão 1: Copiar Pix Copia e Cola (Payload padrão Bacen)
+  if (btnCopiarCopiaECola) {
+    btnCopiarCopiaECola.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(payloadPix);
+        const originalHtml = btnCopiarCopiaECola.innerHTML;
+        btnCopiarCopiaECola.innerHTML = `
+          <i data-lucide="check" class="w-4 h-4 text-emerald-200"></i>
+          <span class="text-white font-semibold">Código Pix Copiado!</span>
+        `;
+        btnCopiarCopiaECola.classList.add('ring-2', 'ring-emerald-400');
+        if (window.lucide) window.lucide.createIcons();
+
+        mostrarToast('Código Pix Copia e Cola copiado! Abra o app do seu banco, acesse a opção "Pix Copia e Cola" e cole.');
+
+        setTimeout(() => {
+          btnCopiarCopiaECola.innerHTML = originalHtml;
+          btnCopiarCopiaECola.classList.remove('ring-2', 'ring-emerald-400');
+          if (window.lucide) window.lucide.createIcons();
+        }, 3000);
+      } catch (err) {
+        const textarea = document.createElement('textarea');
+        textarea.value = payloadPix;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        mostrarToast('Código Pix Copia e Cola copiado!');
+      }
+    });
+  }
+
+  // Botão 2: Copiar apenas a Chave Pix direta (E-mail)
   if (btnCopiarPix) {
     btnCopiarPix.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(config.chave);
-        
         const originalText = btnCopiarPix.innerHTML;
         btnCopiarPix.innerHTML = `
-          <i data-lucide="check" class="w-4 h-4 text-emerald-600"></i>
-          <span class="text-emerald-700 font-semibold">Chave Copiada!</span>
+          <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span class="text-emerald-700 font-semibold">Copiado!</span>
         `;
         btnCopiarPix.classList.add('bg-emerald-50', 'border-emerald-300');
         if (window.lucide) window.lucide.createIcons();
 
-        mostrarToast('Chave Pix copiada com sucesso! Abra o app do seu banco e cole.');
+        mostrarToast('Chave Pix copiada com sucesso! Abra o app do seu banco e transfira para o e-mail.');
 
         setTimeout(() => {
           btnCopiarPix.innerHTML = originalText;
