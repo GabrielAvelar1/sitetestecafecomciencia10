@@ -20,7 +20,7 @@ const GOOGLE_CLIENT_ID_PADRAO = '76820645389-2gg574uebbs4s08jmtoqfp88e8olrcbm.ap
 // 2. CONFIGURAÇÕES DO PIX
 // ============================================================================
 const PIX_CONFIG = {
-  chave: 'cafecomciencia.liga@gmail.com',
+  chave: 'cadumancia@gmail.com',
   tipoChave: 'E-mail',
   titular: 'Organização Café com Ciência',
   cidade: 'Belo Horizonte',

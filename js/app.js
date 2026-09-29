@@ -202,7 +202,7 @@ function configurarPix() {
   const qrCodeImg = document.getElementById('pixQrCode');
 
   const config = window.LigaDB?.PIX_CONFIG || {
-    chave: 'cafecomciencia.liga@gmail.com',
+    chave: 'cadumancia@gmail.com',
     titular: 'Organização Café com Ciência',
     valor: '10.00'
   };
