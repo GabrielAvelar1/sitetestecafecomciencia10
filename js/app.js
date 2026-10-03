@@ -477,6 +477,13 @@ function configurarFormulario() {
 
       exibirCredencialSucesso(resultado.data);
 
+      // Disparo automático de e-mail de confirmação via Resend (em segundo plano)
+      if (window.EmailService && window.EmailService.isEmailAutoInscricao()) {
+        window.EmailService.enviarEmailInscricao(resultado.data).catch(e => {
+          console.warn('Aviso: E-mail de confirmação pelo Resend não disparado:', e.message);
+        });
+      }
+
       form.reset();
       comprovanteArquivoSelecionado = null;
       document.getElementById('uploadPreviewContainer').classList.add('hidden');

@@ -182,11 +182,39 @@ function alternarLiberacaoCertificadosAdmin() {
   if (typeof mostrarToast === 'function') {
     mostrarToast(novo ? 'Certificados liberados para os alunos!' : 'Certificados bloqueados.');
   }
+
+  // Disparo opcional de e-mails de certificado para os presentes
+  if (novo) {
+    setTimeout(async () => {
+      const presentes = (inscricoesCache || []).filter(i => i.presenca_confirmada);
+      if (presentes.length > 0) {
+        const querEnviar = confirm(`Certificados liberados com sucesso!\n\nDeseja enviar automaticamente o e-mail oficial com o link do Certificado para todos os ${presentes.length} participantes com presença confirmada?`);
+        if (querEnviar) {
+          if (!window.EmailService || !window.EmailService.isResendConfigurado()) {
+            alert('Atenção: A chave do Resend ainda não foi configurada. Acesse a aba "Lembretes" no Painel da Liga para salvar sua chave da API Resend.');
+            return;
+          }
+          let enviados = 0;
+          for (const aluno of presentes) {
+            try {
+              await window.EmailService.enviarEmailCertificado(aluno);
+              enviados++;
+              await new Promise(r => setTimeout(r, 200));
+            } catch (e) {
+              console.warn('Erro ao enviar certificado para ' + aluno.email, e);
+            }
+          }
+          alert(`E-mails de certificados enviados para ${enviados} de ${presentes.length} participantes!`);
+        }
+      }
+    }, 300);
+  }
 }
 
 // Carregar Inscrições
 async function carregarInscricoesAdmin() {
   atualizarVisualStatusCertificados();
+  carregarConfiguracoesResendAdmin();
 
   const container = document.getElementById('adminInscricoesList');
   const countBadge = document.getElementById('adminTotalInscricoes');
@@ -321,6 +349,11 @@ async function carregarInscricoesAdmin() {
               <!-- Enviar Lembrete no WhatsApp -->
               <button onclick="enviarLembreteIndividual('${item.id}')" title="Mandar lembrete via WhatsApp" class="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition">
                 <i data-lucide="message-circle" class="w-4 h-4"></i>
+              </button>
+
+              <!-- Enviar E-mail via Resend -->
+              <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="Enviar E-mail via Resend (Credencial, Lembrete ou Certificado)" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition">
+                <i data-lucide="mail" class="w-4 h-4"></i>
               </button>
             </div>
           </td>
@@ -735,6 +768,173 @@ function limparDadosDemo() {
   abrirModalResetarBanco();
 }
 
+// ============================================================================
+// GERENCIADOR DE E-MAILS TRANSACIONAIS (RESEND) NO PAINEL ADMIN
+// ============================================================================
+function carregarConfiguracoesResendAdmin() {
+  if (!window.EmailService) return;
+
+  const inputKey = document.getElementById('inputResendApiKey');
+  const inputFrom = document.getElementById('inputResendFrom');
+  const checkInscricao = document.getElementById('checkEmailAutoInscricao');
+  const checkPresenca = document.getElementById('checkEmailAutoPresenca');
+  const badgeStatus = document.getElementById('badgeStatusConfigResend');
+
+  if (inputKey) inputKey.value = window.EmailService.getResendApiKey();
+  if (inputFrom) inputFrom.value = window.EmailService.getResendFrom();
+  if (checkInscricao) checkInscricao.checked = window.EmailService.isEmailAutoInscricao();
+  if (checkPresenca) checkPresenca.checked = window.EmailService.isEmailAutoPresenca();
+
+  if (badgeStatus) {
+    if (window.EmailService.isResendConfigurado()) {
+      badgeStatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Resend Conectado & Operacional
+        </span>
+      `;
+    } else {
+      badgeStatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          Aguardando Chave API do Resend
+        </span>
+      `;
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function salvarConfiguracaoResendAdmin() {
+  if (!window.EmailService) return;
+
+  const inputKey = document.getElementById('inputResendApiKey');
+  const inputFrom = document.getElementById('inputResendFrom');
+  const checkInscricao = document.getElementById('checkEmailAutoInscricao');
+  const checkPresenca = document.getElementById('checkEmailAutoPresenca');
+
+  const apiKey = inputKey?.value.trim() || '';
+  const from = inputFrom?.value.trim() || '';
+
+  if (apiKey && !apiKey.startsWith('re_')) {
+    alert('Atenção: A chave da API do Resend deve começar com "re_". Ex: re_123456789...');
+    return;
+  }
+
+  window.EmailService.salvarConfigResend(apiKey, from);
+  window.EmailService.salvarTogglesEmail(checkInscricao?.checked, checkPresenca?.checked);
+
+  alert('Configurações do Resend salvas com sucesso!');
+  carregarConfiguracoesResendAdmin();
+}
+
+async function testarEnvioResendAdmin() {
+  if (!window.EmailService) return;
+
+  if (!window.EmailService.isResendConfigurado()) {
+    alert('Por favor, informe a Chave API do Resend no campo acima e clique em "Salvar Configurações do Resend" antes de testar.');
+    return;
+  }
+
+  const emailDestino = prompt('Digite o e-mail de destino para receber a mensagem de teste:', 'cadumancia@gmail.com');
+  if (!emailDestino || !emailDestino.trim()) return;
+
+  try {
+    const res = await window.EmailService.testarEnvioEmail(emailDestino.trim());
+    alert(`Sucesso! E-mail de teste entregue pelo Resend com sucesso.\nID do Envio: ${res.id || 'OK'}`);
+  } catch (err) {
+    alert('Falha ao enviar e-mail de teste: ' + err.message);
+  }
+}
+
+// Disparo Individual de E-mail para um Aluno da Tabela
+async function enviarEmailIndividualAdmin(id) {
+  const aluno = inscricoesCache.find(i => i.id === id);
+  if (!aluno) return;
+
+  if (!window.EmailService || !window.EmailService.isResendConfigurado()) {
+    alert('A API do Resend ainda não está configurada. Salve sua chave API na seção de configurações do Resend na aba "Lembretes".');
+    return;
+  }
+
+  const msg = `Selecione qual e-mail deseja disparar para:\n${aluno.nome_completo} (${aluno.email})\n\n` +
+    `1: Credencial Oficial com QR Code (Confirmação de Inscrição)\n` +
+    `2: Confirmação de Presença (Validação da Portaria)\n` +
+    `3: Lembrete do Evento (Conforme modelo selecionado)\n` +
+    `4: Certificado Oficial de 4 Horas\n\n` +
+    `Digite o número da opção (1, 2, 3 ou 4):`;
+
+  const opcao = prompt(msg, '1');
+  if (!opcao) return;
+
+  try {
+    if (opcao === '1') {
+      await window.EmailService.enviarEmailInscricao(aluno);
+      alert(`E-mail com a Credencial enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '2') {
+      await window.EmailService.enviarEmailPresencaConfirmada(aluno);
+      alert(`E-mail de confirmação de presença enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '3') {
+      const tipo = document.getElementById('selectTipoLembrete')?.value || 'vespera';
+      await window.EmailService.enviarEmailLembrete(aluno, tipo);
+      alert(`E-mail de lembrete enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '4') {
+      await window.EmailService.enviarEmailCertificado(aluno);
+      alert(`E-mail com o Certificado Oficial enviado com sucesso para ${aluno.email}!`);
+    } else {
+      alert('Opção inválida.');
+    }
+  } catch (err) {
+    alert('Erro ao enviar e-mail: ' + err.message);
+  }
+}
+
+// Disparo em Lote de E-mails via Resend
+async function dispararEmailsEmLoteResend() {
+  if (!inscricoesCache || inscricoesCache.length === 0) {
+    alert('Nenhum inscrito na lista para enviar e-mails.');
+    return;
+  }
+
+  if (!window.EmailService || !window.EmailService.isResendConfigurado()) {
+    alert('A chave da API do Resend ainda não foi configurada. Insira sua chave API no formulário de configurações do Resend abaixo.');
+    return;
+  }
+
+  const select = document.getElementById('selectTipoLembrete');
+  const tipo = select?.value || 'vespera';
+
+  const confirmMsg = `Deseja enviar e-mails via Resend para todos os ${inscricoesCache.length} inscritos?\n\nModelo selecionado: ${tipo.toUpperCase()}`;
+  if (!confirm(confirmMsg)) return;
+
+  let enviados = 0;
+  let erros = 0;
+
+  for (let i = 0; i < inscricoesCache.length; i++) {
+    const aluno = inscricoesCache[i];
+    if (aluno && aluno.email) {
+      try {
+        if (tipo === 'certificado') {
+          if (aluno.presenca_confirmada) {
+            await window.EmailService.enviarEmailCertificado(aluno);
+            enviados++;
+          }
+        } else {
+          await window.EmailService.enviarEmailLembrete(aluno, tipo);
+          enviados++;
+        }
+        await new Promise(r => setTimeout(r, 200)); // Intervalo suave para respeitar limites do Resend
+      } catch (e) {
+        console.warn(`Erro no envio para ${aluno.email}:`, e);
+        erros++;
+      }
+    }
+  }
+
+  alert(`Disparo concluído!\n\n✓ ${enviados} e-mails enviados com sucesso pelo Resend.\n${erros > 0 ? `⚠️ ${erros} falhas de envio.` : ''}`);
+}
+
 window.salvarConfiguracaoGoogleAdmin = salvarConfiguracaoGoogleAdmin;
 window.testarPopupGoogleAdmin = testarPopupGoogleAdmin;
 window.limparDadosDemo = limparDadosDemo;
@@ -745,4 +945,10 @@ window.exportarParaCSV = exportarParaCSV;
 window.salvarConfiguracoesSupabase = salvarConfiguracoesSupabase;
 window.alternarLiberacaoCertificadosAdmin = alternarLiberacaoCertificadosAdmin;
 window.atualizarVisualStatusCertificados = atualizarVisualStatusCertificados;
+window.carregarConfiguracoesResendAdmin = carregarConfiguracoesResendAdmin;
+window.salvarConfiguracaoResendAdmin = salvarConfiguracaoResendAdmin;
+window.testarEnvioResendAdmin = testarEnvioResendAdmin;
+window.enviarEmailIndividualAdmin = enviarEmailIndividualAdmin;
+window.dispararEmailsEmLoteResend = dispararEmailsEmLoteResend;
+
 

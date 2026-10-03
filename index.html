@@ -1378,16 +1378,110 @@
             </div>
 
             <!-- Botões de Disparo -->
-            <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+            <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <button 
-                onclick="dispararLembretesEmLote()" 
-                class="w-full sm:w-auto px-6 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                onclick="dispararEmailsEmLoteResend()" 
+                class="flex-1 px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                title="Disparar e-mails via Resend com o modelo selecionado"
               >
-                <i data-lucide="send" class="w-4 h-4"></i>
-                <span>Disparar WhatsApp para Todos os Inscritos</span>
+                <i data-lucide="mail" class="w-4 h-4"></i>
+                <span>Disparar E-mails (Resend) para Todos</span>
               </button>
 
-              <span class="text-xs text-stone-400">ou envie individualmente na tabela de inscrições.</span>
+              <button 
+                onclick="dispararLembretesEmLote()" 
+                class="flex-1 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center gap-2"
+                title="Disparar mensagens de WhatsApp"
+              >
+                <i data-lucide="send" class="w-4 h-4"></i>
+                <span>Disparar WhatsApp</span>
+              </button>
+            </div>
+            
+            <p class="text-[11px] text-stone-400 text-center">
+              Você também pode enviar individualmente clicando nos ícones de e-mail e WhatsApp na tabela de inscrições.
+            </p>
+          </div>
+
+          <!-- Card de Configuração do Resend (E-mails Automáticos) -->
+          <div class="bg-white p-6 rounded-2xl border border-coffee-200 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center shrink-0">
+                  <i data-lucide="mail" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h5 class="text-sm font-bold text-coffee-950">Integração Resend · E-mails Automáticos</h5>
+                  <p class="text-xs text-stone-500">Envio de confirmações, presenças, lembretes e certificados</p>
+                </div>
+              </div>
+              
+              <div id="badgeStatusConfigResend">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                  Chave de API do Resend (API Key):
+                </label>
+                <input 
+                  type="password" 
+                  id="inputResendApiKey" 
+                  placeholder="re_123456789_abcdef..." 
+                  class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
+                />
+                <p class="text-[11px] text-stone-400 mt-1">Crie sua chave gratuita no painel em <a href="https://resend.com/api-keys" target="_blank" class="text-blue-600 underline font-semibold">resend.com/api-keys</a></p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                  E-mail Remetente (From):
+                </label>
+                <input 
+                  type="text" 
+                  id="inputResendFrom" 
+                  value="10° Café com Ciência <onboarding@resend.dev>" 
+                  placeholder="10° Café com Ciência <onboarding@resend.dev>" 
+                  class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
+                />
+                <p class="text-[11px] text-stone-400 mt-1">Use o padrão <code>onboarding@resend.dev</code> ou seu domínio próprio cadastrado no Resend.</p>
+              </div>
+            </div>
+
+            <!-- Automações com Checkbox -->
+            <div class="pt-2 border-t border-stone-100 flex flex-col sm:flex-row gap-4 text-xs text-stone-700">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="checkEmailAutoInscricao" checked class="w-4 h-4 text-blue-600 rounded">
+                <span>Enviar e-mail com credencial automaticamente ao se inscrever</span>
+              </label>
+
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="checkEmailAutoPresenca" checked class="w-4 h-4 text-blue-600 rounded">
+                <span>Enviar e-mail automaticamente ao validar presença (QR Code)</span>
+              </label>
+            </div>
+
+            <!-- Botões de Ação Resend -->
+            <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
+              <button 
+                type="button" 
+                onclick="salvarConfiguracaoResendAdmin()" 
+                class="w-full sm:w-auto px-5 py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+              >
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Salvar Configurações do Resend</span>
+              </button>
+
+              <button 
+                type="button" 
+                onclick="testarEnvioResendAdmin()" 
+                class="w-full sm:w-auto px-5 py-2.5 bg-white border border-stone-300 hover:bg-stone-100 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5"
+              >
+                <i data-lucide="send" class="w-3.5 h-3.5 text-blue-600"></i>
+                <span>Testar Envio de E-mail Agora</span>
+              </button>
             </div>
           </div>
 
@@ -1512,6 +1606,7 @@
 
   <!-- Scripts da Aplicação -->
   <script src="js/supabase-client.js"></script>
+  <script src="js/email-service.js"></script>
   <script src="js/qr-scanner.js"></script>
   <script src="js/admin.js"></script>
   <script src="js/app.js"></script>

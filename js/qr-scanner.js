@@ -141,6 +141,13 @@ async function processarCodigoCheckin(codigoBruto) {
     const resposta = await window.LigaDB.validarPresencaPorQRCode(codigoBruto, 'Portaria Oficial');
     const aluno = resposta.aluno;
 
+    // Dispara e-mail de presença confirmada pelo Resend caso seja o primeiro check-in
+    if (!resposta.jaConfirmado && window.EmailService && window.EmailService.isEmailAutoPresenca()) {
+      window.EmailService.enviarEmailPresencaConfirmada(aluno).catch(e => {
+        console.warn('Aviso: E-mail de presença pelo Resend não disparado:', e.message);
+      });
+    }
+
     const dataHoraCheckin = new Date(aluno.presenca_horario || Date.now()).toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit'

@@ -1,0 +1,28 @@
+name: Supabase Keep Alive
+
+# Mantém o banco de dados do Supabase ativo para evitar que o projeto entre em pausa por inatividade (limite de 7 dias do plano gratuito)
+on:
+  schedule:
+    # Executa a cada 3 dias às 06:00 UTC (bem antes dos 7 dias de limite)
+    - cron: '0 6 */3 * *'
+  workflow_dispatch: # Permite disparar manualmente a qualquer momento pela aba Actions do GitHub
+
+jobs:
+  keep-alive:
+    name: Ping Supabase Database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Realiza requisição leve para manter o Supabase acordado
+        run: |
+          echo "Realizando ping no Supabase..."
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X GET "https://zcbylqggrxocdevddtlx.supabase.co/rest/v1/inscricoes?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYnlscWdncnhvY2RldmRkdGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxOTM2MzIsImV4cCI6MjEwNTc2OTYzMn0.FS5e7VlodcABs72X4xfTvwVW8eFn-E8JdZ9ZQNNxba0" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpjYnlscWdncnhvY2RldmRkdGx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxOTM2MzIsImV4cCI6MjEwNTc2OTYzMn0.FS5e7VlodcABs72X4xfTvwVW8eFn-E8JdZ9ZQNNxba0")
+          
+          echo "Resposta do Supabase: HTTP $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ge 200 ] && [ "$HTTP_STATUS" -lt 300 ]; then
+            echo "Sucesso! O banco de dados do Supabase está ativo e sua contagem de inatividade foi reiniciada."
+          else
+            echo "Aviso: Código inesperado recebido ($HTTP_STATUS)."
+            exit 1
+          fi
