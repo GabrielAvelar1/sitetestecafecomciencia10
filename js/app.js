@@ -582,7 +582,7 @@ function exibirCredencialSucesso(aluno) {
         </div>
         <div class="flex items-center gap-2 font-medium">
           <i data-lucide="map-pin" class="w-3.5 h-3.5 text-coffee-600"></i>
-          <span><strong>Local:</strong> UniArnaldo - Campus Anchieta (Sala 202)</span>
+          <span><strong>Local:</strong> UniArnaldo - Campus Anchieta (Sala 306)</span>
         </div>
         <div class="flex items-center gap-2 font-medium">
           <i data-lucide="user-check" class="w-3.5 h-3.5 text-coffee-600"></i>

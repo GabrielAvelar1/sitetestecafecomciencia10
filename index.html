@@ -99,10 +99,10 @@
         <div id="userAreaDesktop"></div>
 
         <!-- Botão Acesso Organização (Apenas Visível para Organizadores Logados) -->
-        <button id="btnPainelLigaDesktop" onclick="abrirPainelAdmin()" title="Painel da Liga Acadêmica" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded-lg border border-amber-300 transition">
+        <a id="btnPainelLigaDesktop" href="admin.html" title="Painel da Liga Acadêmica" class="hidden inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded-lg border border-amber-300 transition">
           <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
           <span>Painel da Liga</span>
-        </button>
+        </a>
 
         <!-- CTA Inscrição -->
         <a href="#inscricao" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white gradient-cta shadow-md hover:shadow-lg transition transform active:scale-95">
@@ -155,14 +155,15 @@
       <div id="userAreaMobile" class="pt-2 border-t border-stone-100"></div>
 
       <!-- Painel da Liga no Mobile (Apenas Organizadores) -->
-      <button 
+      <a 
         id="btnPainelLigaMobile" 
-        onclick="fecharMenuMobile(); abrirPainelAdmin();" 
+        href="admin.html" 
+        onclick="fecharMenuMobile();" 
         class="hidden w-full py-2.5 px-4 bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs rounded-xl flex items-center justify-center gap-2"
       >
         <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
         <span>Painel da Liga (Organização)</span>
-      </button>
+      </a>
 
     </div>
   </header>
@@ -687,9 +688,9 @@
           <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="p-1.5 text-stone-400 hover:text-pink-400 hover:bg-white/5 rounded-lg transition" title="Instagram Oficial (@cafecomciencia.arnaldobh)">
             <svg class="w-4 h-4 fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
           </a>
-          <button onclick="abrirPainelAdmin()" class="text-coffee-300 hover:text-white underline">
+          <a href="admin.html" class="text-coffee-300 hover:text-white underline">
             Acesso da Liga
-          </button>
+          </a>
         </div>
 
       </div>
@@ -1424,30 +1425,47 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
-                  Chave de API do Resend (API Key):
+                  Modelo do E-mail de Teste:
                 </label>
-                <input 
-                  type="password" 
-                  id="inputResendApiKey" 
-                  placeholder="re_123456789_abcdef..." 
-                  class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
-                />
-                <p class="text-[11px] text-stone-400 mt-1">Crie sua chave gratuita no painel em <a href="https://resend.com/api-keys" target="_blank" class="text-blue-600 underline font-semibold">resend.com/api-keys</a></p>
+                <select 
+                  id="selectModeloTesteEmail" 
+                  class="w-full px-3.5 py-2.5 text-xs font-semibold rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
+                >
+                  <option value="inscricao">📧 Inscrição (com Credencial e QR Code)</option>
+                  <option value="presenca">🎟️ Presença Confirmada (Check-in Portaria Sala 306)</option>
+                  <option value="7_dias">🗓️ Lembrete: 7 dias antes do evento</option>
+                  <option value="vespera" selected>⏳ Lembrete: Véspera (Amanhã na Sala 306)</option>
+                  <option value="hoje_portaria">📍 Lembrete: Hoje às 15h na Sala 306</option>
+                  <option value="certificado">🎓 Certificado Oficial de 4 horas</option>
+                  <option value="teste">☕ Teste de Conexão Geral</option>
+                </select>
               </div>
 
               <div>
                 <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
-                  E-mail Remetente (From):
+                  Enviar Teste para o E-mail:
                 </label>
                 <input 
-                  type="text" 
-                  id="inputResendFrom" 
-                  value="10° Café com Ciência <onboarding@resend.dev>" 
-                  placeholder="10° Café com Ciência <onboarding@resend.dev>" 
+                  type="email" 
+                  id="inputEmailDestinoTeste" 
+                  value="cadumancia@gmail.com" 
+                  placeholder="seu-email@gmail.com" 
                   class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
                 />
-                <p class="text-[11px] text-stone-400 mt-1">Use o padrão <code>onboarding@resend.dev</code> ou seu domínio próprio cadastrado no Resend.</p>
               </div>
+            </div>
+
+            <div class="pt-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+                E-mail Remetente (From):
+              </label>
+              <input 
+                type="text" 
+                id="inputResendFrom" 
+                value="10° Café com Ciência <onboarding@resend.dev>" 
+                placeholder="10° Café com Ciência <onboarding@resend.dev>" 
+                class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-blue-500 outline-none bg-stone-50 focus:bg-white"
+              />
             </div>
 
             <!-- Automações com Checkbox -->
@@ -1466,22 +1484,35 @@
             <!-- Botões de Ação Resend -->
             <div class="pt-2 flex flex-col sm:flex-row items-center gap-3">
               <button 
+                id="btnTestarEnvioEmail"
                 type="button" 
-                onclick="salvarConfiguracaoResendAdmin()" 
-                class="w-full sm:w-auto px-5 py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+                onclick="testarEnvioResendAdmin()" 
+                class="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
               >
-                <i data-lucide="check" class="w-4 h-4"></i>
-                <span>Salvar Configurações do Resend</span>
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                <span>Enviar E-mail de Teste Selecionado</span>
               </button>
 
               <button 
                 type="button" 
-                onclick="testarEnvioResendAdmin()" 
+                onclick="abrirPreviaEmailAdmin()" 
                 class="w-full sm:w-auto px-5 py-2.5 bg-white border border-stone-300 hover:bg-stone-100 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5"
               >
-                <i data-lucide="send" class="w-3.5 h-3.5 text-blue-600"></i>
-                <span>Testar Envio de E-mail Agora</span>
+                <i data-lucide="eye" class="w-3.5 h-3.5 text-stone-500"></i>
+                <span>Visualizar Prévia na Tela</span>
               </button>
+
+              <button 
+                type="button" 
+                onclick="salvarConfiguracaoResendAdmin()" 
+                class="w-full sm:w-auto px-5 py-2.5 bg-stone-800 hover:bg-stone-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 ml-auto"
+              >
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Salvar Configurações</span>
+              </button>
+            </div>
+
+            <div id="statusEnvioTesteEmail" class="hidden"></div>
             </div>
           </div>
 
@@ -1494,6 +1525,35 @@
         <span class="font-mono">Chave Pix: cadumancia@gmail.com</span>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Modal de Prévia de E-mail -->
+  <div id="modalPreviaEmail" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-3xl w-full h-[90vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in duration-150">
+      <div class="p-4 sm:p-5 bg-coffee-950 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <i data-lucide="eye" class="w-4 h-4 text-amber-300"></i>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-sm font-bold truncate">Prévia do E-mail em Tempo Real</h3>
+            <p id="assuntoPreviaEmail" class="text-xs text-stone-300 truncate">Assunto da Mensagem</p>
+          </div>
+        </div>
+        <button onclick="fecharPreviaEmailAdmin()" class="p-2 text-stone-400 hover:text-white rounded-lg hover:bg-white/10 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="flex-1 bg-stone-100 p-2 sm:p-4 overflow-hidden">
+        <iframe id="iframePreviaEmail" class="w-full h-full bg-white rounded-2xl border border-stone-200 shadow-sm" title="Prévia do E-mail"></iframe>
+      </div>
+      <div class="p-3 sm:p-4 bg-white border-t border-stone-200 flex items-center justify-between text-xs text-stone-500 shrink-0">
+        <span>Renderização responsiva idêntica ao recebido no Gmail e smartphones.</span>
+        <button onclick="fecharPreviaEmailAdmin()" class="px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold rounded-xl transition">
+          Fechar Prévia
+        </button>
+      </div>
     </div>
   </div>
 

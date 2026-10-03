@@ -6,34 +6,23 @@
 let inscricoesCache = [];
 let abaAtivaAtual = 'inscricoes';
 
-// Abrir Modal Admin (Restrito a Organizadores)
+// Abrir Painel Admin (Navega para a página dedicada admin.html)
 function abrirPainelAdmin(abaInicial = 'inscricoes') {
-  if (!window.LigaDB.isOrganizadorLogado()) {
-    abrirModalLoginOrganizador(abaInicial);
+  if (window.location.pathname.endsWith('admin.html')) {
+    trocarAbaAdmin(abaInicial);
     return;
   }
-
-  const modal = document.getElementById('adminModal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    trocarAbaAdmin(abaInicial);
-    carregarInscricoesAdmin();
-  }
+  window.location.href = 'admin.html' + (abaInicial ? '#' + abaInicial : '');
 }
 
-// Modal de Login do Organizador
+// Modal de Login do Organizador (quando acionado na home)
 function abrirModalLoginOrganizador(abaAposLogin = 'inscricoes') {
-  const modal = document.getElementById('loginOrganizadorModal');
-  if (modal) {
-    modal.dataset.abaDestino = abaAposLogin;
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    setTimeout(() => {
-      const input = document.getElementById('inputSenhaOrg');
-      if (input) input.focus();
-    }, 100);
+  if (window.location.pathname.endsWith('admin.html')) {
+    const loginScreen = document.getElementById('adminLoginScreen');
+    if (loginScreen) loginScreen.classList.remove('hidden');
+    return;
   }
+  window.location.href = 'admin.html' + (abaAposLogin ? '#' + abaAposLogin : '');
 }
 
 function fecharModalLoginOrganizador() {
@@ -85,17 +74,17 @@ function fecharPainelAdmin() {
   if (modal) {
     modal.classList.add('hidden');
     document.body.style.overflow = '';
-    // Para a câmera se estiver ativa
-    if (window.QRScannerPortaria) {
-      window.QRScannerPortaria.pararLeitorPortaria();
-    }
+  }
+  // Para a câmera se estiver ativa
+  if (window.QRScannerPortaria) {
+    window.QRScannerPortaria.pararLeitorPortaria();
   }
 }
 
 // Trocar Abas no Painel Admin
 function trocarAbaAdmin(aba) {
   abaAtivaAtual = aba;
-  const abas = ['inscricoes', 'portaria', 'lembretes'];
+  const abas = ['inscricoes', 'portaria', 'lembretes', 'resend_teste'];
   
   abas.forEach(nome => {
     const btn = document.getElementById(`tabBtn_${nome}`);
@@ -103,10 +92,10 @@ function trocarAbaAdmin(aba) {
     if (btn) {
       if (nome === aba) {
         btn.classList.add('bg-white', 'text-coffee-950', 'shadow-sm', 'font-bold');
-        btn.classList.remove('text-stone-400', 'hover:text-white');
+        btn.classList.remove('text-stone-300', 'text-stone-400', 'hover:text-white', 'hover:bg-white/10');
       } else {
         btn.classList.remove('bg-white', 'text-coffee-950', 'shadow-sm', 'font-bold');
-        btn.classList.add('text-stone-400', 'hover:text-white');
+        btn.classList.add('text-stone-300', 'hover:text-white');
       }
     }
     if (view) {
@@ -120,13 +109,14 @@ function trocarAbaAdmin(aba) {
 
   // Inicializações específicas de aba
   if (aba === 'portaria') {
-    // Foca no input manual se quiser
     setTimeout(() => {
       const input = document.getElementById('inputCodigoManual');
       if (input) input.focus();
     }, 100);
   } else if (aba === 'lembretes') {
     atualizarPreviewMensagemLembrete();
+  } else if (aba === 'resend_teste') {
+    carregarConfiguracoesResendAdmin();
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -428,15 +418,15 @@ function fecharVisualizadorComprovante() {
 const MODELOS_LEMBRETES = {
   '7_dias': {
     titulo: 'Lembrete: Faltam 7 dias!',
-    texto: `Olá [NOME]! Tudo bem? Passando para lembrar que falta apenas 1 semana para o *10° Café com Ciência: Os Direitos dos Pacientes na Odontologia* com a Profa. Carolina Diniz.\n\n📅 Data: 30 de Outubro às 15:00\n📍 Local: UniArnaldo - Campus Anchieta (Sala 202)\n🎫 Seu Protocolo de Inscrição: [PROTOCOLO]\n\nAcesse sua credencial com QR Code para entrada no evento:\n[LINK_CREDENCIAL]\n\nNos vemos lá!`
+    texto: `Olá [NOME]! Tudo bem? Passando para lembrar que falta apenas 1 semana para o *10° Café com Ciência: Os Direitos dos Pacientes na Odontologia* com a Profa. Carolina Diniz.\n\n📅 Data: 30 de Outubro às 15:00\n📍 Local: UniArnaldo - Campus Anchieta (Sala 306)\n🎫 Seu Protocolo de Inscrição: [PROTOCOLO]\n\nAcesse sua credencial com QR Code para entrada no evento:\n[LINK_CREDENCIAL]\n\nNos vemos lá!`
   },
   'vespera': {
     titulo: 'Lembrete: É amanhã!',
-    texto: `Oi [NOME]! O grande dia está chegando! Amanhã (30/10) às 15h teremos o *10° Café com Ciência* na UniArnaldo (Sala 202).\n\n⚠️ *Aviso Importante*: Tenha em mãos a sua Credencial com o QR Code para fazer o check-in na portaria:\n[LINK_CREDENCIAL]\n\nTeremos coffee break especial e emissão de certificado oficial após a palestra!`
+    texto: `Oi [NOME]! O grande dia está chegando! Amanhã (30/10) às 15h teremos o *10° Café com Ciência* na UniArnaldo (Sala 306).\n\n⚠️ *Aviso Importante*: Tenha em mãos a sua Credencial com o QR Code para fazer o check-in na portaria:\n[LINK_CREDENCIAL]\n\nTeremos coffee break especial e emissão de certificado oficial após a palestra!`
   },
   'hoje_portaria': {
     titulo: 'Lembrete: É hoje! Portaria aberta',
-    texto: `Olá [NOME]! O *10° Café com Ciência* acontece HOJE às 15h00 na Sala 202 da UniArnaldo (Campus Anchieta)!\n\nChegue com 15 minutos de antecedência e apresente seu QR Code na entrada:\n[LINK_CREDENCIAL]\n\nAté logo!`
+    texto: `Olá [NOME]! O *10° Café com Ciência* acontece HOJE às 15h00 na Sala 306 da UniArnaldo (Campus Anchieta)!\n\nChegue com 15 minutos de antecedência e apresente seu QR Code na entrada:\n[LINK_CREDENCIAL]\n\nAté logo!`
   },
   'certificado': {
     titulo: 'Aviso: Seu Certificado Oficial está disponível!',
@@ -774,33 +764,22 @@ function limparDadosDemo() {
 function carregarConfiguracoesResendAdmin() {
   if (!window.EmailService) return;
 
-  const inputKey = document.getElementById('inputResendApiKey');
   const inputFrom = document.getElementById('inputResendFrom');
   const checkInscricao = document.getElementById('checkEmailAutoInscricao');
   const checkPresenca = document.getElementById('checkEmailAutoPresenca');
   const badgeStatus = document.getElementById('badgeStatusConfigResend');
 
-  if (inputKey) inputKey.value = window.EmailService.getResendApiKey();
   if (inputFrom) inputFrom.value = window.EmailService.getResendFrom();
   if (checkInscricao) checkInscricao.checked = window.EmailService.isEmailAutoInscricao();
   if (checkPresenca) checkPresenca.checked = window.EmailService.isEmailAutoPresenca();
 
   if (badgeStatus) {
-    if (window.EmailService.isResendConfigurado()) {
-      badgeStatus.innerHTML = `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Resend Conectado & Operacional
-        </span>
-      `;
-    } else {
-      badgeStatus.innerHTML = `
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
-          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-          Aguardando Chave API do Resend
-        </span>
-      `;
-    }
+    badgeStatus.innerHTML = `
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Chave Resend Conectada & Ativa
+      </span>
+    `;
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -809,43 +788,132 @@ function carregarConfiguracoesResendAdmin() {
 function salvarConfiguracaoResendAdmin() {
   if (!window.EmailService) return;
 
-  const inputKey = document.getElementById('inputResendApiKey');
   const inputFrom = document.getElementById('inputResendFrom');
   const checkInscricao = document.getElementById('checkEmailAutoInscricao');
   const checkPresenca = document.getElementById('checkEmailAutoPresenca');
 
-  const apiKey = inputKey?.value.trim() || '';
   const from = inputFrom?.value.trim() || '';
-
-  if (apiKey && !apiKey.startsWith('re_')) {
-    alert('Atenção: A chave da API do Resend deve começar com "re_". Ex: re_123456789...');
-    return;
-  }
-
-  window.EmailService.salvarConfigResend(apiKey, from);
+  if (from) window.EmailService.salvarConfigResend(undefined, from);
   window.EmailService.salvarTogglesEmail(checkInscricao?.checked, checkPresenca?.checked);
 
-  alert('Configurações do Resend salvas com sucesso!');
+  if (typeof mostrarToast === 'function') {
+    mostrarToast('Configurações de e-mail salvas com sucesso!');
+  } else {
+    alert('Configurações de e-mail salvas com sucesso!');
+  }
   carregarConfiguracoesResendAdmin();
 }
 
 async function testarEnvioResendAdmin() {
   if (!window.EmailService) return;
 
-  if (!window.EmailService.isResendConfigurado()) {
-    alert('Por favor, informe a Chave API do Resend no campo acima e clique em "Salvar Configurações do Resend" antes de testar.');
+  const selectModelo = document.getElementById('selectModeloTesteEmail');
+  const inputEmail = document.getElementById('inputEmailDestinoTeste');
+  const btn = document.getElementById('btnTestarEnvioEmail');
+  const statusDiv = document.getElementById('statusEnvioTesteEmail');
+
+  const modelo = selectModelo ? selectModelo.value : 'vespera';
+  let emailDestino = inputEmail ? inputEmail.value.trim() : '';
+
+  if (!emailDestino) {
+    emailDestino = prompt('Digite o e-mail que receberá a mensagem de teste:', 'cadumancia@gmail.com');
+    if (inputEmail && emailDestino) inputEmail.value = emailDestino;
+  }
+
+  if (!emailDestino || !emailDestino.trim()) {
+    alert('Por favor, informe um e-mail de destino válido.');
     return;
   }
 
-  const emailDestino = prompt('Digite o e-mail de destino para receber a mensagem de teste:', 'cadumancia@gmail.com');
-  if (!emailDestino || !emailDestino.trim()) return;
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Disparando e-mail pelo Resend...</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  if (statusDiv) {
+    statusDiv.classList.add('hidden');
+    statusDiv.className = 'mt-3 p-3.5 rounded-xl text-xs font-medium';
+  }
 
   try {
-    const res = await window.EmailService.testarEnvioEmail(emailDestino.trim());
-    alert(`Sucesso! E-mail de teste entregue pelo Resend com sucesso.\nID do Envio: ${res.id || 'OK'}`);
+    const res = await window.EmailService.testarEnvioEmail(emailDestino.trim(), modelo);
+    
+    if (statusDiv) {
+      statusDiv.className = 'mt-3 p-3.5 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 block';
+      statusDiv.innerHTML = `
+        <div class="flex items-center gap-2">
+          <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+          <span><strong>E-mail de teste enviado com sucesso para ${emailDestino}!</strong> Verifique sua caixa de entrada. (ID: ${res?.id || 'OK'})</span>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    } else {
+      alert(`Sucesso! E-mail de teste (${modelo}) entregue pelo Resend para ${emailDestino}!\nID do Envio: ${res?.id || 'OK'}`);
+    }
   } catch (err) {
-    alert('Falha ao enviar e-mail de teste: ' + err.message);
+    console.error('Erro no envio de teste:', err);
+    let errMsg = err.message || 'Falha ao enviar e-mail.';
+    let dicaExtra = '';
+    
+    if (errMsg.includes('validation_error') || errMsg.includes('domain') || errMsg.includes('only send testing emails')) {
+      dicaExtra = '<br><span class="text-[11px] text-amber-700 mt-1 block">💡 <strong>Dica do Resend:</strong> No modo de teste gratuito com remetente onboarding@resend.dev, o Resend só entrega mensagens para o e-mail cadastrado na sua conta do Resend.</span>';
+    }
+
+    if (statusDiv) {
+      statusDiv.className = 'mt-3 p-3.5 rounded-xl text-xs font-medium bg-red-50 text-red-800 border border-red-200 block';
+      statusDiv.innerHTML = `
+        <div class="flex items-start gap-2">
+          <i data-lucide="alert-circle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+          <div>
+            <strong>Falha no envio:</strong> ${errMsg}
+            ${dicaExtra}
+          </div>
+        </div>
+      `;
+      if (window.lucide) window.lucide.createIcons();
+    } else {
+      alert(`Falha ao enviar e-mail de teste: ${errMsg}`);
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i><span>Enviar E-mail de Teste Agora</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
   }
+}
+
+function abrirPreviaEmailAdmin() {
+  if (!window.EmailService) return;
+  const selectModelo = document.getElementById('selectModeloTesteEmail');
+  const inputEmail = document.getElementById('inputEmailDestinoTeste');
+  const modelo = selectModelo ? selectModelo.value : 'vespera';
+  const emailDestino = inputEmail ? inputEmail.value.trim() : 'participante@teste.com';
+
+  const previewData = window.EmailService.obterHtmlModeloTeste(modelo, emailDestino);
+  
+  const modal = document.getElementById('modalPreviaEmail');
+  const iframe = document.getElementById('iframePreviaEmail');
+  const subjectSpan = document.getElementById('assuntoPreviaEmail');
+
+  if (modal && iframe) {
+    if (subjectSpan) subjectSpan.textContent = previewData.subject;
+    modal.classList.remove('hidden');
+    iframe.srcdoc = previewData.html;
+    if (window.lucide) window.lucide.createIcons();
+  } else {
+    const novaAba = window.open('', '_blank');
+    if (novaAba) {
+      novaAba.document.write(previewData.html);
+      novaAba.document.close();
+    }
+  }
+}
+
+function fecharPreviaEmailAdmin() {
+  const modal = document.getElementById('modalPreviaEmail');
+  if (modal) modal.classList.add('hidden');
 }
 
 // Disparo Individual de E-mail para um Aluno da Tabela
@@ -950,5 +1018,7 @@ window.salvarConfiguracaoResendAdmin = salvarConfiguracaoResendAdmin;
 window.testarEnvioResendAdmin = testarEnvioResendAdmin;
 window.enviarEmailIndividualAdmin = enviarEmailIndividualAdmin;
 window.dispararEmailsEmLoteResend = dispararEmailsEmLoteResend;
+window.abrirPreviaEmailAdmin = abrirPreviaEmailAdmin;
+window.fecharPreviaEmailAdmin = fecharPreviaEmailAdmin;
 
 
