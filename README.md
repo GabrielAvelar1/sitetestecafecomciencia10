@@ -16,9 +16,7 @@
 - O botão **"Painel da Liga"** fica visível **apenas para as contas dos membros da liga organizadora**.
 - Alunos e visitantes comuns não visualizam nem acessam o painel administrativo.
 - Credenciais padrão para acesso da comissão:
-  - **E-mail:** `cafecomciencia.liga@gmail.com`
-  - **Senha:** `cafe2026`
-  *(Você pode alterar a senha e o e-mail no arquivo `js/supabase-client.js` ou rodar o script no Supabase).*
+
 
 ### 3. 📱 Design Otimizado para Celular (Menu Hambúrguer)
 - Cabeçalho totalmente reformulado com **botão hambúrguer** no celular.
