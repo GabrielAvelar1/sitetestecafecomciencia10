@@ -258,7 +258,10 @@ async function carregarInscricoesAdmin() {
     if (totalPresencas) totalPresencas.textContent = `${qtdPresentes} presenças validadas`;
     if (totalArrecadado) totalArrecadado.textContent = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
 
-    filtrarInscricoesTabelaAdmin();
+    renderizarLinhasTabelaAdmin(inscricoesCache);
+    if (typeof filtrarInscricoesTabelaAdmin === 'function') {
+      filtrarInscricoesTabelaAdmin();
+    }
   } catch (err) {
     console.error('Erro ao listar:', err);
     container.innerHTML = `

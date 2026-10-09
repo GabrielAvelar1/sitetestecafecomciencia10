@@ -1119,33 +1119,6 @@
         window.location.reload();
       }
     }
-
-    // Filtro instantâneo na tabela de inscritos
-    function filtrarInscricoesTabelaAdmin() {
-      const termo = (document.getElementById('inputBuscaInscritosAdmin')?.value || '').toLowerCase().trim();
-      const filtroStatus = document.getElementById('selectFiltroStatusAdmin')?.value || 'todos';
-
-      const linhas = document.querySelectorAll('#adminInscricoesList tr');
-      linhas.forEach(tr => {
-        const texto = tr.textContent.toLowerCase();
-        const correspondeTermo = !termo || texto.includes(termo);
-
-        let correspondeStatus = true;
-        if (filtroStatus === 'aprovados') {
-          correspondeStatus = texto.includes('aprovado') || texto.includes('pago');
-        } else if (filtroStatus === 'pendentes') {
-          correspondeStatus = texto.includes('pendente') || texto.includes('aguardando');
-        } else if (filtroStatus === 'presentes') {
-          correspondeStatus = texto.includes('confirmada') || texto.includes('presente');
-        }
-
-        if (correspondeTermo && correspondeStatus) {
-          tr.style.display = '';
-        } else {
-          tr.style.display = 'none';
-        }
-      });
-    }
   </script>
 </body>
 </html>
