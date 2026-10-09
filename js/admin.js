@@ -117,6 +117,7 @@ function trocarAbaAdmin(aba) {
     atualizarPreviewMensagemLembrete();
   } else if (aba === 'resend_teste') {
     carregarConfiguracoesResendAdmin();
+    carregarHistoricoEmailsResend();
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -916,6 +917,84 @@ function fecharPreviaEmailAdmin() {
   if (modal) modal.classList.add('hidden');
 }
 
+/**
+ * Consulta e exibe o histórico de e-mails disparados via Resend
+ */
+async function carregarHistoricoEmailsResend() {
+  const tbody = document.getElementById('listaHistoricoEmailsResend');
+  const countBadge = document.getElementById('totalEmailsEnviadosResend');
+  const btnAtualizar = document.getElementById('btnAtualizarHistoricoEmails');
+
+  if (!tbody) return;
+
+  if (btnAtualizar) {
+    btnAtualizar.disabled = true;
+    btnAtualizar.innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Carregando...</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  try {
+    const res = await window.EmailService.listarEmailsEnviados();
+    const emails = res?.data || [];
+
+    if (countBadge) {
+      countBadge.textContent = `${emails.length} e-mail${emails.length === 1 ? '' : 's'} disparado${emails.length === 1 ? '' : 's'}`;
+    }
+
+    if (emails.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-4 py-8 text-center text-xs text-stone-400">
+            Nenhum e-mail registrado recentemente no Resend. Faça um envio de teste acima!
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = emails.map(email => {
+      const dataFormatada = email.created_at ? new Date(email.created_at).toLocaleString('pt-BR') : '-';
+      const destinatario = Array.isArray(email.to) ? email.to.join(', ') : (email.to || '-');
+      
+      let statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">Enviado</span>';
+      if (email.last_event === 'delivered') {
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Entregue</span>';
+      } else if (email.last_event === 'bounced') {
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 text-red-800 border border-red-300">✕ Erro (Bounced)</span>';
+      } else if (email.last_event === 'complained') {
+        statusBadge = '<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Spam</span>';
+      }
+
+      return `
+        <tr class="hover:bg-stone-50/80 transition text-xs border-b border-stone-100">
+          <td class="px-4 py-3 font-semibold text-stone-900">${destinatario}</td>
+          <td class="px-4 py-3 text-stone-700 max-w-xs truncate" title="${email.subject || ''}">${email.subject || '-'}</td>
+          <td class="px-4 py-3 text-center whitespace-nowrap">${statusBadge}</td>
+          <td class="px-4 py-3 text-stone-500 whitespace-nowrap text-center">${dataFormatada}</td>
+          <td class="px-4 py-3 text-right font-mono text-[10px] text-stone-400 select-all">${email.id ? email.id.slice(0, 13) + '...' : '-'}</td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Erro ao listar e-mails:', err);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="px-4 py-6 text-center text-xs text-stone-500">
+          Não foi possível carregar o histórico agora (${err.message}).<br>
+          Você pode acompanhar os relatórios diretamente em <a href="https://resend.com/emails" target="_blank" class="text-blue-600 underline font-bold">resend.com/emails</a>.
+        </td>
+      </tr>
+    `;
+  } finally {
+    if (btnAtualizar) {
+      btnAtualizar.disabled = false;
+      btnAtualizar.innerHTML = '<i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i><span>Atualizar Histórico</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+}
+
 // Disparo Individual de E-mail para um Aluno da Tabela
 async function enviarEmailIndividualAdmin(id) {
   const aluno = inscricoesCache.find(i => i.id === id);
@@ -1020,5 +1099,6 @@ window.enviarEmailIndividualAdmin = enviarEmailIndividualAdmin;
 window.dispararEmailsEmLoteResend = dispararEmailsEmLoteResend;
 window.abrirPreviaEmailAdmin = abrirPreviaEmailAdmin;
 window.fecharPreviaEmailAdmin = fecharPreviaEmailAdmin;
+window.carregarHistoricoEmailsResend = carregarHistoricoEmailsResend;
 
 

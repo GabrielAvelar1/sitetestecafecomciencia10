@@ -566,6 +566,22 @@
     });
   }
 
+  /**
+   * Consulta a lista de e-mails enviados pelo Resend
+   */
+  async function listarEmailsEnviados() {
+    const endpoint = '/.netlify/functions/send-email';
+    const res = await fetch(endpoint, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Erro ao consultar e-mails do Resend (status ${res.status})`);
+    }
+    return res.json();
+  }
+
   // Exportação Global
   window.EmailService = {
     getResendApiKey,
@@ -581,7 +597,8 @@
     enviarEmailLembrete,
     enviarEmailCertificado,
     testarEnvioEmail,
-    obterHtmlModeloTeste
+    obterHtmlModeloTeste,
+    listarEmailsEnviados
   };
 
 })();

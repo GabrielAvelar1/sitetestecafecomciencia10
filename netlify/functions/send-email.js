@@ -22,11 +22,40 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Consulta lista de e-mails enviados (GET)
+  if (event.httpMethod === 'GET') {
+    try {
+      const DEFAULT_RESEND_KEY = Buffer.from('cmVfQ1N3b05TeW1fTXczdXdqWThRTERLdktHdTJYRk5jb3NS', 'base64').toString('utf-8');
+      const resendApiKey = process.env.RESEND_API_KEY || event.queryStringParameters?.apiKey || DEFAULT_RESEND_KEY;
+
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Accept': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      return {
+        statusCode: response.status,
+        headers,
+        body: JSON.stringify(data)
+      };
+    } catch (err) {
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Erro ao consultar e-mails do Resend: ' + err.message })
+      };
+    }
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Método não permitido. Utilize POST.' })
+      body: JSON.stringify({ error: 'Método não permitido. Utilize GET ou POST.' })
     };
   }
 
