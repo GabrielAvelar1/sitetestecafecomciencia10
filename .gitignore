@@ -5,3 +5,8 @@ Thumbs.db
 .env.local
 node_modules/
 package-lock.json
+
+# Planejamento futuro (mantido apenas no computador local)
+portal.html
+11cafe.html
+*11cafe*
