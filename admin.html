@@ -670,6 +670,94 @@
 
           </div>
 
+          <!-- Card de Envio Direto via Gmail Oficial (Opção 2 - Sem Restrição de Domínio) -->
+          <div class="bg-white p-6 sm:p-7 rounded-2xl border-2 border-emerald-500/50 shadow-sm space-y-4">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-stone-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                  <i data-lucide="mail" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h4 class="text-sm font-bold text-stone-900">Envio Direto pelo Gmail da Liga (Opção 2)</h4>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">Recomendado</span>
+                  </div>
+                  <p class="text-xs text-stone-500">Envia para qualquer e-mail (alunos, faculdade, hotmail, gmail) sem bloqueio anti-spam e sem precisar de domínio.</p>
+                </div>
+              </div>
+
+              <div id="badgeStatusConfigGmail">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                  Aguardando Senha de App
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  1. Seu E-mail do Gmail:
+                </label>
+                <input 
+                  type="email" 
+                  id="inputGmailUser" 
+                  value="cadumancia@gmail.com" 
+                  placeholder="ex: cadumancia@gmail.com" 
+                  class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-emerald-600 outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  2. Senha de App do Google (16 Letras):
+                </label>
+                <input 
+                  type="password" 
+                  id="inputGmailAppPass" 
+                  placeholder="Cole as 16 letras geradas pelo Google" 
+                  class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-emerald-600 outline-none bg-stone-50 focus:bg-white"
+                />
+              </div>
+            </div>
+
+            <div class="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs text-stone-600 space-y-1">
+              <p class="font-bold text-stone-800 flex items-center gap-1.5">
+                <i data-lucide="help-circle" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                Como gerar sua Senha de App de 16 letras no Google:
+              </p>
+              <ol class="list-decimal list-inside space-y-0.5 text-[11px] text-stone-600 pl-1">
+                <li>Acesse o link direto: <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-bold underline">myaccount.google.com/apppasswords</a></li>
+                <li>No campo "Nome do app", digite <strong>Cafe com Ciencia</strong> e clique em <strong>Criar</strong>.</li>
+                <li>Copie as 16 letras amarelas geradas pelo Google e cole no campo acima!</li>
+              </ol>
+            </div>
+
+            <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <button 
+                type="button" 
+                onclick="salvarConfiguracaoGmailAdmin()" 
+                class="px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+              >
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span>Salvar Configurações do Gmail</span>
+              </button>
+
+              <button 
+                id="btnReenviarCredenciaisLote"
+                type="button" 
+                onclick="reenviarCredenciaisTodosInscritosAdmin()" 
+                class="px-5 py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2 sm:ml-auto"
+                title="Dispara as credenciais oficiais com QR Code para todos os inscritos que ainda não receberam"
+              >
+                <i data-lucide="mail-check" class="w-4 h-4 text-amber-300"></i>
+                <span>Reenviar Credencial com QR Code para Todos os 13 Inscritos</span>
+              </button>
+            </div>
+
+          </div>
+
           <!-- Configurações de Automações e Remetente -->
           <div class="bg-white p-6 sm:p-7 rounded-2xl border border-stone-200 shadow-sm space-y-4">
             <h4 class="text-sm font-bold text-stone-900 uppercase tracking-wider">Configurações Gerais de Envio</h4>

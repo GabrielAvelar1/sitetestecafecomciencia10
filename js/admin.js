@@ -783,6 +783,8 @@ function carregarConfiguracoesResendAdmin() {
     `;
   }
 
+  carregarConfiguracoesGmailAdmin();
+
   if (window.lucide) window.lucide.createIcons();
 }
 
@@ -1079,7 +1081,103 @@ async function dispararEmailsEmLoteResend() {
     }
   }
 
-  alert(`Disparo concluído!\n\n✓ ${enviados} e-mails enviados com sucesso pelo Resend.\n${erros > 0 ? `⚠️ ${erros} falhas de envio.` : ''}`);
+  alert(`Disparo concluído!\n\n✓ ${enviados} e-mails enviados com sucesso.\n${erros > 0 ? `⚠️ ${erros} falhas de envio.` : ''}`);
+  carregarHistoricoEmailsResend();
+}
+
+/**
+ * Reenvia a credencial oficial com QR Code para todos os inscritos já cadastrados
+ */
+async function reenviarCredenciaisTodosInscritosAdmin() {
+  if (!inscricoesCache || inscricoesCache.length === 0) {
+    alert('Nenhum inscrito carregado na lista para enviar credenciais.');
+    return;
+  }
+
+  const confirmMsg = `Atenção: Deseja reenviar o e-mail oficial com a Credencial e o QR Code para todos os ${inscricoesCache.length} participantes já inscritos?`;
+  if (!confirm(confirmMsg)) return;
+
+  const btn = document.getElementById('btnReenviarCredenciaisLote');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Disparando credenciais...</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  let enviados = 0;
+  let erros = 0;
+  let ultimoErro = '';
+
+  for (let i = 0; i < inscricoesCache.length; i++) {
+    const aluno = inscricoesCache[i];
+    if (aluno && aluno.email) {
+      try {
+        await window.EmailService.enviarEmailInscricao(aluno);
+        enviados++;
+        await new Promise(r => setTimeout(r, 400));
+      } catch (err) {
+        console.warn(`Erro no envio para ${aluno.email}:`, err);
+        erros++;
+        ultimoErro = err.message;
+      }
+    }
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i data-lucide="mail-check" class="w-4 h-4"></i><span>Reenviar Credencial com QR Code para Todos os 13 Inscritos</span>';
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  if (enviados > 0) {
+    alert(`Envio concluído com sucesso!\n\n✓ ${enviados} credenciais enviadas aos inscritos!${erros > 0 ? `\n⚠️ ${erros} falhas: ${ultimoErro}` : ''}`);
+    carregarHistoricoEmailsResend();
+  } else {
+    alert(`Nenhum e-mail pôde ser entregue:\n\n${ultimoErro || 'Verifique se as credenciais do Gmail ou do Resend estão preenchidas.'}`);
+  }
+}
+
+function carregarConfiguracoesGmailAdmin() {
+  if (!window.EmailService) return;
+  const inputUser = document.getElementById('inputGmailUser');
+  const inputPass = document.getElementById('inputGmailAppPass');
+  const badgeStatus = document.getElementById('badgeStatusConfigGmail');
+
+  if (inputUser) inputUser.value = window.EmailService.getGmailUser();
+  if (inputPass) inputPass.value = window.EmailService.getGmailAppPassword();
+
+  if (badgeStatus) {
+    if (window.EmailService.isGmailConfigurado()) {
+      badgeStatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Gmail Conectado & Operacional
+        </span>
+      `;
+    } else {
+      badgeStatus.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          Aguardando Senha de App
+        </span>
+      `;
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function salvarConfiguracaoGmailAdmin() {
+  if (!window.EmailService) return;
+  const inputUser = document.getElementById('inputGmailUser');
+  const inputPass = document.getElementById('inputGmailAppPass');
+
+  const user = inputUser?.value.trim() || '';
+  const pass = inputPass?.value.trim() || '';
+
+  window.EmailService.salvarConfigGmail(user, pass);
+  carregarConfiguracoesGmailAdmin();
+  alert('Configurações do Gmail salvas com sucesso! Agora você pode testar o envio.');
 }
 
 window.salvarConfiguracaoGoogleAdmin = salvarConfiguracaoGoogleAdmin;
@@ -1100,5 +1198,8 @@ window.dispararEmailsEmLoteResend = dispararEmailsEmLoteResend;
 window.abrirPreviaEmailAdmin = abrirPreviaEmailAdmin;
 window.fecharPreviaEmailAdmin = fecharPreviaEmailAdmin;
 window.carregarHistoricoEmailsResend = carregarHistoricoEmailsResend;
+window.reenviarCredenciaisTodosInscritosAdmin = reenviarCredenciaisTodosInscritosAdmin;
+window.carregarConfiguracoesGmailAdmin = carregarConfiguracoesGmailAdmin;
+window.salvarConfiguracaoGmailAdmin = salvarConfiguracaoGmailAdmin;
 
 

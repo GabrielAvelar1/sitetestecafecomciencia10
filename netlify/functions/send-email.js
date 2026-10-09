@@ -1,15 +1,11 @@
-/**
- * Netlify Serverless Function: Integração Segura com Resend API
- * Disparo de e-mails transacionais (Inscrição, Presença, Lembretes e Certificados)
- * 10° Café com Ciência: Os Direitos dos Pacientes na Odontologia
- */
+const nodemailer = require('nodemailer');
 
 exports.handler = async (event, context) => {
   // Configuração de Cabeçalhos CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Content-Type': 'application/json'
   };
 
@@ -61,10 +57,74 @@ exports.handler = async (event, context) => {
 
   try {
     const payload = JSON.parse(event.body || '{}');
-    const { to, subject, html, text, from: customFrom, apiKey: clientApiKey } = payload;
+    const { 
+      to, 
+      subject, 
+      html, 
+      text, 
+      from: customFrom, 
+      apiKey: clientApiKey,
+      gmailUser: clientGmailUser,
+      gmailAppPassword: clientGmailPass
+    } = payload;
 
+    if (!to || !subject || (!html && !text)) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'Parâmetros obrigatórios ausentes: informe "to", "subject" e "html" ou "text".'
+        })
+      };
+    }
+
+    // 1. PRIORIDADE: ENVIO VIA GMAIL SMTP (Sem restrição de domínio ou destinatário)
+    const gmailUser = process.env.GMAIL_USER || clientGmailUser;
+    const gmailPass = process.env.GMAIL_PASS || clientGmailPass;
+
+    if (gmailUser && gmailPass && gmailUser.includes('@') && gmailPass.trim().length >= 8) {
+      try {
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: gmailUser.trim(),
+            pass: gmailPass.trim().replace(/\s+/g, '')
+          }
+        });
+
+        const mailOptions = {
+          from: customFrom || `10° Café com Ciência <${gmailUser.trim()}>`,
+          to: Array.isArray(to) ? to.join(', ') : to,
+          subject,
+          html: html || undefined,
+          text: text || undefined
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            provider: 'gmail',
+            id: info.messageId,
+            status: 'sent'
+          })
+        };
+      } catch (gmailErr) {
+        console.error('Erro no envio via Gmail SMTP:', gmailErr);
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({
+            error: `Erro ao enviar via Gmail: ${gmailErr.message}. Verifique se o e-mail e a Senha de App de 16 dígitos estão corretos.`
+          })
+        };
+      }
+    }
+
+    // 2. FALLBACK: RESEND API
     const DEFAULT_RESEND_KEY = Buffer.from('cmVfQ1N3b05TeW1fTXczdXdqWThRTERLdktHdTJYRk5jb3NS', 'base64').toString('utf-8');
-    // Obtém a chave API do Resend (prioriza variável de ambiente Netlify, chave informada no painel, ou chave padrão)
     const resendApiKey = process.env.RESEND_API_KEY || clientApiKey || DEFAULT_RESEND_KEY;
 
     if (!resendApiKey || !resendApiKey.trim().startsWith('re_')) {
@@ -72,7 +132,7 @@ exports.handler = async (event, context) => {
         statusCode: 400,
         headers,
         body: JSON.stringify({
-          error: 'Chave da API Resend não configurada ou inválida.'
+          error: 'Chave da API Resend ou credenciais do Gmail não configuradas.'
         })
       };
     }

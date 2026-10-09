@@ -8,7 +8,9 @@
     API_KEY: 'cafe_resend_api_key',
     FROM: 'cafe_resend_from',
     AUTO_INSCRICAO: 'cafe_email_auto_inscricao',
-    AUTO_PRESENCA: 'cafe_email_auto_presenca'
+    AUTO_PRESENCA: 'cafe_email_auto_presenca',
+    GMAIL_USER: 'cafe_gmail_user',
+    GMAIL_APP_PASS: 'cafe_gmail_app_pass'
   };
 
   const DEFAULT_API_KEY = typeof atob === 'function' ? atob('cmVfQ1N3b05TeW1fTXczdXdqWThRTERLdktHdTJYRk5jb3NS') : '';
@@ -20,6 +22,26 @@
 
   function getResendFrom() {
     return localStorage.getItem(EMAIL_STORAGE_KEYS.FROM) || DEFAULT_FROM;
+  }
+
+  function getGmailUser() {
+    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_USER) || '';
+  }
+
+  function getGmailAppPassword() {
+    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_APP_PASS) || '';
+  }
+
+  function salvarConfigGmail(user, pass) {
+    if (user !== undefined) localStorage.setItem(EMAIL_STORAGE_KEYS.GMAIL_USER, user.trim());
+    if (pass !== undefined) localStorage.setItem(EMAIL_STORAGE_KEYS.GMAIL_APP_PASS, pass.trim());
+    return true;
+  }
+
+  function isGmailConfigurado() {
+    const user = getGmailUser();
+    const pass = getGmailAppPassword();
+    return Boolean(user && user.includes('@') && pass && pass.length >= 8);
   }
 
   function salvarConfigResend(apiKey, from) {
@@ -42,8 +64,7 @@
   }
 
   function isResendConfigurado() {
-    const key = getResendApiKey();
-    return Boolean(key && key.startsWith('re_'));
+    return isGmailConfigurado() || Boolean(getResendApiKey() && getResendApiKey().startsWith('re_'));
   }
 
   function getUrlBase() {
@@ -67,7 +88,9 @@
       html,
       text,
       from,
-      apiKey: apiKey || undefined
+      apiKey: apiKey || undefined,
+      gmailUser: getGmailUser() || undefined,
+      gmailAppPassword: getGmailAppPassword() || undefined
     };
 
     try {
@@ -598,7 +621,11 @@
     enviarEmailCertificado,
     testarEnvioEmail,
     obterHtmlModeloTeste,
-    listarEmailsEnviados
+    listarEmailsEnviados,
+    getGmailUser,
+    getGmailAppPassword,
+    salvarConfigGmail,
+    isGmailConfigurado
   };
 
 })();
