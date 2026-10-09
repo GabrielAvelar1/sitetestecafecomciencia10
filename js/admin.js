@@ -217,7 +217,7 @@ async function carregarInscricoesAdmin() {
 
   container.innerHTML = `
     <tr>
-      <td colspan="7" class="px-6 py-8 text-center text-stone-500">
+      <td colspan="9" class="px-6 py-8 text-center text-stone-500">
         <div class="flex justify-center items-center gap-2">
           <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-700"></i>
           <span>Carregando inscrições do banco...</span>
@@ -258,111 +258,163 @@ async function carregarInscricoesAdmin() {
     if (totalPresencas) totalPresencas.textContent = `${qtdPresentes} presenças validadas`;
     if (totalArrecadado) totalArrecadado.textContent = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
 
-    if (qtdInscritos === 0) {
-      container.innerHTML = `
-        <tr>
-          <td colspan="7" class="px-6 py-12 text-center text-stone-400">
-            <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-stone-300"></i>
-            <p class="font-medium text-stone-600">Nenhuma inscrição registrada ainda.</p>
-            <p class="text-xs text-stone-400 mt-1">As inscrições enviadas pelo formulário aparecerão aqui automaticamente.</p>
-          </td>
-        </tr>
-      `;
-      if (window.lucide) window.lucide.createIcons();
-      return;
-    }
-
-    container.innerHTML = inscricoesCache.map(item => {
-      const whatsappClean = (item.telefone || '').replace(/\D/g, '');
-      
-      // Status Pagamento
-      const statusPagamentoBadge = item.status_pagamento === 'aprovado'
-        ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">Aprovado</span>`
-        : item.status_pagamento === 'recusado'
-        ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">Recusado</span>`
-        : `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Pendente</span>`;
-
-      // Status Presença
-      const presencaBadge = item.presenca_confirmada
-        ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-400" title="Check-in realizado em: ${new Date(item.presenca_horario).toLocaleTimeString('pt-BR')}">
-             <i data-lucide="check-check" class="w-3 h-3 text-emerald-600"></i> Presente
-           </span>`
-        : `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-500 border border-stone-200">Não chegou</span>`;
-
-      // Botão Comprovante
-      const comprovanteBtn = item.comprovante_url
-        ? `<button onclick="visualizarComprovante('${item.id}')" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 transition">
-             <i data-lucide="file-check" class="w-3.5 h-3.5 text-amber-700"></i> Ver Pix
-           </button>`
-        : `<span class="text-xs text-stone-400">Sem anexo</span>`;
-
-      // Botão Certificado Oficial
-      const certificadoBtn = item.presenca_confirmada
-        ? `<a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Abrir certificado oficial para impressão">
-             <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Certificado
-           </a>`
-        : `<span class="text-xs text-stone-300 italic" title="Disponível após o check-in por QR Code na portaria">Pós-Checkin</span>`;
-
-      return `
-        <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
-          <td class="px-4 py-3">
-            <div class="font-bold text-stone-900">${item.nome_completo}</div>
-            <div class="text-[11px] font-mono text-coffee-700">${item.protocolo || '-'}</div>
-          </td>
-          <td class="px-4 py-3 text-stone-600 text-xs">${item.email}</td>
-          <td class="px-4 py-3 text-stone-700 text-xs whitespace-nowrap">
-            <a href="https://wa.me/55${whatsappClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:text-emerald-700 font-medium" title="Abrir conversa no WhatsApp">
-              <i data-lucide="phone" class="w-3 h-3 text-emerald-600"></i>
-              ${item.telefone}
-            </a>
-          </td>
-          <td class="px-4 py-3 text-center">${statusPagamentoBadge}</td>
-          <td class="px-4 py-3 text-center">${presencaBadge}</td>
-          <td class="px-4 py-3 text-center">${comprovanteBtn}</td>
-          <td class="px-4 py-3 text-center">${certificadoBtn}</td>
-          <td class="px-4 py-3 text-right whitespace-nowrap">
-            <div class="flex items-center justify-end gap-1">
-              <!-- Botão Ver Credencial / QR Code -->
-              <button onclick="abrirCredencialPorProtocolo('${item.protocolo}')" title="Ver Credencial com QR Code" class="p-1.5 rounded-lg text-coffee-700 hover:bg-coffee-50 transition">
-                <i data-lucide="qr-code" class="w-4 h-4"></i>
-              </button>
-              
-              <!-- Aprovar Pix -->
-              <button onclick="alterarStatusPix('${item.id}', 'aprovado')" title="Aprovar pagamento Pix" class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition">
-                <i data-lucide="check-circle" class="w-4 h-4"></i>
-              </button>
-
-              <!-- Recusar Pix -->
-              <button onclick="alterarStatusPix('${item.id}', 'recusado')" title="Recusar pagamento Pix" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition">
-                <i data-lucide="x-circle" class="w-4 h-4"></i>
-              </button>
-
-              <!-- Enviar Lembrete no WhatsApp -->
-              <button onclick="enviarLembreteIndividual('${item.id}')" title="Mandar lembrete via WhatsApp" class="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition">
-                <i data-lucide="message-circle" class="w-4 h-4"></i>
-              </button>
-
-              <!-- Enviar E-mail via Resend -->
-              <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="Enviar E-mail via Resend (Credencial, Lembrete ou Certificado)" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition">
-                <i data-lucide="mail" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    if (window.lucide) window.lucide.createIcons();
+    filtrarInscricoesTabelaAdmin();
   } catch (err) {
     console.error('Erro ao listar:', err);
     container.innerHTML = `
       <tr>
-        <td colspan="7" class="px-6 py-6 text-center text-red-600 text-sm">
+        <td colspan="9" class="px-6 py-6 text-center text-red-600 text-sm">
           Erro ao carregar inscrições. Verifique o console ou a conexão com o Supabase.
         </td>
       </tr>
     `;
   }
+}
+
+function renderizarLinhasTabelaAdmin(lista) {
+  const container = document.getElementById('adminInscricoesList');
+  if (!container) return;
+
+  if (!lista || lista.length === 0) {
+    container.innerHTML = `
+      <tr>
+        <td colspan="9" class="px-6 py-12 text-center text-stone-400">
+          <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-stone-300"></i>
+          <p class="font-medium text-stone-600">Nenhuma inscrição encontrada.</p>
+          <p class="text-xs text-stone-400 mt-1">Verifique os filtros de pesquisa ou aguarde novos participantes.</p>
+        </td>
+      </tr>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = lista.map(item => {
+    const whatsappClean = (item.telefone || '').replace(/\D/g, '');
+    const instituicaoNome = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo');
+    const isArnaldo = instituicaoNome.toLowerCase().includes('arnaldo');
+
+    const instituicaoBadge = isArnaldo
+      ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200" title="Aluno(a) Faculdade Arnaldo">
+           <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-amber-700"></i>
+           UniArnaldo
+         </span>`
+      : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-900 border border-blue-200" title="Instituição: ${instituicaoNome}">
+           <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-700"></i>
+           ${instituicaoNome}
+         </span>`;
+    
+    // Status Pagamento
+    const statusPagamentoBadge = item.status_pagamento === 'aprovado'
+      ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">Aprovado</span>`
+      : item.status_pagamento === 'recusado'
+      ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">Recusado</span>`
+      : `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Pendente</span>`;
+
+    // Status Presença
+    const presencaBadge = item.presenca_confirmada
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-400" title="Check-in realizado em: ${new Date(item.presenca_horario).toLocaleTimeString('pt-BR')}">
+           <i data-lucide="check-check" class="w-3 h-3 text-emerald-600"></i> Presente
+         </span>`
+      : `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-500 border border-stone-200">Não chegou</span>`;
+
+    // Botão Comprovante
+    const comprovanteBtn = item.comprovante_url
+      ? `<button onclick="visualizarComprovante('${item.id}')" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 transition">
+           <i data-lucide="file-check" class="w-3.5 h-3.5 text-amber-700"></i> Ver Pix
+         </button>`
+      : `<span class="text-xs text-stone-400">Sem anexo</span>`;
+
+    // Botão Certificado Oficial
+    const certificadoBtn = item.presenca_confirmada
+      ? `<a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Abrir certificado oficial para impressão">
+           <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Certificado
+         </a>`
+      : `<span class="text-xs text-stone-300 italic" title="Disponível após o check-in por QR Code na portaria">Pós-Checkin</span>`;
+
+    return `
+      <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
+        <td class="px-4 py-3">
+          <div class="font-bold text-stone-900">${item.nome_completo}</div>
+          <div class="text-[11px] font-mono text-coffee-700">${item.protocolo || '-'}</div>
+        </td>
+        <td class="px-4 py-3 whitespace-nowrap">${instituicaoBadge}</td>
+        <td class="px-4 py-3 text-stone-600 text-xs">${item.email}</td>
+        <td class="px-4 py-3 text-stone-700 text-xs whitespace-nowrap">
+          <a href="https://wa.me/55${whatsappClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:text-emerald-700 font-medium" title="Abrir conversa no WhatsApp">
+            <i data-lucide="phone" class="w-3 h-3 text-emerald-600"></i>
+            ${item.telefone}
+          </a>
+        </td>
+        <td class="px-4 py-3 text-center">${statusPagamentoBadge}</td>
+        <td class="px-4 py-3 text-center">${presencaBadge}</td>
+        <td class="px-4 py-3 text-center">${comprovanteBtn}</td>
+        <td class="px-4 py-3 text-center">${certificadoBtn}</td>
+        <td class="px-4 py-3 text-right whitespace-nowrap">
+          <div class="flex items-center justify-end gap-1">
+            <!-- Botão Ver Credencial / QR Code -->
+            <button onclick="abrirCredencialPorProtocolo('${item.protocolo}')" title="Ver Credencial com QR Code" class="p-1.5 rounded-lg text-coffee-700 hover:bg-coffee-50 transition">
+              <i data-lucide="qr-code" class="w-4 h-4"></i>
+            </button>
+            
+            <!-- Aprovar Pix -->
+            <button onclick="alterarStatusPix('${item.id}', 'aprovado')" title="Aprovar pagamento Pix" class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition">
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Recusar Pix -->
+            <button onclick="alterarStatusPix('${item.id}', 'recusado')" title="Recusar pagamento Pix" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition">
+              <i data-lucide="x-circle" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Enviar Lembrete no WhatsApp -->
+            <button onclick="enviarLembreteIndividual('${item.id}')" title="Mandar lembrete via WhatsApp" class="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition">
+              <i data-lucide="message-circle" class="w-4 h-4"></i>
+            </button>
+
+            <!-- Enviar E-mail via Resend -->
+            <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="Enviar E-mail via Resend (Credencial, Lembrete ou Certificado)" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition">
+              <i data-lucide="mail" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function filtrarInscricoesTabelaAdmin() {
+  const inputBusca = document.getElementById('inputBuscaInscritosAdmin');
+  const selectStatus = document.getElementById('selectFiltroStatusAdmin');
+  const termo = (inputBusca?.value || '').toLowerCase().trim();
+  const status = selectStatus?.value || 'todos';
+
+  if (!inscricoesCache) return;
+
+  const filtrados = inscricoesCache.filter(item => {
+    const inst = (window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo')).toLowerCase();
+    const nome = (item.nome_completo || '').toLowerCase();
+    const email = (item.email || '').toLowerCase();
+    const prot = (item.protocolo || '').toLowerCase();
+    const tel = (item.telefone || '').replace(/\D/g, '');
+
+    const bateTexto = !termo || nome.includes(termo) || email.includes(termo) || prot.includes(termo) || tel.includes(termo) || inst.includes(termo);
+
+    let bateStatus = true;
+    if (status === 'aprovados') {
+      bateStatus = item.status_pagamento === 'aprovado';
+    } else if (status === 'pendentes') {
+      bateStatus = item.status_pagamento === 'pendente';
+    } else if (status === 'presentes') {
+      bateStatus = Boolean(item.presenca_confirmada);
+    }
+
+    return bateTexto && bateStatus;
+  });
+
+  renderizarLinhasTabelaAdmin(filtrados);
 }
 
 // Alterar Status Pix
@@ -594,18 +646,22 @@ function exportarParaCSV() {
     return;
   }
 
-  const cabecalhos = ['Protocolo', 'Nome Completo', 'E-mail', 'Telefone', 'Status Pagamento', 'Presenca Confirmada', 'Horario Check-in', 'Codigo Certificado', 'Data Inscricao'];
-  const linhas = inscricoesCache.map(i => [
-    `"${i.protocolo || ''}"`,
-    `"${i.nome_completo.replace(/"/g, '""')}"`,
-    `"${i.email}"`,
-    `"${i.telefone}"`,
-    `"${i.status_pagamento || 'pendente'}"`,
-    `"${i.presenca_confirmada ? 'SIM' : 'NÃO'}"`,
-    `"${i.presenca_horario ? new Date(i.presenca_horario).toLocaleString('pt-BR') : '-'}"`,
-    `"${i.certificado_codigo || '-'}"`,
-    `"${new Date(i.created_at).toLocaleString('pt-BR')}"`
-  ]);
+  const cabecalhos = ['Protocolo', 'Nome Completo', 'Faculdade / Instituição', 'E-mail', 'Telefone', 'Status Pagamento', 'Presenca Confirmada', 'Horario Check-in', 'Codigo Certificado', 'Data Inscricao'];
+  const linhas = inscricoesCache.map(i => {
+    const inst = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(i) : (i.instituicao || 'Faculdade Arnaldo');
+    return [
+      `"${i.protocolo || ''}"`,
+      `"${i.nome_completo.replace(/"/g, '""')}"`,
+      `"${inst.replace(/"/g, '""')}"`,
+      `"${i.email}"`,
+      `"${i.telefone}"`,
+      `"${i.status_pagamento || 'pendente'}"`,
+      `"${i.presenca_confirmada ? 'SIM' : 'NÃO'}"`,
+      `"${i.presenca_horario ? new Date(i.presenca_horario).toLocaleString('pt-BR') : '-'}"`,
+      `"${i.certificado_codigo || '-'}"`,
+      `"${new Date(i.created_at).toLocaleString('pt-BR')}"`
+    ];
+  });
 
   const csvContent = '\uFEFF' + [cabecalhos.join(';'), ...linhas.map(e => e.join(';'))].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -1201,5 +1257,6 @@ window.carregarHistoricoEmailsResend = carregarHistoricoEmailsResend;
 window.reenviarCredenciaisTodosInscritosAdmin = reenviarCredenciaisTodosInscritosAdmin;
 window.carregarConfiguracoesGmailAdmin = carregarConfiguracoesGmailAdmin;
 window.salvarConfiguracaoGmailAdmin = salvarConfiguracaoGmailAdmin;
+window.filtrarInscricoesTabelaAdmin = filtrarInscricoesTabelaAdmin;
 
 

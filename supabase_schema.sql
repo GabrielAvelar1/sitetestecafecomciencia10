@@ -63,3 +63,8 @@ DROP POLICY IF EXISTS "Permitir exclusao de comprovantes" ON storage.objects;
 CREATE POLICY "Permitir exclusao de comprovantes" 
 ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'comprovantes');
 
+-- 7. Adicionar coluna 'instituicao' para participantes (padrão 'Faculdade Arnaldo')
+ALTER TABLE public.inscricoes ADD COLUMN IF NOT EXISTS instituicao TEXT DEFAULT 'Faculdade Arnaldo';
+UPDATE public.inscricoes SET instituicao = 'Faculdade Arnaldo' WHERE instituicao IS NULL;
+
+

@@ -388,13 +388,34 @@ function fileToBase64(file) {
   });
 }
 
-async function registrarInscricao({ nome_completo, email, telefone, comprovanteFile }) {
+function extrairInstituicaoAluno(aluno) {
+  if (!aluno) return 'Faculdade Arnaldo';
+  if (aluno.instituicao && typeof aluno.instituicao === 'string' && aluno.instituicao.trim()) {
+    return aluno.instituicao.trim();
+  }
+  if (aluno.observacoes && typeof aluno.observacoes === 'string' && aluno.observacoes.trim()) {
+    const obs = aluno.observacoes.trim();
+    if (obs.toLowerCase().startsWith('faculdade:')) {
+      const extraido = obs.substring(10).trim();
+      if (extraido) return extraido;
+    }
+    if (obs.toLowerCase() === 'faculdade arnaldo') {
+      return 'Faculdade Arnaldo';
+    }
+    return obs;
+  }
+  return 'Faculdade Arnaldo';
+}
+
+async function registrarInscricao({ nome_completo, email, telefone, instituicao, comprovanteFile }) {
   if (!comprovanteFile) {
     throw new Error('O anexo do comprovante de pagamento Pix de R$ 10,00 é estritamente obrigatório.');
   }
 
   const protocolo = gerarProtocolo();
   const emailLimpo = email.trim().toLowerCase();
+  const instituicaoLimpa = (instituicao && instituicao.trim()) ? instituicao.trim() : 'Faculdade Arnaldo';
+  const obsValor = (instituicaoLimpa === 'Faculdade Arnaldo') ? 'Faculdade Arnaldo' : `Faculdade: ${instituicaoLimpa}`;
   const sb = getSupabase();
 
   if (sb) {
@@ -429,33 +450,54 @@ async function registrarInscricao({ nome_completo, email, telefone, comprovanteF
         }
       }
 
-      const { data: insertData, error: insertError } = await sb
+      const basePayload = {
+        protocolo: protocolo,
+        nome_completo: nome_completo.trim(),
+        email: emailLimpo,
+        telefone: telefone.trim(),
+        senha: 'google-oauth',
+        role: 'aluno',
+        valor: parseFloat(PIX_CONFIG.valor),
+        status_pagamento: 'pendente', // Comprovante em análise pela comissão
+        comprovante_url: comprovanteUrl,
+        comprovante_nome: comprovanteNome,
+        presenca_confirmada: false,
+        certificado_emitido: false,
+        lembrete_enviado: false,
+        observacoes: obsValor
+      };
+
+      // Tenta inserir incluindo 'instituicao'. Se a coluna ainda não existir no Postgres,
+      // faz fallback transparente para basePayload (onde o dado fica preservado em 'observacoes').
+      let insertData = null;
+      const { data: dComInst, error: errComInst } = await sb
         .from(SUPABASE_CONFIG.tableName)
-        .insert([
-          {
-            protocolo: protocolo,
-            nome_completo: nome_completo.trim(),
-            email: emailLimpo,
-            telefone: telefone.trim(),
-            senha: 'google-oauth',
-            role: 'aluno',
-            valor: parseFloat(PIX_CONFIG.valor),
-            status_pagamento: 'pendente', // Comprovante em análise pela comissão
-            comprovante_url: comprovanteUrl,
-            comprovante_nome: comprovanteNome,
-            presenca_confirmada: false,
-            certificado_emitido: false,
-            lembrete_enviado: false
-          }
-        ])
+        .insert([{ ...basePayload, instituicao: instituicaoLimpa }])
         .select();
 
-      if (insertError) {
-        console.error('Erro ao salvar no Supabase:', insertError);
-        throw new Error('Falha ao registrar inscrição no banco de dados.');
+      if (errComInst) {
+        if (errComInst.code === '42703' || (errComInst.message && errComInst.message.toLowerCase().includes('instituicao'))) {
+          const { data: dFallback, error: errFallback } = await sb
+            .from(SUPABASE_CONFIG.tableName)
+            .insert([basePayload])
+            .select();
+          if (errFallback) {
+            console.error('Erro ao salvar no Supabase (fallback):', errFallback);
+            throw new Error('Falha ao registrar inscrição no banco de dados.');
+          }
+          insertData = dFallback;
+        } else {
+          console.error('Erro ao salvar no Supabase:', errComInst);
+          throw new Error('Falha ao registrar inscrição no banco de dados.');
+        }
+      } else {
+        insertData = dComInst;
       }
 
-      const novoUsuario = insertData[0];
+      const novoUsuario = {
+        ...insertData[0],
+        instituicao: instituicaoLimpa
+      };
       salvarSessaoUsuario(novoUsuario);
 
       return {
@@ -491,6 +533,8 @@ async function registrarInscricao({ nome_completo, email, telefone, comprovanteF
       nome_completo: nome_completo.trim(),
       email: emailLimpo,
       telefone: telefone.trim(),
+      instituicao: instituicaoLimpa,
+      observacoes: obsValor,
       senha: 'google-oauth',
       role: 'aluno',
       valor: parseFloat(PIX_CONFIG.valor),
@@ -661,6 +705,7 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
 // ============================================================================
 async function listarInscricoes() {
   const sb = getSupabase();
+  let lista = [];
   if (sb) {
     const { data, error } = await sb
       .from(SUPABASE_CONFIG.tableName)
@@ -672,11 +717,17 @@ async function listarInscricoes() {
       console.error('Erro ao buscar do Supabase:', error);
       throw error;
     }
-    return data || [];
+    lista = data || [];
   } else {
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
-    return inscricoes.filter(i => i.role !== 'organizador');
+    lista = inscricoes.filter(i => i.role !== 'organizador');
   }
+
+  // Garante que todos os participantes (incluindo os inscritos anteriores) tenham a instituição definida (padrão 'Faculdade Arnaldo')
+  return lista.map(item => ({
+    ...item,
+    instituicao: extrairInstituicaoAluno(item)
+  }));
 }
 
 async function atualizarStatusPagamento(id, novoStatus) {
@@ -918,6 +969,7 @@ window.LigaDB = {
   salvarGoogleClientId,
   isGoogleConfigured,
   estaoCertificadosLiberados,
-  alternarLiberacaoCertificados
+  alternarLiberacaoCertificados,
+  extrairInstituicaoAluno
 };
 

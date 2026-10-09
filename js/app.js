@@ -409,8 +409,33 @@ function configurarUploadComprovante() {
 function configurarFormulario() {
   const form = document.getElementById('formInscricao');
   const btnSubmit = document.getElementById('btnSubmitInscricao');
+  const radioSim = document.getElementById('alunoArnaldoSim');
+  const radioNao = document.getElementById('alunoArnaldoNao');
+  const containerOutra = document.getElementById('containerOutraFaculdade');
+  const inputOutra = document.getElementById('outraFaculdadeNome');
 
   if (!form) return;
+
+  // Alternância do campo de outra faculdade
+  function atualizarExibicaoOutraFaculdade() {
+    if (radioNao && radioNao.checked) {
+      if (containerOutra) containerOutra.classList.remove('hidden');
+      if (inputOutra) {
+        inputOutra.required = true;
+        setTimeout(() => inputOutra.focus(), 100);
+      }
+    } else {
+      if (containerOutra) containerOutra.classList.add('hidden');
+      if (inputOutra) {
+        inputOutra.required = false;
+        inputOutra.value = '';
+      }
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  if (radioSim) radioSim.addEventListener('change', atualizarExibicaoOutraFaculdade);
+  if (radioNao) radioNao.addEventListener('change', atualizarExibicaoOutraFaculdade);
 
   // Preenche dados se já houver usuário logado
   const usuarioInicial = window.LigaDB.getUsuarioLogado();
@@ -443,6 +468,18 @@ function configurarFormulario() {
       return;
     }
 
+    // Validação da Instituição de Ensino
+    let instituicao = 'Faculdade Arnaldo';
+    if (radioNao && radioNao.checked) {
+      const nomeOutra = inputOutra ? inputOutra.value.trim() : '';
+      if (!nomeOutra) {
+        alert('Por favor, informe o nome ou sigla da sua faculdade/instituição.');
+        if (inputOutra) inputOutra.focus();
+        return;
+      }
+      instituicao = nomeOutra;
+    }
+
     // VALIDAÇÃO ESTRITA: OBRIGATÓRIO ANEXAR COMPROVANTE
     if (!comprovanteArquivoSelecionado) {
       alert('⚠️ ATENÇÃO: É estritamente obrigatório anexar a imagem ou PDF do comprovante do Pix de R$ 10,00 para garantir sua vaga.');
@@ -472,6 +509,7 @@ function configurarFormulario() {
         nome_completo: nome,
         email: email,
         telefone: telefone,
+        instituicao: instituicao,
         comprovanteFile: comprovanteArquivoSelecionado
       });
 
@@ -485,6 +523,9 @@ function configurarFormulario() {
       }
 
       form.reset();
+      if (radioSim) radioSim.checked = true;
+      if (containerOutra) containerOutra.classList.add('hidden');
+      if (inputOutra) inputOutra.value = '';
       comprovanteArquivoSelecionado = null;
       document.getElementById('uploadPreviewContainer').classList.add('hidden');
       document.getElementById('uploadEmptyContainer').classList.remove('hidden');
@@ -537,6 +578,12 @@ function exibirCredencialSucesso(aluno) {
         <span class="text-xs uppercase tracking-wider text-stone-400 font-semibold block mb-1">Participante Inscrito</span>
         <h3 class="text-2xl font-black text-coffee-900 leading-tight">${aluno.nome_completo}</h3>
         <p class="text-xs text-stone-500 mt-1 font-mono">${aluno.email}</p>
+        <div class="mt-2.5 flex justify-center">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${(window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(aluno) : (aluno.instituicao || 'Faculdade Arnaldo')).toLowerCase().includes('arnaldo') ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-blue-100 text-blue-900 border border-blue-300'}">
+            <i data-lucide="${(window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(aluno) : (aluno.instituicao || 'Faculdade Arnaldo')).toLowerCase().includes('arnaldo') ? 'graduation-cap' : 'building-2'}" class="w-3.5 h-3.5"></i>
+            ${window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(aluno) : (aluno.instituicao || 'Faculdade Arnaldo')}
+          </span>
+        </div>
       </div>
 
       <!-- AVISO DE STATUS DO COMPROVANTE -->
