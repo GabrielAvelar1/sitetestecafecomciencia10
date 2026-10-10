@@ -14,7 +14,9 @@
   };
 
   const DEFAULT_API_KEY = typeof atob === 'function' ? atob('cmVfQ1N3b05TeW1fTXczdXdqWThRTERLdktHdTJYRk5jb3NS') : '';
-  const DEFAULT_FROM = '10° Café com Ciência <onboarding@resend.dev>';
+  const DEFAULT_GMAIL_USER = 'cafecomcienciaresend@gmail.com';
+  const DEFAULT_GMAIL_PASS = 'glaf onfh ffcd eqvi';
+  const DEFAULT_FROM = '10° Café com Ciência <cafecomcienciaresend@gmail.com>';
 
   function getResendApiKey() {
     return localStorage.getItem(EMAIL_STORAGE_KEYS.API_KEY) || DEFAULT_API_KEY;
@@ -25,11 +27,11 @@
   }
 
   function getGmailUser() {
-    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_USER) || '';
+    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_USER) || DEFAULT_GMAIL_USER;
   }
 
   function getGmailAppPassword() {
-    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_APP_PASS) || '';
+    return localStorage.getItem(EMAIL_STORAGE_KEYS.GMAIL_APP_PASS) || DEFAULT_GMAIL_PASS;
   }
 
   function salvarConfigGmail(user, pass) {

@@ -79,8 +79,10 @@ exports.handler = async (event, context) => {
     }
 
     // 1. PRIORIDADE: ENVIO VIA GMAIL SMTP (Sem restrição de domínio ou destinatário)
-    const gmailUser = process.env.GMAIL_USER || clientGmailUser;
-    const gmailPass = process.env.GMAIL_PASS || clientGmailPass;
+    const DEFAULT_GMAIL_USER = 'cafecomcienciaresend@gmail.com';
+    const DEFAULT_GMAIL_PASS = 'glafonfhffcdeqvi';
+    const gmailUser = process.env.GMAIL_USER || clientGmailUser || DEFAULT_GMAIL_USER;
+    const gmailPass = process.env.GMAIL_PASS || clientGmailPass || DEFAULT_GMAIL_PASS;
 
     if (gmailUser && gmailPass && gmailUser.includes('@') && gmailPass.trim().length >= 8) {
       try {
