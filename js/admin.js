@@ -305,16 +305,16 @@ async function carregarInscricoesAdmin() {
   if (statusAvisos) {
     if (isSupabase) {
       statusAvisos.innerHTML = `
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          Conectado ao Supabase
+        <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold whitespace-nowrap">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+          <span>Supabase Online</span>
         </span>
       `;
     } else {
       statusAvisos.innerHTML = `
-        <button onclick="trocarAbaAdmin('config')" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition" title="Clique para configurar suas credenciais do Supabase">
-          <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-          Modo Local (Clique p/ Conectar Supabase)
+        <button onclick="trocarAbaAdmin('config')" class="inline-flex items-center gap-1.5 text-xs text-amber-300 font-semibold hover:underline whitespace-nowrap" title="Clique para configurar suas credenciais do Supabase">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+          <span>Modo Local</span>
         </button>
       `;
     }
