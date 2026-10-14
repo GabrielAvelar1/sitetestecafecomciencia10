@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portal Café com Ciência | Calendário Oficial de Palestras</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Google Fonts: Inter e Playfair Display -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coffee: {
+              50: '#FBF8F5',
+              100: '#F6F0E8',
+              200: '#EADCC9',
+              300: '#D6C0A5',
+              400: '#C69255',
+              500: '#A46F35',
+              600: '#784C28',
+              700: '#5C3A21',
+              800: '#3D2214',
+              900: '#26160F',
+              950: '#1A0E0A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Estilos Customizados -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body class="bg-[#FAF7F2] text-stone-800 antialiased min-h-screen flex flex-col selection:bg-coffee-400 selection:text-white">
+
+  <!-- ========================================================================
+       NAVBAR LIMPA & MODERNA DO PORTAL
+       ======================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-coffee-100 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo Oficial do Café com Ciência -->
+      <a href="portal.html" class="flex items-center gap-3 group">
+        <div class="relative w-11 h-11 rounded-xl overflow-hidden shadow-xs bg-white p-1 border border-coffee-200 group-hover:scale-105 transition shrink-0">
+          <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
+        </div>
+        <div class="flex flex-col justify-center">
+          <span class="font-extrabold text-lg sm:text-xl text-coffee-950 tracking-tight leading-tight">Café com Ciência</span>
+          <span class="text-[11px] sm:text-xs text-stone-500 font-medium">Liga Acadêmica de Odontologia · Faculdade Arnaldo</span>
+        </div>
+      </a>
+
+      <!-- Ações do Cabeçalho -->
+      <div class="flex items-center gap-3">
+        <a 
+          href="https://www.instagram.com/cafecomciencia.arnaldobh/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="p-2 text-stone-500 hover:text-pink-600 rounded-xl hover:bg-pink-50 transition" 
+          title="Instagram Oficial (@cafecomciencia.arnaldobh)"
+        >
+          <svg class="w-5 h-5 text-pink-500 fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+        </a>
+
+        <a 
+          href="admin.html" 
+          class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 transition" 
+          title="Acesso da Coordenação da Liga"
+        >
+          <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
+          <span>Painel da Liga</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       CALENDÁRIO OFICIAL (SEÇÃO PRINCIPAL)
+       ======================================================================== -->
+  <main class="flex-1 py-12 sm:py-16 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+    
+    <!-- Cabeçalho do Calendário -->
+    <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+      <span class="text-xs font-bold uppercase tracking-wider text-coffee-600 bg-coffee-100 px-3.5 py-1 rounded-full border border-coffee-200">
+        Calendário Oficial
+      </span>
+      <h1 class="text-3xl font-extrabold text-coffee-950 mt-3 sm:text-4xl font-serif">
+        Edições do Café com Ciência
+      </h1>
+      <p class="text-stone-600 text-sm sm:text-base mt-2">
+        Acesse os detalhes de cada palestra, conheça os convidados e garanta sua participação.
+      </p>
+    </div>
+
+    <!-- Grid de Palestras -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-10">
+
+      <!-- ==========================================
+           CARD 1: 10° CAFÉ COM CIÊNCIA (EDIÇÃO ATUAL)
+           ========================================== -->
+      <div class="bg-white rounded-3xl border-2 border-emerald-300/80 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden flex flex-col group relative">
+        
+        <!-- Badge Superior Destaque -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 text-white px-5 py-2.5 flex items-center justify-between text-xs font-bold">
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-ping"></span>
+            <span>EDIÇÃO ATUAL · INSCRIÇÕES ABERTAS</span>
+          </span>
+          <span class="bg-black/20 px-2.5 py-0.5 rounded-full text-[11px] font-mono">10ª EDIÇÃO</span>
+        </div>
+
+        <!-- Banner com Imagem Oficial -->
+        <div class="relative bg-stone-900 overflow-hidden aspect-[16/10] sm:aspect-[16/9]">
+          <img 
+            src="banner.jpeg" 
+            alt="10° Café com Ciência: Os Direitos dos Pacientes na Odontologia - Profa. Carolina Diniz" 
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80"></div>
+          
+          <div class="absolute bottom-4 left-4 right-4 text-white">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-300 block mb-1">Palestra Confirmada</span>
+            <h3 class="text-xl sm:text-2xl font-black leading-tight drop-shadow-md">
+              Os Direitos dos Pacientes na Odontologia
+            </h3>
+            <p class="text-xs sm:text-sm text-stone-200 mt-1 font-medium flex items-center gap-1.5">
+              <i data-lucide="user" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Profa. Carolina Diniz</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Conteúdo do Card -->
+        <div class="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-5">
+          
+          <!-- Metadados do Evento -->
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-3">
+              <div class="text-stone-400 flex items-center gap-1.5 font-semibold text-[11px] mb-1">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-coffee-600"></i> Data & Horário
+              </div>
+              <div class="font-bold text-stone-900 text-sm">30 de Outubro</div>
+              <div class="text-stone-500 text-xs">Quinta-feira às 15:00</div>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-3">
+              <div class="text-stone-400 flex items-center gap-1.5 font-semibold text-[11px] mb-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-coffee-600"></i> Local Oficial
+              </div>
+              <div class="font-bold text-stone-900 text-sm">UniArnaldo</div>
+              <div class="text-stone-500 text-xs">Campus Anchieta · Sala 306</div>
+            </div>
+          </div>
+
+          <!-- Benefícios Inclusos -->
+          <div class="space-y-2 border-t border-stone-100 pt-4 text-xs text-stone-600">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+              <span>Coffee Break completo incluso para todos os presentes</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+              <span>Certificado Oficial Incluso · Horas complementares</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+              <span>Credencial personalizada com QR Code para check-in rápido</span>
+            </div>
+          </div>
+
+          <!-- Rodapé do Card com Preço e Botão de Ação -->
+          <div class="border-t border-stone-100 pt-5 flex items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] text-stone-400 font-bold uppercase tracking-wider block leading-none">Investimento</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-xs font-semibold text-emerald-700">R$</span>
+                <span class="text-2xl font-black text-stone-900">10,00</span>
+              </div>
+            </div>
+
+            <a 
+              href="index.html" 
+              class="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-emerald-600 hover:bg-emerald-700 active:scale-98 shadow-md hover:shadow-lg transition inline-flex items-center gap-2"
+            >
+              <span>Acessar e Inscrever-se</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==========================================
+           CARD 2: 11° CAFÉ COM CIÊNCIA (EDIÇÃO DE NOVEMBRO)
+           ========================================== -->
+      <div class="bg-white rounded-3xl border-2 border-amber-300/80 shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden flex flex-col group relative">
+        
+        <!-- Badge Superior Destaque -->
+        <div class="bg-gradient-to-r from-amber-600 via-amber-700 to-coffee-800 text-white px-5 py-2.5 flex items-center justify-between text-xs font-bold">
+          <span class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-300 animate-pulse"></span>
+            <span>PRÓXIMA EDIÇÃO · INSCRIÇÕES ABERTAS</span>
+          </span>
+          <span class="bg-black/20 px-2.5 py-0.5 rounded-full text-[11px] font-mono">11ª EDIÇÃO</span>
+        </div>
+
+        <!-- Banner com Imagem Oficial -->
+        <div class="relative bg-stone-900 overflow-hidden aspect-[16/10] sm:aspect-[16/9]">
+          <img 
+            src="banner_11cafe.jpeg" 
+            alt="11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral - Dra. Thaissa Calab" 
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-transparent opacity-80"></div>
+          
+          <div class="absolute bottom-4 left-4 right-4 text-white">
+            <span class="text-xs font-bold uppercase tracking-wider text-amber-300 block mb-1">Palestra Confirmada</span>
+            <h3 class="text-xl sm:text-2xl font-black leading-tight drop-shadow-md">
+              Diagnóstico e Planejamento na Reabilitação Oral
+            </h3>
+            <p class="text-xs sm:text-sm text-stone-200 mt-1 font-medium flex items-center gap-1.5">
+              <i data-lucide="user" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>Dra. Thaissa Calab (Especialista em Prótese)</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Conteúdo do Card -->
+        <div class="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-5">
+          
+          <!-- Metadados do Evento -->
+          <div class="grid grid-cols-2 gap-3 text-xs">
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-3">
+              <div class="text-stone-400 flex items-center gap-1.5 font-semibold text-[11px] mb-1">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-coffee-600"></i> Data & Horário
+              </div>
+              <div class="font-bold text-stone-900 text-sm">06 de Novembro</div>
+              <div class="text-stone-500 text-xs">Sexta-feira às 16:00</div>
+            </div>
+
+            <div class="bg-stone-50 border border-stone-200 rounded-xl p-3">
+              <div class="text-stone-400 flex items-center gap-1.5 font-semibold text-[11px] mb-1">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-coffee-600"></i> Local Oficial
+              </div>
+              <div class="font-bold text-stone-900 text-sm">UniArnaldo</div>
+              <div class="text-stone-500 text-xs">Campus Anchieta · Sala 306</div>
+            </div>
+          </div>
+
+          <!-- Benefícios Inclusos -->
+          <div class="space-y-2 border-t border-stone-100 pt-4 text-xs text-stone-600">
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-600 shrink-0"></i>
+              <span>Coffee Break incluso & Networking profissional</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-600 shrink-0"></i>
+              <span>Certificado Oficial Incluso · Horas complementares</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-600 shrink-0"></i>
+              <span>Abordagem de planejamento protético e reabilitação de alto nível</span>
+            </div>
+          </div>
+
+          <!-- Rodapé do Card com Preço e Botão de Ação -->
+          <div class="border-t border-stone-100 pt-5 flex items-center justify-between gap-3">
+            <div>
+              <span class="text-[11px] text-stone-400 font-bold uppercase tracking-wider block leading-none">Investimento</span>
+              <div class="flex items-baseline gap-1 mt-0.5">
+                <span class="text-xs font-semibold text-amber-700">R$</span>
+                <span class="text-2xl font-black text-stone-900">10,00</span>
+              </div>
+            </div>
+
+            <a 
+              href="11cafe.html" 
+              class="px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-coffee-800 hover:bg-coffee-900 active:scale-98 shadow-md hover:shadow-lg transition inline-flex items-center gap-2"
+            >
+              <span>Acessar e Inscrever-se</span>
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================================
+       RODAPÉ OFICIAL DO PORTAL
+       ======================================================================== -->
+  <footer class="bg-coffee-950 text-stone-400 py-10 border-t border-coffee-900 text-xs mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+      <div class="flex items-center justify-center gap-3">
+        <img src="logo.png" alt="Logo" class="w-8 h-8 object-contain" />
+        <span class="text-white font-bold">Café com Ciência · Liga Acadêmica de Odontologia</span>
+      </div>
+      <p class="text-stone-500 text-[11px]">
+        Faculdade Arnaldo · Campus Anchieta · Belo Horizonte - MG
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-stone-400 pt-1">
+        <a href="index.html" class="hover:text-amber-300 transition">10ª Edição (30/10)</a>
+        <span>·</span>
+        <a href="11cafe.html" class="hover:text-amber-300 transition">11ª Edição (06/11)</a>
+        <span>·</span>
+        <a href="admin.html" class="hover:text-amber-300 transition">Painel da Liga</a>
+        <span>·</span>
+        <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="hover:text-pink-400 transition">Instagram</a>
+      </div>
+      <div class="pt-4 border-t border-coffee-900/60 text-stone-600 text-[10px]">
+        © 2026 Liga Acadêmica de Odontologia. Todos os direitos reservados.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    if (window.lucide) window.lucide.createIcons();
+  </script>
+
+</body>
+</html>
