@@ -57,20 +57,22 @@
   <!-- ========================================================================
        1. NAVBAR DE NAVEGAÇÃO
        ======================================================================== -->
-  <header class="bg-white/95 backdrop-blur-md border-b border-coffee-100 shadow-xs sticky top-0 z-40 transition-all">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+  <header class="bg-white/95 backdrop-blur-md border-b border-coffee-100 shadow-xs sticky top-0 z-40 transition-all w-full">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 w-full">
       
       <!-- Logo Oficial -->
-      <a href="portal.html" class="flex items-center gap-2.5 sm:gap-3 group shrink-0" title="Ir para o Portal de Palestras">
-        <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden shadow-xs bg-white p-1 border border-coffee-200 group-hover:scale-105 transition shrink-0">
+      <a href="portal.html" class="flex items-center gap-2 sm:gap-3 group min-w-0" title="Ir para o Portal de Palestras">
+        <div class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden shadow-xs bg-white p-1 border border-coffee-200 group-hover:scale-105 transition shrink-0">
           <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
         </div>
-        <div class="flex flex-col justify-center">
-          <div class="flex items-center gap-1.5 sm:gap-2">
-            <span class="font-extrabold text-base sm:text-lg text-coffee-950 tracking-tight leading-tight whitespace-nowrap">Café com Ciência</span>
-            <span class="inline-flex px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-md bg-coffee-100 text-coffee-800 border border-coffee-300 leading-none shrink-0">11ª Edição</span>
+        <div class="flex flex-col justify-center min-w-0">
+          <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+            <span class="font-extrabold text-sm sm:text-lg text-coffee-950 tracking-tight leading-tight truncate">Café com Ciência</span>
+            <span class="hidden sm:inline-flex px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-md bg-coffee-100 text-coffee-800 border border-coffee-300 leading-none shrink-0">11ª Edição</span>
           </div>
-          <span class="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-0.5 whitespace-nowrap">Liga Acadêmica de Odontologia</span>
+          <span class="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-0.5 truncate">
+            Liga de Odontologia <span class="sm:hidden text-coffee-700 font-bold">· 11ª Ed.</span>
+          </span>
         </div>
       </a>
 
@@ -106,15 +108,15 @@
         </a>
       </div>
 
-      <!-- Controles Mobile (Compactos e Limpos) -->
-      <div class="flex items-center gap-2 lg:hidden shrink-0">
-        <a href="#inscricao" class="px-3.5 py-2 rounded-xl text-xs font-bold text-white gradient-cta shadow-sm whitespace-nowrap active:scale-95 transition">
-          Garantir Vaga
+      <!-- Controles Mobile (Compactos e que cabem 100% na tela) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
+        <a href="#inscricao" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-white gradient-cta shadow-sm whitespace-nowrap active:scale-95 transition">
+          Inscrever
         </a>
         <button 
           id="btnMenuMobile" 
           onclick="toggleMenuMobile()" 
-          class="p-2 rounded-xl text-stone-700 hover:text-coffee-950 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition"
+          class="p-2 rounded-xl text-stone-700 hover:text-coffee-950 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition shrink-0"
           aria-label="Abrir menu de navegação"
         >
           <i data-lucide="menu" class="w-5 h-5"></i>
