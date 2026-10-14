@@ -118,9 +118,64 @@
   }
 
   /**
-   * Template Base HTML com Estilo Visual Sofisticado
+   * Identifica os dados específicos da edição do evento (10ª ou 11ª)
    */
-  function gerarLayoutHtmlBase({ preheader, titulo, badge, conteudoHtml, botaoTexto, botaoLink }) {
+  function obterDadosEdicao(alunoOuEdicao) {
+    let edicao = 10;
+    if (typeof alunoOuEdicao === 'number') {
+      edicao = alunoOuEdicao;
+    } else if (typeof alunoOuEdicao === 'string') {
+      const str = alunoOuEdicao.toUpperCase();
+      edicao = str.startsWith('CC11-') || str === '11' ? 11 : 10;
+    } else if (alunoOuEdicao && typeof alunoOuEdicao === 'object') {
+      if (alunoOuEdicao.protocolo && alunoOuEdicao.protocolo.toUpperCase().startsWith('CC11-')) {
+        edicao = 11;
+      } else if (alunoOuEdicao.edicao && parseInt(alunoOuEdicao.edicao, 10) === 11) {
+        edicao = 11;
+      } else if (typeof window !== 'undefined' && window.EDICAO_ATUAL === 11 && !alunoOuEdicao.protocolo?.toUpperCase().startsWith('CC10-')) {
+        edicao = 11;
+      }
+    }
+
+    if (edicao === 11) {
+      return {
+        edicao: 11,
+        is11: true,
+        numeroOrdinal: '11°',
+        numeroOrdinalFem: '11ª',
+        tituloEdicao: '11° CAFÉ COM CIÊNCIA',
+        subtituloEdicao: 'Diagnóstico e Planejamento na Reabilitação Oral',
+        badgePadrao: '11ª Edição Especial · UniArnaldo',
+        dataHora: '06 de Novembro de 2026 às 16:00 horas',
+        dataCurta: '06/11 às 16h',
+        local: 'UniArnaldo · Campus Anchieta (Sala a definir)',
+        palestrante: 'Dra. Thaissa Calab',
+        urlPagina: '11cafe.html'
+      };
+    }
+
+    return {
+      edicao: 10,
+      is11: false,
+      numeroOrdinal: '10°',
+      numeroOrdinalFem: '10ª',
+      tituloEdicao: '10° CAFÉ COM CIÊNCIA',
+      subtituloEdicao: 'Atendimento Odontológico de Pacientes Hospitalizados',
+      badgePadrao: '10ª Edição Comemorativa · UniArnaldo',
+      dataHora: '30 de Outubro de 2026 às 15:00 horas',
+      dataCurta: '30/10 às 15h',
+      local: 'UniArnaldo · Campus Anchieta (Sala 306)',
+      palestrante: 'Profa. Carolina Diniz',
+      urlPagina: 'index.html'
+    };
+  }
+
+  /**
+   * Template Base HTML com Estilo Visual Sofisticado adaptável à Edição (10 ou 11)
+   */
+  function gerarLayoutHtmlBase({ preheader, titulo, badge, conteudoHtml, botaoTexto, botaoLink, aluno, edicao }) {
+    const dados = obterDadosEdicao(aluno || edicao);
+
     return `
       <!DOCTYPE html>
       <html lang="pt-BR">
@@ -139,19 +194,19 @@
             <td align="center">
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(45, 38, 33, 0.08); border: 1px solid #ebd9c8;">
                 
-                <!-- Topo com Identidade Visual do Café com Ciência -->
+                <!-- Topo com Identidade Visual Dinâmica da Edição -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #1f140e 0%, #3d2417 100%); padding: 36px 32px 30px 32px; text-align: center;">
                     <div style="display: inline-block; background-color: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 30px; padding: 6px 16px; margin-bottom: 16px;">
                       <span style="color: #f3d4b6; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
-                        ${badge || '10ª Edição Comemorativa · UniArnaldo'}
+                        ${badge || dados.badgePadrao}
                       </span>
                     </div>
                     <h1 style="color: #ffffff; font-size: 24px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px;">
-                      10° CAFÉ COM CIÊNCIA
+                      ${dados.tituloEdicao}
                     </h1>
                     <p style="color: #ebd9c8; font-size: 14px; margin: 0; font-style: italic;">
-                      Os Direitos dos Pacientes na Odontologia
+                      ${dados.subtituloEdicao}
                     </p>
                   </td>
                 </tr>
@@ -187,9 +242,9 @@
                             📌 Informações Oficiais do Evento:
                           </div>
                           <div style="font-size: 13px; color: #4a3f35; line-height: 1.5;">
-                            <strong>📅 Data:</strong> 30 de Outubro de 2026 às 15:00 horas<br>
-                            <strong>📍 Local:</strong> UniArnaldo · Campus Anchieta (Sala 306)<br>
-                            <strong>👩‍⚕️ Palestrante:</strong> Profa. Carolina Diniz<br>
+                            <strong>📅 Data:</strong> ${dados.dataHora}<br>
+                            <strong>📍 Local:</strong> ${dados.local}<br>
+                            <strong>👩‍⚕️ Palestrante:</strong> ${dados.palestrante}<br>
                             <strong>☕ Incluso:</strong> Coffee Break & Certificado Oficial de 4 Horas
                           </div>
                         </td>
@@ -230,15 +285,12 @@
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
-    const is11 = aluno.protocolo && aluno.protocolo.startsWith('CC11-');
-    const nomeEvento = is11 ? '11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral' : '10° Café com Ciência: Os Direitos dos Pacientes na Odontologia';
-    const linkPagina = is11 ? `${urlBase}11cafe.html?consultar=${aluno.protocolo}` : `${urlBase}index.html?consultar=${aluno.protocolo}`;
-    const dataPortaria = is11 ? '06 de Novembro às 16:00' : '30 de Outubro às 15:00';
-    const palestranteInfo = is11 ? 'com a <strong>Dra. Thaissa Calab</strong>' : 'com a <strong>Profa. Carolina Diniz</strong>';
+    const dados = obterDadosEdicao(aluno);
+    const linkPagina = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
 
     const conteudoHtml = `
       <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-      <p>Sua inscrição para o <strong>${nomeEvento}</strong> ${palestranteInfo} foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
+      <p>Sua inscrição para o <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong> com a <strong>${dados.palestrante}</strong> foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
       
       <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
         <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Seu Protocolo Oficial:</div>
@@ -246,20 +298,21 @@
         <div style="font-size: 12px; color: #6b5c4f;">Status: Comprovante Pix anexado para conferência da comissão.</div>
       </div>
 
-      <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia <strong>${dataPortaria}</strong> para validação de presença e liberação do seu certificado.</p>
+      <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia <strong>${dados.dataHora}</strong> para validação de presença e liberação do seu certificado.</p>
       <p>Você pode acessar sua credencial a qualquer momento pelo botão abaixo:</p>
     `;
 
     return enviarEmail({
       to: aluno.email,
-      subject: `☕ Inscrição Recebida! ${is11 ? '11°' : '10°'} Café com Ciência [${aluno.protocolo}]`,
+      subject: `☕ Inscrição Recebida! ${dados.numeroOrdinal} Café com Ciência [${aluno.protocolo}]`,
       html: gerarLayoutHtmlBase({
-        preheader: `Sua inscrição foi recebida com sucesso! Protocolo: ${aluno.protocolo}`,
+        preheader: `Sua inscrição no ${dados.numeroOrdinal} Café com Ciência foi recebida! Protocolo: ${aluno.protocolo}`,
         titulo: 'Inscrição Registrada com Sucesso!',
-        badge: is11 ? 'Inscrição Confirmada · 11ª Edição' : 'Inscrição Confirmada · 10ª Edição',
+        badge: `Inscrição Confirmada · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
         botaoTexto: 'Visualizar Minha Credencial e QR Code',
-        botaoLink: linkPagina
+        botaoLink: linkPagina,
+        aluno
       })
     });
   }
@@ -271,32 +324,34 @@
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
+    const dados = obterDadosEdicao(aluno);
     const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
 
     const conteudoHtml = `
       <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-      <p>Sua presença no <strong>10° Café com Ciência: Os Direitos dos Pacientes na Odontologia</strong> acaba de ser <strong>confirmada com sucesso na portaria oficial</strong>!</p>
+      <p>Sua presença no <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong> acaba de ser <strong>confirmada com sucesso na portaria oficial</strong>!</p>
       
       <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
         <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Check-in Confirmado</div>
-        <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada na UniArnaldo</div>
+        <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada · ${dados.local}</div>
         <div style="font-size: 12px; color: #365314;">Horas Complementares: 4 horas acadêmicas garantidas.</div>
       </div>
 
-      <p>Esperamos que aproveite a palestra com a <strong>Profa. Carolina Diniz</strong> e o nosso coffee break com networking!</p>
+      <p>Esperamos que aproveite a palestra com a <strong>${dados.palestrante}</strong> e o nosso coffee break com networking!</p>
       <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 4 horas</strong> estará disponível para download no link abaixo:</p>
     `;
 
     return enviarEmail({
       to: aluno.email,
-      subject: `✅ Presença Confirmada! 10° Café com Ciência · UniArnaldo`,
+      subject: `✅ Presença Confirmada! ${dados.numeroOrdinal} Café com Ciência · UniArnaldo`,
       html: gerarLayoutHtmlBase({
-        preheader: `Sua presença foi validada! Certificado de 4 horas garantido.`,
+        preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 4 horas garantido.`,
         titulo: 'Presença Confirmada no Evento!',
-        badge: 'Check-in Realizado · Portaria Oficial',
+        badge: `Check-in Realizado · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
         botaoTexto: 'Acompanhar Emissão do Certificado',
-        botaoLink: linkCertificado
+        botaoLink: linkCertificado,
+        aluno
       })
     });
   }
@@ -308,24 +363,25 @@
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
-    const linkCredencial = `${urlBase}index.html?consultar=${aluno.protocolo}`;
+    const dados = obterDadosEdicao(aluno);
+    const linkCredencial = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
 
     let tituloLembrete = 'Lembrete do Evento';
     let textoIntro = '';
     let subject = '';
 
     if (tipo === '7_dias') {
-      subject = '🗓️ Falta 1 Semana! 10° Café com Ciência na UniArnaldo';
+      subject = `🗓️ Falta 1 Semana! ${dados.numeroOrdinal} Café com Ciência na UniArnaldo`;
       tituloLembrete = 'Falta Apenas 1 Semana!';
-      textoIntro = 'Passando para lembrar que no próximo dia <strong>30 de Outubro às 15:00</strong> teremos o nosso encontro especial sobre os <em>Direitos dos Pacientes na Odontologia</em>.';
+      textoIntro = `Passando para lembrar que no próximo dia <strong>${dados.dataHora}</strong> teremos o nosso encontro especial sobre <em>${dados.subtituloEdicao}</em> com a <strong>${dados.palestrante}</strong>.`;
     } else if (tipo === 'vespera') {
-      subject = '⏳ É Amanhã! 10° Café com Ciência às 15h (UniArnaldo)';
+      subject = `⏳ É Amanhã! ${dados.numeroOrdinal} Café com Ciência (${dados.dataCurta})`;
       tituloLembrete = 'O Grande Dia é Amanhã!';
-      textoIntro = 'O <strong>10° Café com Ciência</strong> acontece amanhã (30/10) às <strong>15h00 na Sala 306 (Campus Anchieta)</strong>!';
+      textoIntro = `O <strong>${dados.tituloEdicao}</strong> acontece amanhã às <strong>${dados.dataHora} (${dados.local})</strong>!`;
     } else {
-      subject = '📍 É HOJE às 15h! 10° Café com Ciência na UniArnaldo';
-      tituloLembrete = 'É Hoje! Portaria Aberta às 15h';
-      textoIntro = 'Nosso evento acontece <strong>HOJE às 15h00</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.';
+      subject = `📍 É HOJE! ${dados.numeroOrdinal} Café com Ciência na UniArnaldo`;
+      tituloLembrete = 'É Hoje! Portaria Aberta';
+      textoIntro = `Nosso evento acontece <strong>HOJE (${dados.dataHora})</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.`;
     }
 
     const conteudoHtml = `
@@ -345,12 +401,13 @@
       to: aluno.email,
       subject,
       html: gerarLayoutHtmlBase({
-        preheader: `Lembrete importante do 10° Café com Ciência.`,
+        preheader: `Lembrete importante do ${dados.numeroOrdinal} Café com Ciência.`,
         titulo: tituloLembrete,
-        badge: 'Lembrete Oficial · UniArnaldo',
+        badge: `Lembrete Oficial · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
         botaoTexto: 'Abrir Minha Credencial com QR Code',
-        botaoLink: linkCredencial
+        botaoLink: linkCredencial,
+        aluno
       })
     });
   }
@@ -362,12 +419,13 @@
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
+    const dados = obterDadosEdicao(aluno);
     const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
     const codigoCert = aluno.certificado_codigo || `CERT-${aluno.protocolo}`;
 
     const conteudoHtml = `
       <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
-      <p>Seu <strong>Certificado Oficial de Participação de 4 Horas Complementares</strong> do <strong>10° Café com Ciência</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
+      <p>Seu <strong>Certificado Oficial de Participação de 4 Horas Complementares</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
       
       <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
         <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Código de Autenticidade Oficial:</div>
@@ -380,14 +438,15 @@
 
     return enviarEmail({
       to: aluno.email,
-      subject: `🎓 Seu Certificado Oficial está Disponível! 10° Café com Ciência`,
+      subject: `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`,
       html: gerarLayoutHtmlBase({
-        preheader: `Seu certificado de 4 horas complementares foi liberado! Código: ${codigoCert}`,
+        preheader: `Seu certificado de 4 horas complementares do ${dados.numeroOrdinal} Café foi liberado! Código: ${codigoCert}`,
         titulo: 'Seu Certificado Oficial está Pronto!',
-        badge: 'Certificado Disponível · 4 Horas',
+        badge: `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
         botaoTexto: 'Visualizar e Baixar Meu Certificado',
-        botaoLink: linkCertificado
+        botaoLink: linkCertificado,
+        aluno
       })
     });
   }
@@ -395,31 +454,34 @@
   /**
    * Mock para testes e prévias de e-mails
    */
-  function criarAlunoMock(emailDestino = 'participante@teste.com') {
+  function criarAlunoMock(emailDestino = 'participante@teste.com', edicao = 10) {
+    const is11 = parseInt(edicao, 10) === 11;
     return {
-      id: 'mock-teste-01',
+      id: is11 ? 'mock-teste-11' : 'mock-teste-10',
       nome_completo: 'Dra. Gabriela Teste da Silva',
       email: emailDestino.trim(),
-      protocolo: 'CC10-TESTE26',
-      qr_code: 'CC10-TESTE26',
+      protocolo: is11 ? 'CC11-TESTE26' : 'CC10-TESTE26',
+      qr_code: is11 ? 'CC11-TESTE26' : 'CC10-TESTE26',
       pix_status: 'aprovado',
       presenca_confirmada: true,
-      presenca_horario: '2026-10-30T15:05:00.000Z'
+      presenca_horario: is11 ? '2026-11-06T16:05:00.000Z' : '2026-10-30T15:05:00.000Z',
+      edicao: is11 ? 11 : 10
     };
   }
 
   /**
    * Gera o HTML exato de um modelo para exibição na tela (Prévia)
    */
-  function obterHtmlModeloTeste(modelo = 'inscricao', emailDestino = 'participante@teste.com') {
+  function obterHtmlModeloTeste(modelo = 'inscricao', emailDestino = 'participante@teste.com', edicao = 10) {
     const urlBase = getUrlBase();
-    const aluno = criarAlunoMock(emailDestino);
+    const aluno = criarAlunoMock(emailDestino, edicao);
+    const dados = obterDadosEdicao(aluno);
 
     if (modelo === 'inscricao') {
-      const linkCredencial = `${urlBase}index.html?consultar=${aluno.protocolo}`;
+      const linkCredencial = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
       const conteudoHtml = `
         <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-        <p>Sua inscrição para o <strong>10° Café com Ciência</strong> foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
+        <p>Sua inscrição para o <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong> com a <strong>${dados.palestrante}</strong> foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
         
         <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Seu Protocolo Oficial:</div>
@@ -427,18 +489,19 @@
           <div style="font-size: 12px; color: #6b5c4f;">Status: Comprovante Pix anexado para conferência da comissão.</div>
         </div>
 
-        <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia 30 de Outubro para validação de presença e liberação do seu certificado.</p>
+        <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia <strong>${dados.dataHora}</strong> para validação de presença e liberação do seu certificado.</p>
         <p>Você pode acessar sua credencial a qualquer momento pelo botão abaixo:</p>
       `;
       return {
-        subject: `☕ Inscrição Recebida! 10° Café com Ciência [${aluno.protocolo}]`,
+        subject: `☕ Inscrição Recebida! ${dados.numeroOrdinal} Café com Ciência [${aluno.protocolo}]`,
         html: gerarLayoutHtmlBase({
-          preheader: `Sua inscrição foi recebida com sucesso! Protocolo: ${aluno.protocolo}`,
+          preheader: `Sua inscrição no ${dados.numeroOrdinal} Café com Ciência foi recebida! Protocolo: ${aluno.protocolo}`,
           titulo: 'Inscrição Registrada com Sucesso!',
-          badge: 'Inscrição Confirmada · 10ª Edição',
+          badge: `Inscrição Confirmada · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,
           botaoTexto: 'Visualizar Minha Credencial e QR Code',
-          botaoLink: linkCredencial
+          botaoLink: linkCredencial,
+          aluno
         })
       };
     }
@@ -447,48 +510,49 @@
       const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
       const conteudoHtml = `
         <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-        <p>Sua presença no <strong>10° Café com Ciência: Os Direitos dos Pacientes na Odontologia</strong> acaba de ser <strong>confirmada com sucesso na portaria oficial</strong>!</p>
+        <p>Sua presença no <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong> acaba de ser <strong>confirmada com sucesso na portaria oficial</strong>!</p>
         
         <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Check-in Confirmado</div>
-          <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada na UniArnaldo (Sala 306)</div>
+          <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada · ${dados.local}</div>
           <div style="font-size: 12px; color: #365314;">Horas Complementares: 4 horas acadêmicas garantidas.</div>
         </div>
 
-        <p>Esperamos que aproveite a palestra com a <strong>Profa. Carolina Diniz</strong> e o nosso coffee break com networking!</p>
+        <p>Esperamos que aproveite a palestra com a <strong>${dados.palestrante}</strong> e o nosso coffee break com networking!</p>
         <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 4 horas</strong> estará disponível para download no link abaixo:</p>
       `;
       return {
-        subject: `✅ Presença Confirmada! 10° Café com Ciência · UniArnaldo`,
+        subject: `✅ Presença Confirmada! ${dados.numeroOrdinal} Café com Ciência · UniArnaldo`,
         html: gerarLayoutHtmlBase({
-          preheader: `Sua presença foi validada! Certificado de 4 horas garantido.`,
+          preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 4 horas garantido.`,
           titulo: 'Presença Confirmada no Evento!',
-          badge: 'Check-in Realizado · Portaria Oficial',
+          badge: `Check-in Realizado · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,
           botaoTexto: 'Acompanhar Emissão do Certificado',
-          botaoLink: linkCertificado
+          botaoLink: linkCertificado,
+          aluno
         })
       };
     }
 
     if (modelo === '7_dias' || modelo === 'vespera' || modelo === 'hoje_portaria') {
-      const linkCredencial = `${urlBase}index.html?consultar=${aluno.protocolo}`;
+      const linkCredencial = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
       let tituloLembrete = 'Lembrete do Evento';
       let textoIntro = '';
       let subject = '';
 
       if (modelo === '7_dias') {
-        subject = '🗓️ Falta 1 Semana! 10° Café com Ciência na UniArnaldo';
+        subject = `🗓️ Falta 1 Semana! ${dados.numeroOrdinal} Café com Ciência na UniArnaldo`;
         tituloLembrete = 'Falta Apenas 1 Semana!';
-        textoIntro = 'Passando para lembrar que no próximo dia <strong>30 de Outubro às 15:00</strong> teremos o nosso encontro especial sobre os <em>Direitos dos Pacientes na Odontologia</em>.';
+        textoIntro = `Passando para lembrar que no próximo dia <strong>${dados.dataHora}</strong> teremos o nosso encontro especial sobre <em>${dados.subtituloEdicao}</em> com a <strong>${dados.palestrante}</strong>.`;
       } else if (modelo === 'vespera') {
-        subject = '⏳ É Amanhã! 10° Café com Ciência às 15h (UniArnaldo)';
+        subject = `⏳ É Amanhã! ${dados.numeroOrdinal} Café com Ciência (${dados.dataCurta})`;
         tituloLembrete = 'O Grande Dia é Amanhã!';
-        textoIntro = 'O <strong>10° Café com Ciência</strong> acontece amanhã (30/10) às <strong>15h00 na Sala 306 (Campus Anchieta)</strong>!';
+        textoIntro = `O <strong>${dados.tituloEdicao}</strong> acontece amanhã às <strong>${dados.dataHora} (${dados.local})</strong>!`;
       } else {
-        subject = '📍 É HOJE às 15h! 10° Café com Ciência na UniArnaldo';
-        tituloLembrete = 'É Hoje! Portaria Aberta às 15h';
-        textoIntro = 'Nosso evento acontece <strong>HOJE às 15h00 na Sala 306</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.';
+        subject = `📍 É HOJE! ${dados.numeroOrdinal} Café com Ciência na UniArnaldo`;
+        tituloLembrete = 'É Hoje! Portaria Aberta';
+        textoIntro = `Nosso evento acontece <strong>HOJE (${dados.dataHora})</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.`;
       }
 
       const conteudoHtml = `
@@ -498,7 +562,7 @@
         <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Seu Protocolo:</div>
           <div style="font-size: 20px; font-weight: 800; font-family: monospace; color: #2b1810; margin: 4px 0;">${aluno.protocolo}</div>
-          <div style="font-size: 12px; color: #6b5c4f;">Tenha sua Credencial aberta no celular para ler o QR Code na entrada (Sala 306).</div>
+          <div style="font-size: 12px; color: #6b5c4f;">Tenha sua Credencial aberta no celular para ler o QR Code na entrada.</div>
         </div>
 
         <p>Apresente o QR Code na entrada para credenciamento rápido e garantir seu certificado oficial de 4 horas.</p>
@@ -507,12 +571,13 @@
       return {
         subject,
         html: gerarLayoutHtmlBase({
-          preheader: `${tituloLembrete} - 10° Café com Ciência na UniArnaldo`,
+          preheader: `Lembrete importante do ${dados.numeroOrdinal} Café com Ciência.`,
           titulo: tituloLembrete,
-          badge: 'Lembrete Oficial · Comissão Organizadora',
+          badge: `Lembrete Oficial · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,
           botaoTexto: 'Abrir Minha Credencial com QR Code',
-          botaoLink: linkCredencial
+          botaoLink: linkCredencial,
+          aluno
         })
       };
     }
@@ -521,8 +586,8 @@
       const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
       const conteudoHtml = `
         <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-        <p>Agradecemos muito sua participação no <strong>10° Café com Ciência: Os Direitos dos Pacientes na Odontologia</strong>!</p>
-        <p>Temos o prazer de informar que o seu <strong>Certificado Oficial de Participação (4 Horas)</strong> já está assinado e liberado para emissão.</p>
+        <p>Agradecemos muito sua participação no <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong>!</p>
+        <p>Temos o prazer de informar que o seu <strong>Certificado Oficial de Participação (4 Horas)</strong> com a <strong>${dados.palestrante}</strong> já está assinado e liberado para emissão.</p>
 
         <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Certificado Homologado:</div>
@@ -534,45 +599,47 @@
       `;
 
       return {
-        subject: `🎓 Seu Certificado Oficial está Disponível! 10° Café com Ciência`,
+        subject: `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`,
         html: gerarLayoutHtmlBase({
-          preheader: `Seu certificado de 4 horas complementares foi liberado! Código: CERT-${aluno.protocolo}`,
+          preheader: `Seu certificado de 4 horas complementares do ${dados.numeroOrdinal} Café foi liberado! Código: CERT-${aluno.protocolo}`,
           titulo: 'Seu Certificado Oficial está Pronto!',
-          badge: 'Certificado Disponível · 4 Horas',
+          badge: `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,
           botaoTexto: 'Visualizar e Baixar Meu Certificado',
-          botaoLink: linkCertificado
+          botaoLink: linkCertificado,
+          aluno
         })
       };
     }
 
     // Padrão: Teste genérico
     const conteudoHtml = `
-      <p>Olá! Este é um <strong>e-mail de teste de conexão com o Resend</strong> enviado diretamente da plataforma do <strong>10° Café com Ciência</strong>.</p>
+      <p>Olá! Este é um <strong>e-mail de teste de conexão com o Resend</strong> enviado diretamente da plataforma do <strong>${dados.tituloEdicao}</strong>.</p>
       <p>Se você está recebendo esta mensagem, significa que sua integração com a API do Resend está funcionando perfeitamente!</p>
-      <p>A partir de agora, o sistema pode enviar e-mails automáticos de confirmação de inscrição, validação de presença, lembretes de véspera e envio de certificados.</p>
+      <p>A partir de agora, o sistema pode enviar e-mails automáticos de confirmação de inscrição, validação de presença, lembretes de véspera e envio de certificados tanto para a 10ª quanto para a 11ª edição.</p>
     `;
 
     return {
-      subject: '☕ Teste de Conexão com Resend · 10° Café com Ciência',
+      subject: `☕ Teste de Conexão com Resend · ${dados.numeroOrdinal} Café com Ciência`,
       html: gerarLayoutHtmlBase({
-        preheader: 'Teste de conexão com a API Resend realizado com sucesso!',
+        preheader: `Teste de conexão com a API Resend realizado com sucesso para o ${dados.numeroOrdinal} Café!`,
         titulo: 'Integração Resend Operacional!',
-        badge: 'Teste de E-mail · Sucesso',
+        badge: `Teste de E-mail · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
         botaoTexto: 'Acessar Site do Evento',
-        botaoLink: `${urlBase}index.html`
+        botaoLink: `${urlBase}${dados.urlPagina}`,
+        aluno
       })
     };
   }
 
   /**
-   * Teste de Envio de E-mail com suporte a escolha de modelo
+   * Teste de Envio de E-mail com suporte a escolha de modelo e edição
    */
-  async function testarEnvioEmail(destinatario, modelo = 'teste') {
+  async function testarEnvioEmail(destinatario, modelo = 'teste', edicao = null) {
     if (!destinatario) throw new Error('Informe o e-mail de destino para o teste.');
 
-    const alunoMock = criarAlunoMock(destinatario);
+    const alunoMock = criarAlunoMock(destinatario, edicao);
 
     if (modelo === 'inscricao') {
       return enviarEmailInscricao(alunoMock);
@@ -587,7 +654,7 @@
       return enviarEmailCertificado(alunoMock);
     }
 
-    const { subject, html } = obterHtmlModeloTeste('teste', destinatario);
+    const { subject, html } = obterHtmlModeloTeste('teste', destinatario, edicao);
     return enviarEmail({
       to: destinatario.trim(),
       subject,

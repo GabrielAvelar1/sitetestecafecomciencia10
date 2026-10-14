@@ -975,7 +975,8 @@ async function testarEnvioResendAdmin() {
   }
 
   try {
-    const res = await window.EmailService.testarEnvioEmail(emailDestino.trim(), modelo);
+    const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10;
+    const res = await window.EmailService.testarEnvioEmail(emailDestino.trim(), modelo, edicaoParaTeste);
     
     if (statusDiv) {
       statusDiv.className = 'mt-3 p-3.5 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200 block';
@@ -1029,7 +1030,8 @@ function abrirPreviaEmailAdmin() {
   const modelo = selectModelo ? selectModelo.value : 'vespera';
   const emailDestino = inputEmail ? inputEmail.value.trim() : 'participante@teste.com';
 
-  const previewData = window.EmailService.obterHtmlModeloTeste(modelo, emailDestino);
+  const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10;
+  const previewData = window.EmailService.obterHtmlModeloTeste(modelo, emailDestino, edicaoParaTeste);
   
   const modal = document.getElementById('modalPreviaEmail');
   const iframe = document.getElementById('iframePreviaEmail');
