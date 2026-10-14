@@ -48,6 +48,9 @@
   <!-- HTML5 QR Code Scanner CDN -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
+  <!-- Google Identity Services (GIS) para Suporte ao Pop-up Nativo do Google -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- Estilos Customizados -->
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -847,6 +850,429 @@
         </button>
       </div>
       <div id="comprovanteViewerContent" class="flex items-center justify-center min-h-[300px]"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: CONSULTA DE INSCRIÇÃO & EMISSÃO DE CERTIFICADO
+       ======================================================================== -->
+  <div id="consultaModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-coffee-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="award" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-coffee-950">Consultar Inscrição & Certificado</h3>
+            <p class="text-xs text-stone-500">Acesse sua credencial com QR Code ou baixe seu certificado</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalConsulta()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-coffee-900 mb-1.5">
+            E-mail ou Protocolo de Inscrição
+          </label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="inputBuscaInscricao" 
+              placeholder="Ex: seuemail@exemplo.com ou CC11-123456" 
+              class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-500 focus:ring-2 focus:ring-coffee-200 outline-none"
+              onkeydown="if(event.key === 'Enter') executarBuscaInscricao()"
+            />
+            <button 
+              onclick="executarBuscaInscricao()" 
+              class="px-5 py-3 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-sm rounded-xl transition flex items-center gap-1.5 shrink-0"
+            >
+              <i data-lucide="search" class="w-4 h-4"></i>
+              <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Área onde o resultado da consulta é exibido -->
+        <div id="resultadoConsultaInscricao" class="hidden"></div>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+        <span>Ainda não se inscreveu?</span>
+        <a href="#inscricao" onclick="fecharModalConsulta()" class="font-bold text-coffee-800 hover:underline">
+          Fazer Inscrição Agora (R$ 10)
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: LOGIN DO ALUNO / USUÁRIO (COM GOOGLE)
+       ======================================================================== -->
+  <div id="loginModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      
+      <!-- Topo -->
+      <div class="flex items-center justify-between pb-4 border-b border-coffee-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200">
+            <i data-lucide="user" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-coffee-950">Acesse sua Conta</h3>
+            <p class="text-xs text-stone-500">Sem senhas · Conexão com Google</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalLogin()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Explicação e Benefícios -->
+      <div class="text-center py-2 space-y-2">
+        <p class="text-sm text-stone-600 leading-relaxed">
+          Você não precisa memorizar nem criar senhas. Entre diretamente com sua <strong>Conta Google</strong> para acessar seu comprovante oficial e baixar seu certificado!
+        </p>
+        <span class="inline-block text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+          ✓ Você pode entrar mesmo se ainda não se inscreveu
+        </span>
+      </div>
+
+      <!-- Botão Google Oficial -->
+      <div class="py-4">
+        <button 
+          id="btnGoogleLogin"
+          onclick="iniciarLoginGoogle()" 
+          class="w-full py-3.5 px-4 bg-white hover:bg-stone-50 text-stone-800 font-bold text-sm rounded-2xl border-2 border-stone-200 hover:border-coffee-400 shadow-md hover:shadow-lg transition flex items-center justify-center gap-3 active:scale-98"
+        >
+          <svg class="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Continuar com o Google</span>
+        </button>
+      </div>
+
+      <!-- Opção de Consulta por Protocolo sem Login -->
+      <div class="text-center pt-2 pb-1">
+        <button onclick="fecharModalLogin(); abrirModalConsulta();" class="text-xs text-coffee-800 font-semibold hover:underline flex items-center justify-center gap-1.5 mx-auto">
+          <i data-lucide="search" class="w-3.5 h-3.5"></i>
+          <span>Já tem protocolo? Consultar comprovante rápido</span>
+        </button>
+      </div>
+
+      <div id="erroLogin" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl mt-3"></div>
+
+      <!-- Rodapé do Modal -->
+      <div class="mt-4 pt-4 border-t border-stone-100 flex flex-col items-center gap-2 text-xs text-stone-500 text-center">
+        <div>
+          <span>Ainda não se inscreveu?</span>
+          <a href="#inscricao" onclick="fecharModalLogin()" class="font-bold text-coffee-800 hover:underline ml-1">
+            Garantir vaga por R$ 10
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Seletor de Contas do Google Oficial (Escolha uma conta) -->
+  <div id="modalGoogleAuth" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl border border-stone-200 relative overflow-hidden">
+      <!-- Botão Fechar -->
+      <button onclick="fecharModalGoogleAuth()" class="absolute top-4 right-4 p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <!-- Cabeçalho Oficial do Google -->
+      <div class="text-center pb-4 border-b border-stone-100">
+        <svg class="w-8 h-8 mx-auto mb-2" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <h4 class="text-base font-bold text-stone-900 leading-tight">Fazer login com o Google</h4>
+        <p class="text-xs text-stone-500 mt-1">Escolha uma conta para continuar em <span class="font-semibold text-coffee-900">Café com Ciência</span></p>
+      </div>
+
+      <!-- Container do Botão Google Identity Services Oficial (se GIS estiver ativo) -->
+      <div id="googleGsiBtnContainer" class="flex justify-center pt-3 empty:hidden"></div>
+
+      <!-- Lista de Contas para Seleção com 1 Toque -->
+      <div id="listaContasGoogle" class="divide-y divide-stone-100 my-2"></div>
+
+      <!-- Opção de Digitar Outra Conta Google -->
+      <div class="pt-2">
+        <button 
+          id="btnToggleOutraConta"
+          onclick="toggleInputOutraContaGoogle()" 
+          class="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-stone-50 transition text-left text-xs text-stone-700"
+        >
+          <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 shrink-0">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+          </div>
+          <span class="font-medium text-coffee-900">Usar outra conta do Google</span>
+        </button>
+
+        <div id="formOutraContaGoogle" class="hidden mt-3 space-y-2.5 p-3 bg-stone-50 rounded-2xl border border-stone-200">
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-600 mb-1">Seu Nome Completo</label>
+            <input type="text" id="googleInputNome" placeholder="Ex: Camila Pereira" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none bg-white" onkeydown="if(event.key === 'Enter') document.getElementById('googleInputEmail').focus()" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-600 mb-1">E-mail Google (@gmail.com)</label>
+            <input type="email" id="googleInputEmail" placeholder="seuemail@gmail.com" class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none bg-white" onkeydown="if(event.key === 'Enter') confirmarLoginGooglePrompt()" />
+          </div>
+          <button 
+            id="btnConfirmarGoogle"
+            onclick="confirmarLoginGooglePrompt()" 
+            class="w-full py-2.5 px-3 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <span>Confirmar e Entrar</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Botão para abrir o Tutorial da Janela Pop-up -->
+      <div class="pt-2.5 text-center">
+        <button 
+          type="button"
+          onclick="abrirTutorialGoogleOAuth()" 
+          class="text-[11px] text-coffee-700 hover:text-coffee-950 font-semibold hover:underline inline-flex items-center gap-1.5 transition"
+        >
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-coffee-600"></i>
+          <span>Como ativar a Janela Pop-up Oficial do Google (Tutorial)</span>
+        </button>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-stone-100 text-center text-[10px] text-stone-400">
+        Para continuar, o Google compartilhará seu nome, endereço de e-mail e foto do perfil com o Café com Ciência.
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL TUTORIAL PASSO A PASSO: GOOGLE OAUTH POP-UP NATIVO
+       ======================================================================== -->
+  <div id="modalTutorialGoogleOAuth" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      
+      <!-- Topo -->
+      <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-6 sticky top-0 bg-white/95 backdrop-blur-md z-10">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-coffee-950">Ativar Janela Pop-up Nativa do Google</h3>
+            <p class="text-xs text-stone-500">Tutorial de 3 minutos no Google Cloud Console</p>
+          </div>
+        </div>
+
+        <button onclick="fecharTutorialGoogleOAuth()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Introdução -->
+      <div class="p-4 bg-blue-50/80 rounded-2xl border border-blue-200 text-xs text-blue-950 leading-relaxed mb-6 space-y-1">
+        <p class="font-bold flex items-center gap-1.5 text-blue-900">
+          <i data-lucide="info" class="w-4 h-4 text-blue-600 shrink-0"></i>
+          Por que o Google exige esse passo?
+        </p>
+        <p>
+          Para proteger os usuários de golpes, o Google só permite abrir a janela pop-up oficial em sites que possuam um <strong>Client ID registrado no Google Cloud</strong>. O processo é 100% gratuito e leva apenas 3 minutos!
+        </p>
+      </div>
+
+      <!-- Passo a Passo -->
+      <div class="space-y-5 text-xs text-stone-700">
+        
+        <!-- Passo 1 -->
+        <div class="flex gap-3.5 items-start">
+          <div class="w-7 h-7 rounded-full bg-coffee-900 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</div>
+          <div class="space-y-1.5 flex-1">
+            <h5 class="font-bold text-sm text-coffee-950">Acesse o Google Cloud Console e Crie um Projeto</h5>
+            <p>Acesse o painel do Google com seu Gmail e crie um novo projeto:</p>
+            <a href="https://console.cloud.google.com/projectcreate" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 font-bold text-blue-700 transition">
+              <span>Abrir Google Cloud Console</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <p class="text-stone-500">Dê o nome de <strong>Café com Ciência</strong> e clique em <em>Criar</em>.</p>
+          </div>
+        </div>
+
+        <!-- Passo 2 -->
+        <div class="flex gap-3.5 items-start">
+          <div class="w-7 h-7 rounded-full bg-coffee-900 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</div>
+          <div class="space-y-1.5 flex-1">
+            <h5 class="font-bold text-sm text-coffee-950">Configure a Tela de Permissão OAuth</h5>
+            <p>No menu lateral esquerdo, vá em <strong>APIs e Serviços</strong> &gt; <strong>Tela de permissão OAuth</strong>:</p>
+            <ul class="list-disc list-inside space-y-1 pl-1 text-stone-600">
+              <li>Selecione <strong>Externo</strong> e clique em <em>Criar</em>.</li>
+              <li>Preencha o <strong>Nome do app</strong>: <code>11° Café com Ciência</code></li>
+              <li>Selecione seu e-mail em <strong>E-mail de suporte</strong> e <strong>Dados de contato</strong>.</li>
+              <li>Clique em <em>Salvar e Continuar</em> até o final.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Passo 3 -->
+        <div class="flex gap-3.5 items-start">
+          <div class="w-7 h-7 rounded-full bg-coffee-900 text-white font-bold flex items-center justify-center shrink-0 text-xs">3</div>
+          <div class="space-y-1.5 flex-1">
+            <h5 class="font-bold text-sm text-coffee-950">Crie o ID do Cliente OAuth (Credencial)</h5>
+            <p>Vá em <strong>APIs e Serviços</strong> &gt; <strong>Credenciais</strong> &gt; clique em <strong>+ Criar Credenciais</strong> &gt; <strong>ID do cliente OAuth</strong>:</p>
+            <ul class="list-disc list-inside space-y-1 pl-1 text-stone-600">
+              <li>Tipo de aplicativo: selecione <strong>Aplicativo da Web</strong>.</li>
+              <li>Nome: <code>Site Café com Ciência</code></li>
+              <li>
+                <strong>Origens JavaScript autorizadas</strong> (Muito importante): Adicione as URLs:
+                <div class="mt-1 space-y-1 font-mono text-[11px] bg-stone-100 p-2 rounded-lg text-stone-800">
+                  <div>https://gabrielavelar1.github.io</div>
+                  <div>http://localhost</div>
+                  <div>http://127.0.0.1</div>
+                </div>
+              </li>
+            </ul>
+            <p class="text-stone-500">Clique em <strong>Criar</strong>. Uma janela aparecerá exibindo seu <strong>ID de cliente</strong>.</p>
+          </div>
+        </div>
+
+        <!-- Passo 4 -->
+        <div class="flex gap-3.5 items-start">
+          <div class="w-7 h-7 rounded-full bg-coffee-900 text-white font-bold flex items-center justify-center shrink-0 text-xs">4</div>
+          <div class="space-y-2 flex-1">
+            <h5 class="font-bold text-sm text-coffee-950">Cole o seu Client ID Abaixo para Ativar o Pop-up</h5>
+            <p>Copie o código que termina com <code>.apps.googleusercontent.com</code> e cole aqui:</p>
+            
+            <div class="space-y-2 p-3 bg-stone-50 rounded-2xl border border-stone-200">
+              <input 
+                type="text" 
+                id="inputGoogleClientIdTutorial" 
+                placeholder="Ex: 1234567890-abcdefg.apps.googleusercontent.com" 
+                class="w-full px-3.5 py-2.5 text-xs font-mono rounded-xl border border-stone-300 focus:border-coffee-500 outline-none bg-white"
+              />
+              <button 
+                type="button" 
+                onclick="salvarGoogleClientIdFromTutorial()" 
+                class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+              >
+                <i data-lucide="check-circle" class="w-4 h-4"></i>
+                <span>Salvar e Ativar Pop-up Nativo do Google</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Rodapé -->
+      <div class="mt-6 pt-4 border-t border-stone-100 flex items-center justify-between text-xs text-stone-400">
+        <span>Café com Ciência · Configurações de Nuvem</span>
+        <button onclick="fecharTutorialGoogleOAuth()" class="text-coffee-800 font-bold hover:underline">
+          Fechar Tutorial
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ÁREA DO ALUNO (MINHA CONTA)
+       ======================================================================== -->
+  <div id="areaAlunoModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-coffee-200 relative">
+      <!-- Botão de Fechar -->
+      <button onclick="fecharAreaDoAluno()" class="absolute top-5 right-5 p-2 text-stone-400 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Conteúdo Injetado Dinamicamente -->
+      <div id="areaAlunoContent"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: ACESSO RESTRITO - COMISSÃO DA LIGA
+       ======================================================================== -->
+  <div id="loginOrganizadorModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 backdrop-modal">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-amber-300 relative">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-stone-100 mb-5">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-stone-900">Acesso da Liga Acadêmica</h3>
+            <p class="text-xs text-stone-500">Painel de Inscrições, Portaria e Lembretes</p>
+          </div>
+        </div>
+
+        <button onclick="fecharModalLoginOrganizador()" class="p-2 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-100 transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+            E-mail do Membro da Liga
+          </label>
+          <input 
+            type="email" 
+            id="inputEmailOrg" 
+            value="" 
+            placeholder="organizador@email.com" 
+            class="w-full px-4 py-2.5 text-xs rounded-xl border border-stone-300 focus:border-coffee-500 outline-none"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+            Senha de Acesso
+          </label>
+          <input 
+            type="password" 
+            id="inputSenhaOrg" 
+            placeholder="Digite sua senha de organizador" 
+            class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 outline-none"
+            onkeydown="if(event.key === 'Enter') executarLoginOrganizador()"
+          />
+        </div>
+
+        <div id="erroLoginOrg" class="hidden p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl"></div>
+
+        <button 
+          onclick="executarLoginOrganizador()" 
+          class="w-full py-3.5 px-4 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+        >
+          <i data-lucide="key" class="w-4 h-4"></i>
+          <span>Entrar no Painel da Liga</span>
+        </button>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-stone-100 text-center text-[11px] text-stone-400">
+        Acesso restrito exclusivamente aos membros da comissão organizadora.
+      </div>
+
     </div>
   </div>
 
