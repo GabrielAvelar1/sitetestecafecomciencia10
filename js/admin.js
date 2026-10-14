@@ -202,15 +202,88 @@ function alternarLiberacaoCertificadosAdmin() {
   }
 }
 
+let edicaoFiltroAdmin = '10'; // '10', '11' ou 'todas'
+
+function selecionarEdicaoAdmin(edicao) {
+  edicaoFiltroAdmin = edicao;
+
+  const btn10 = document.getElementById('btnEdicao_10');
+  const btn11 = document.getElementById('btnEdicao_11');
+  const btnTodas = document.getElementById('btnEdicao_todas');
+  const nomeLabel = document.getElementById('adminNomeEdicaoSelecionada');
+
+  [btn10, btn11, btnTodas].forEach(b => {
+    if (b) {
+      b.classList.remove('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
+      b.classList.add('text-stone-600', 'font-semibold');
+    }
+  });
+
+  if (edicao === '10' && btn10) {
+    btn10.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
+    btn10.classList.remove('text-stone-600', 'font-semibold');
+    if (nomeLabel) nomeLabel.textContent = '10° Café com Ciência (Palestra Atual · 30/10)';
+  } else if (edicao === '11' && btn11) {
+    btn11.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
+    btn11.classList.remove('text-stone-600', 'font-semibold');
+    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Dra. Thaissa Calab · 06/11)';
+  } else if (btnTodas) {
+    btnTodas.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
+    btnTodas.classList.remove('text-stone-600', 'font-semibold');
+    if (nomeLabel) nomeLabel.textContent = 'Todas as Palestras e Edições Cadastradas';
+  }
+
+  atualizarMetricasPorEdicao();
+  filtrarInscricoesTabelaAdmin();
+}
+
+function obterInscricoesFiltradasPorEdicao(lista = inscricoesCache) {
+  if (!lista) return [];
+  if (edicaoFiltroAdmin === '11') {
+    return lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+  } else if (edicaoFiltroAdmin === '10') {
+    return lista.filter(i => !i.protocolo || (!i.protocolo.startsWith('CC11-') && i.edicao !== 11));
+  }
+  return lista;
+}
+
+function atualizarMetricasPorEdicao() {
+  const countBadge = document.getElementById('adminTotalInscricoes');
+  const totalArrecadado = document.getElementById('adminTotalArrecadado');
+  const totalPendentes = document.getElementById('adminTotalPendentes');
+  const totalPresencas = document.getElementById('adminTotalPresencas');
+
+  const badge10 = document.getElementById('badgeContagemEdicao10');
+  const badge11 = document.getElementById('badgeContagemEdicao11');
+  const badgeTodas = document.getElementById('badgeContagemEdicaoTodas');
+
+  if (inscricoesCache) {
+    const lista10 = inscricoesCache.filter(i => !i.protocolo || (!i.protocolo.startsWith('CC11-') && i.edicao !== 11));
+    const lista11 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+
+    if (badge10) badge10.textContent = `${lista10.length}`;
+    if (badge11) badge11.textContent = `${lista11.length}`;
+    if (badgeTodas) badgeTodas.textContent = `${inscricoesCache.length}`;
+
+    const listaAtual = obterInscricoesFiltradasPorEdicao(inscricoesCache);
+    const qtdInscritos = listaAtual.length;
+    const qtdPresentes = listaAtual.filter(i => i.presenca_confirmada).length;
+    const qtdPendentes = listaAtual.filter(i => i.status_pagamento === 'pendente' || !i.status_pagamento).length;
+    const totalValor = listaAtual.filter(i => i.status_pagamento === 'aprovado').reduce((acc, curr) => acc + (parseFloat(curr.valor) || 10), 0);
+
+    if (countBadge) countBadge.textContent = `${qtdInscritos} inscritos`;
+    if (totalPresencas) totalPresencas.textContent = `${qtdPresentes} presenças`;
+    if (totalPendentes) totalPendentes.textContent = `${qtdPendentes} pendentes`;
+    if (totalArrecadado) totalArrecadado.textContent = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
+  }
+}
+
 // Carregar Inscrições
 async function carregarInscricoesAdmin() {
   atualizarVisualStatusCertificados();
   carregarConfiguracoesResendAdmin();
 
   const container = document.getElementById('adminInscricoesList');
-  const countBadge = document.getElementById('adminTotalInscricoes');
-  const totalArrecadado = document.getElementById('adminTotalArrecadado');
-  const totalPresencas = document.getElementById('adminTotalPresencas');
   const statusAvisos = document.getElementById('adminStatusDb');
 
   if (!container) return;
@@ -250,15 +323,7 @@ async function carregarInscricoesAdmin() {
   try {
     inscricoesCache = await window.LigaDB.listarInscricoes();
 
-    const qtdInscritos = inscricoesCache.length;
-    const qtdPresentes = inscricoesCache.filter(i => i.presenca_confirmada).length;
-    const totalValor = inscricoesCache.reduce((acc, curr) => acc + (parseFloat(curr.valor) || 10), 0);
-
-    if (countBadge) countBadge.textContent = `${qtdInscritos} inscritos`;
-    if (totalPresencas) totalPresencas.textContent = `${qtdPresentes} presenças validadas`;
-    if (totalArrecadado) totalArrecadado.textContent = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
-
-    renderizarLinhasTabelaAdmin(inscricoesCache);
+    atualizarMetricasPorEdicao();
     if (typeof filtrarInscricoesTabelaAdmin === 'function') {
       filtrarInscricoesTabelaAdmin();
     }
@@ -296,6 +361,11 @@ function renderizarLinhasTabelaAdmin(lista) {
     const whatsappClean = (item.telefone || '').replace(/\D/g, '');
     const instituicaoNome = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo');
     const isArnaldo = instituicaoNome.toLowerCase().includes('arnaldo');
+
+    const isEdicao11 = (item.protocolo && item.protocolo.startsWith('CC11-')) || item.edicao === 11;
+    const edicaoBadge = isEdicao11
+      ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="11° Café com Ciência (Dra. Thaissa Calab)">11° Café</span>`
+      : `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="10° Café com Ciência (Profa. Carolina Diniz)">10° Café</span>`;
 
     const instituicaoBadge = isArnaldo
       ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200" title="Aluno(a) Faculdade Arnaldo">
@@ -338,7 +408,10 @@ function renderizarLinhasTabelaAdmin(lista) {
     return `
       <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
         <td class="px-4 py-3">
-          <div class="font-bold text-stone-900">${item.nome_completo}</div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-stone-900">${item.nome_completo}</span>
+            ${edicaoBadge}
+          </div>
           <div class="text-[11px] font-mono text-coffee-700">${item.protocolo || '-'}</div>
         </td>
         <td class="px-4 py-3 whitespace-nowrap">${instituicaoBadge}</td>
@@ -396,7 +469,10 @@ function filtrarInscricoesTabelaAdmin() {
 
   if (!inscricoesCache) return;
 
-  const filtrados = inscricoesCache.filter(item => {
+  // Filtra por edição selecionada
+  const listaPorEdicao = obterInscricoesFiltradasPorEdicao(inscricoesCache);
+
+  const filtrados = listaPorEdicao.filter(item => {
     const inst = (window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo')).toLowerCase();
     const nome = (item.nome_completo || '').toLowerCase();
     const email = (item.email || '').toLowerCase();
@@ -409,7 +485,7 @@ function filtrarInscricoesTabelaAdmin() {
     if (status === 'aprovados') {
       bateStatus = item.status_pagamento === 'aprovado';
     } else if (status === 'pendentes') {
-      bateStatus = item.status_pagamento === 'pendente';
+      bateStatus = item.status_pagamento === 'pendente' || !item.status_pagamento;
     } else if (status === 'presentes') {
       bateStatus = Boolean(item.presenca_confirmada);
     }

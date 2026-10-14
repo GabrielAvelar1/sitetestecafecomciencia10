@@ -28,6 +28,16 @@ const PIX_CONFIG = {
   mensagem: '10 Cafe com Ciencia'
 };
 
+const PIX_CONFIG_11 = {
+  payloadCopiaECola: '00020126580014br.gov.bcb.pix0136e4dafbbe-4395-413b-aac8-8dd5878d1db95204000053039865802BR5925ANA CAROLINA MESQUITA ARA6009Sao Paulo62290525REC6ACF6FE413C668839679276304BAF1',
+  chave: 'e4dafbbe-4395-413b-aac8-8dd5878d1db9',
+  tipoChave: 'Aleatória',
+  titular: 'ANA CAROLINA MESQUITA ARA',
+  cidade: 'Sao Paulo',
+  valor: '10.00',
+  mensagem: '11 Cafe com Ciencia'
+};
+
 // ============================================================================
 // GERADOR DE PAYLOAD PIX PADRÃO BANCO CENTRAL (BR CODE / EMVCo)
 // Permite que qualquer aplicativo bancário reconheça o QR Code e o Pix Copia e Cola
@@ -374,9 +384,10 @@ async function fazerLogin(email, senha) {
 // ============================================================================
 // 5. REGISTRO DE INSCRIÇÃO (SEM PRECISAR DE SENHA)
 // ============================================================================
-function gerarProtocolo() {
+function gerarProtocolo(edicao = 10) {
   const aleatorio = Math.floor(100000 + Math.random() * 900000);
-  return `CC10-${aleatorio}`;
+  const prefixo = parseInt(edicao, 10) === 11 ? 'CC11' : 'CC10';
+  return `${prefixo}-${aleatorio}`;
 }
 
 function fileToBase64(file) {
@@ -407,15 +418,17 @@ function extrairInstituicaoAluno(aluno) {
   return 'Faculdade Arnaldo';
 }
 
-async function registrarInscricao({ nome_completo, email, telefone, instituicao, comprovanteFile }) {
+async function registrarInscricao({ nome_completo, email, telefone, instituicao, comprovanteFile, edicao = 10 }) {
   if (!comprovanteFile) {
     throw new Error('O anexo do comprovante de pagamento Pix de R$ 10,00 é estritamente obrigatório.');
   }
 
-  const protocolo = gerarProtocolo();
+  const numEdicao = parseInt(edicao, 10) === 11 ? 11 : 10;
+  const protocolo = gerarProtocolo(numEdicao);
   const emailLimpo = email.trim().toLowerCase();
   const instituicaoLimpa = (instituicao && instituicao.trim()) ? instituicao.trim() : 'Faculdade Arnaldo';
-  const obsValor = (instituicaoLimpa === 'Faculdade Arnaldo') ? 'Faculdade Arnaldo' : `Faculdade: ${instituicaoLimpa}`;
+  const prefixoTag = numEdicao === 11 ? '[11° Café] ' : '';
+  const obsValor = `${prefixoTag}${(instituicaoLimpa === 'Faculdade Arnaldo') ? 'Faculdade Arnaldo' : `Faculdade: ${instituicaoLimpa}`}`;
   const sb = getSupabase();
 
   if (sb) {
@@ -423,11 +436,15 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
       const { data: existente } = await sb
         .from(SUPABASE_CONFIG.tableName)
         .select('id, email, protocolo')
-        .ilike('email', emailLimpo)
-        .limit(1);
+        .ilike('email', emailLimpo);
 
-      if (existente && existente.length > 0) {
-        throw new Error('Já existe uma inscrição registrada para este e-mail. Acesse sua conta com o Google para ver sua credencial.');
+      const prefixoEsperado = numEdicao === 11 ? 'CC11-' : 'CC10-';
+      const jaInscritoNestaEdicao = (existente || []).some(item => 
+        item.protocolo && item.protocolo.startsWith(prefixoEsperado)
+      );
+
+      if (jaInscritoNestaEdicao) {
+        throw new Error(`Já existe uma inscrição registrada para este e-mail no ${numEdicao}° Café com Ciência. Acesse sua conta ou consulte sua credencial.`);
       }
 
       let comprovanteUrl = '';
@@ -457,7 +474,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         telefone: telefone.trim(),
         senha: 'google-oauth',
         role: 'aluno',
-        valor: parseFloat(PIX_CONFIG.valor),
+        valor: 10.00,
         status_pagamento: 'pendente', // Comprovante em análise pela comissão
         comprovante_url: comprovanteUrl,
         comprovante_nome: comprovanteNome,
@@ -467,25 +484,54 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         observacoes: obsValor
       };
 
-      // Tenta inserir incluindo 'instituicao'. Se a coluna ainda não existir no Postgres,
-      // faz fallback transparente para basePayload (onde o dado fica preservado em 'observacoes').
+      // Tenta inserir incluindo 'instituicao'. Se houver erro de coluna ou restrição única legada, faz fallback transparente.
       let insertData = null;
-      const { data: dComInst, error: errComInst } = await sb
+      let { data: dComInst, error: errComInst } = await sb
         .from(SUPABASE_CONFIG.tableName)
         .insert([{ ...basePayload, instituicao: instituicaoLimpa }])
         .select();
 
       if (errComInst) {
-        if (errComInst.code === '42703' || (errComInst.message && errComInst.message.toLowerCase().includes('instituicao'))) {
+        // Fallback 1: se for erro de restrição única no e-mail (aluno que já estava cadastrado no 10° Café)
+        if (errComInst.code === '23505' && numEdicao === 11) {
+          const partes = emailLimpo.split('@');
+          const emailAlias = partes.length === 2 ? `${partes[0]}+11@${partes[1]}` : `${emailLimpo}.11`;
+          const { data: dAlias, error: errAlias } = await sb
+            .from(SUPABASE_CONFIG.tableName)
+            .insert([{ ...basePayload, email: emailAlias, instituicao: instituicaoLimpa }])
+            .select();
+          if (!errAlias && dAlias && dAlias.length > 0) {
+            insertData = dAlias;
+          } else {
+            console.error('Erro ao salvar no Supabase (alias):', errAlias);
+            throw new Error('Falha ao registrar inscrição no banco de dados.');
+          }
+        } else if (errComInst.code === '42703' || (errComInst.message && errComInst.message.toLowerCase().includes('instituicao'))) {
+          // Fallback 2: coluna 'instituicao' inexistente
           const { data: dFallback, error: errFallback } = await sb
             .from(SUPABASE_CONFIG.tableName)
             .insert([basePayload])
             .select();
           if (errFallback) {
-            console.error('Erro ao salvar no Supabase (fallback):', errFallback);
-            throw new Error('Falha ao registrar inscrição no banco de dados.');
+            if (errFallback.code === '23505' && numEdicao === 11) {
+              const partes = emailLimpo.split('@');
+              const emailAlias = partes.length === 2 ? `${partes[0]}+11@${partes[1]}` : `${emailLimpo}.11`;
+              const { data: dAlias, error: errAlias } = await sb
+                .from(SUPABASE_CONFIG.tableName)
+                .insert([{ ...basePayload, email: emailAlias }])
+                .select();
+              if (!errAlias && dAlias && dAlias.length > 0) {
+                insertData = dAlias;
+              } else {
+                throw new Error('Falha ao registrar inscrição no banco de dados.');
+              }
+            } else {
+              console.error('Erro ao salvar no Supabase (fallback):', errFallback);
+              throw new Error('Falha ao registrar inscrição no banco de dados.');
+            }
+          } else {
+            insertData = dFallback;
           }
-          insertData = dFallback;
         } else {
           console.error('Erro ao salvar no Supabase:', errComInst);
           throw new Error('Falha ao registrar inscrição no banco de dados.');
@@ -496,7 +542,9 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
 
       const novoUsuario = {
         ...insertData[0],
-        instituicao: instituicaoLimpa
+        email: emailLimpo,
+        instituicao: instituicaoLimpa,
+        edicao: numEdicao
       };
       salvarSessaoUsuario(novoUsuario);
 
@@ -512,9 +560,12 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
   } else {
     // Modo Local
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
-    const existente = inscricoes.find(i => i.email && i.email.toLowerCase() === emailLimpo);
+    const prefixoEsperado = numEdicao === 11 ? 'CC11-' : 'CC10-';
+    const existente = inscricoes.find(i => 
+      i.email && i.email.toLowerCase() === emailLimpo && i.protocolo && i.protocolo.startsWith(prefixoEsperado)
+    );
     if (existente) {
-      throw new Error('Já existe uma inscrição registrada para este e-mail. Faça login com o Google para ver sua credencial.');
+      throw new Error(`Já existe uma inscrição registrada para este e-mail no ${numEdicao}° Café com Ciência.`);
     }
 
     let comprovanteBase64 = '';
@@ -535,9 +586,10 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
       telefone: telefone.trim(),
       instituicao: instituicaoLimpa,
       observacoes: obsValor,
+      edicao: numEdicao,
       senha: 'google-oauth',
       role: 'aluno',
-      valor: parseFloat(PIX_CONFIG.valor),
+      valor: 10.00,
       status_pagamento: 'pendente', // Comprovante em análise pela comissão
       comprovante_url: comprovanteBase64,
       comprovante_nome: comprovanteFile ? comprovanteFile.name : 'comprovante.jpg',
@@ -944,6 +996,7 @@ async function resetarBancoDeDados(senha) {
 window.LigaDB = {
   SUPABASE_CONFIG,
   PIX_CONFIG,
+  PIX_CONFIG_11,
   ORGANIZADOR_PADRAO,
   getSupabase,
   getSupabaseCredentials,

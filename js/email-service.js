@@ -230,11 +230,15 @@
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
-    const linkCredencial = `${urlBase}index.html?consultar=${aluno.protocolo}`;
+    const is11 = aluno.protocolo && aluno.protocolo.startsWith('CC11-');
+    const nomeEvento = is11 ? '11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral' : '10° Café com Ciência: Os Direitos dos Pacientes na Odontologia';
+    const linkPagina = is11 ? `${urlBase}11cafe.html?consultar=${aluno.protocolo}` : `${urlBase}index.html?consultar=${aluno.protocolo}`;
+    const dataPortaria = is11 ? '06 de Novembro às 16:00' : '30 de Outubro às 15:00';
+    const palestranteInfo = is11 ? 'com a <strong>Dra. Thaissa Calab</strong>' : 'com a <strong>Profa. Carolina Diniz</strong>';
 
     const conteudoHtml = `
       <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
-      <p>Sua inscrição para o <strong>10° Café com Ciência</strong> foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
+      <p>Sua inscrição para o <strong>${nomeEvento}</strong> ${palestranteInfo} foi registrada com sucesso no sistema oficial da liga acadêmica!</p>
       
       <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
         <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Seu Protocolo Oficial:</div>
@@ -242,20 +246,20 @@
         <div style="font-size: 12px; color: #6b5c4f;">Status: Comprovante Pix anexado para conferência da comissão.</div>
       </div>
 
-      <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia 30 de Outubro para validação de presença e liberação do seu certificado.</p>
+      <p>Sua <strong>Credencial Digital com QR Code</strong> exclusivo já está disponível. Você deverá apresentá-la na portaria no dia <strong>${dataPortaria}</strong> para validação de presença e liberação do seu certificado.</p>
       <p>Você pode acessar sua credencial a qualquer momento pelo botão abaixo:</p>
     `;
 
     return enviarEmail({
       to: aluno.email,
-      subject: `☕ Inscrição Recebida! 10° Café com Ciência [${aluno.protocolo}]`,
+      subject: `☕ Inscrição Recebida! ${is11 ? '11°' : '10°'} Café com Ciência [${aluno.protocolo}]`,
       html: gerarLayoutHtmlBase({
         preheader: `Sua inscrição foi recebida com sucesso! Protocolo: ${aluno.protocolo}`,
         titulo: 'Inscrição Registrada com Sucesso!',
-        badge: 'Inscrição Confirmada · 10ª Edição',
+        badge: is11 ? 'Inscrição Confirmada · 11ª Edição' : 'Inscrição Confirmada · 10ª Edição',
         conteudoHtml,
         botaoTexto: 'Visualizar Minha Credencial e QR Code',
-        botaoLink: linkCredencial
+        botaoLink: linkPagina
       })
     });
   }

@@ -202,16 +202,25 @@ function configurarPix() {
   const btnCopiarCopiaECola = document.getElementById('btnCopiarCopiaECola');
   const qrCodeImg = document.getElementById('pixQrCode');
 
-  const config = window.LigaDB?.PIX_CONFIG || {
-    chave: 'cadumancia@gmail.com',
-    titular: 'Organização Café com Ciência',
-    cidade: 'Belo Horizonte',
-    valor: '10.00'
-  };
+  const isEdicao11 = window.EDICAO_ATUAL === 11;
+  const config = isEdicao11 
+    ? (window.LigaDB?.PIX_CONFIG_11 || {
+        chave: 'e4dafbbe-4395-413b-aac8-8dd5878d1db9',
+        titular: 'ANA CAROLINA MESQUITA ARA',
+        cidade: 'Sao Paulo',
+        valor: '10.00',
+        payloadCopiaECola: '00020126580014br.gov.bcb.pix0136e4dafbbe-4395-413b-aac8-8dd5878d1db95204000053039865802BR5925ANA CAROLINA MESQUITA ARA6009Sao Paulo62290525REC6ACF6FE413C668839679276304BAF1'
+      })
+    : (window.LigaDB?.PIX_CONFIG || {
+        chave: 'cadumancia@gmail.com',
+        titular: 'Organização Café com Ciência',
+        cidade: 'Belo Horizonte',
+        valor: '10.00'
+      });
 
-  const payloadPix = window.LigaDB?.gerarPayloadPix 
+  const payloadPix = config.payloadCopiaECola || (window.LigaDB?.gerarPayloadPix 
     ? window.LigaDB.gerarPayloadPix(config) 
-    : '00020101021226420014br.gov.bcb.pix0120cadumancia@gmail.com520400005303986540510.005802BR5916CAFE COM CIENCIA6014BELO HORIZONTE62070503***63044319';
+    : '00020101021226420014br.gov.bcb.pix0120cadumancia@gmail.com520400005303986540510.005802BR5916CAFE COM CIENCIA6014BELO HORIZONTE62070503***63044319');
 
   if (chavePixEl) chavePixEl.textContent = config.chave;
   if (titularPixEl) titularPixEl.textContent = `${config.titular} (R$ ${config.valor})`;
@@ -510,15 +519,16 @@ function configurarFormulario() {
         email: email,
         telefone: telefone,
         instituicao: instituicao,
-        comprovanteFile: comprovanteArquivoSelecionado
+        comprovanteFile: comprovanteArquivoSelecionado,
+        edicao: window.EDICAO_ATUAL || 10
       });
 
       exibirCredencialSucesso(resultado.data);
 
-      // Disparo automático de e-mail de confirmação via Resend (em segundo plano)
+      // Disparo automático de e-mail de confirmação via Resend / Gmail (em segundo plano)
       if (window.EmailService && window.EmailService.isEmailAutoInscricao()) {
         window.EmailService.enviarEmailInscricao(resultado.data).catch(e => {
-          console.warn('Aviso: E-mail de confirmação pelo Resend não disparado:', e.message);
+          console.warn('Aviso: E-mail de confirmação não disparado:', e.message);
         });
       }
 
@@ -550,6 +560,12 @@ function exibirCredencialSucesso(aluno) {
 
   if (!modal || !target || !aluno) return;
 
+  const is11 = (aluno.protocolo && aluno.protocolo.startsWith('CC11-')) || window.EDICAO_ATUAL === 11;
+  const tituloEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
+  const dataEvento = is11 ? '06 de Novembro · 16:00 horas' : '30 de Outubro · 15:00 horas';
+  const localEvento = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
+  const palestranteEvento = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
+
   // QR Code em alta definição (350x350) com margem adequada para leitura fácil por câmeras
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(aluno.protocolo)}&color=2B1810&bgcolor=FFFFFF&margin=2`;
 
@@ -563,7 +579,7 @@ function exibirCredencialSucesso(aluno) {
             <img src="logo.png" alt="Logo" class="w-full h-full object-contain" />
           </div>
           <div>
-            <h4 class="font-bold text-coffee-950 text-sm leading-tight">10° Café com Ciência</h4>
+            <h4 class="font-bold text-coffee-950 text-sm leading-tight">${tituloEvento}</h4>
             <span class="text-[11px] text-stone-500">Credencial Oficial de Inscrição</span>
           </div>
         </div>
@@ -625,15 +641,15 @@ function exibirCredencialSucesso(aluno) {
       <div class="bg-stone-50 p-3.5 rounded-xl border border-stone-200 text-xs text-stone-700 space-y-1.5 my-3">
         <div class="flex items-center gap-2 font-medium">
           <i data-lucide="calendar" class="w-3.5 h-3.5 text-coffee-600"></i>
-          <span><strong>Data:</strong> 30 de Outubro · 15:00 horas</span>
+          <span><strong>Data:</strong> ${dataEvento}</span>
         </div>
         <div class="flex items-center gap-2 font-medium">
           <i data-lucide="map-pin" class="w-3.5 h-3.5 text-coffee-600"></i>
-          <span><strong>Local:</strong> UniArnaldo - Campus Anchieta (Sala 306)</span>
+          <span><strong>Local:</strong> ${localEvento}</span>
         </div>
         <div class="flex items-center gap-2 font-medium">
           <i data-lucide="user-check" class="w-3.5 h-3.5 text-coffee-600"></i>
-          <span><strong>Palestra:</strong> Profa. Carolina Diniz</span>
+          <span><strong>Palestra:</strong> ${palestranteEvento}</span>
         </div>
       </div>
 
