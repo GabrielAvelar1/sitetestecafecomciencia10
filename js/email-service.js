@@ -16,7 +16,7 @@
   const DEFAULT_API_KEY = typeof atob === 'function' ? atob('cmVfQ1N3b05TeW1fTXczdXdqWThRTERLdktHdTJYRk5jb3NS') : '';
   const DEFAULT_GMAIL_USER = 'cafecomcienciaresend@gmail.com';
   const DEFAULT_GMAIL_PASS = 'glaf onfh ffcd eqvi';
-  const DEFAULT_FROM = '10° Café com Ciência <cafecomcienciaresend@gmail.com>';
+  const DEFAULT_FROM = 'Café com Ciência <cafecomcienciaresend@gmail.com>';
 
   function getResendApiKey() {
     return localStorage.getItem(EMAIL_STORAGE_KEYS.API_KEY) || DEFAULT_API_KEY;
@@ -261,7 +261,7 @@
                     </p>
                     <p style="margin: 0 0 10px 0;">
                       Dúvidas ou suporte? Entre em contato: 
-                      <a href="mailto:cadumancia@gmail.com" style="color: #a65824; text-decoration: none; font-weight: 600;">cadumancia@gmail.com</a>
+                      <a href="mailto:cafecomcienciaresend@gmail.com" style="color: #a65824; text-decoration: none; font-weight: 600;">cafecomcienciaresend@gmail.com</a>
                     </p>
                     <p style="margin: 0; font-size: 11px; color: #a49688;">
                       Instagram Oficial: <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" style="color: #a65824; text-decoration: none;">@cafecomciencia.arnaldobh</a>

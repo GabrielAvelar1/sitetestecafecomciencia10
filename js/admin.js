@@ -954,7 +954,7 @@ async function testarEnvioResendAdmin() {
   let emailDestino = inputEmail ? inputEmail.value.trim() : '';
 
   if (!emailDestino) {
-    emailDestino = prompt('Digite o e-mail que receberá a mensagem de teste:', 'cadumancia@gmail.com');
+    emailDestino = prompt('Digite o e-mail que receberá a mensagem de teste:', 'cafecomcienciaresend@gmail.com');
     if (inputEmail && emailDestino) inputEmail.value = emailDestino;
   }
 
