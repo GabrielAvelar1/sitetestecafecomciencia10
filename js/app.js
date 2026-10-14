@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
           history.replaceState(null, '', window.location.pathname);
         }
         if (usuario.protocolo) {
-          exibirCredencialSucesso(usuario);
+          abrirAreaDoAluno(usuario);
         }
       }
     });
@@ -572,17 +572,43 @@ function exibirCredencialSucesso(aluno) {
 
   if (!modal || !target || !aluno) return;
 
-  const is11 = (aluno.protocolo && aluno.protocolo.startsWith('CC11-')) || window.EDICAO_ATUAL === 11;
+  const is11 = (aluno.protocolo && aluno.protocolo.startsWith('CC11-')) ||
+               (aluno.edicao && parseInt(aluno.edicao, 10) === 11) ||
+               (!aluno.protocolo?.startsWith('CC10-') && window.EDICAO_ATUAL === 11);
   const tituloEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
   const dataEvento = is11 ? '06 de Novembro · 16:00 horas' : '30 de Outubro · 15:00 horas';
   const localEvento = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
   const palestranteEvento = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
+  const dataEventoObj = is11 ? new Date(2026, 10, 6, 20, 0) : new Date(2026, 9, 30, 20, 0);
+  const eventoPassado = new Date() > dataEventoObj;
 
   // QR Code em alta definição (350x350) com margem adequada para leitura fácil por câmeras
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(aluno.protocolo)}&color=2B1810&bgcolor=FFFFFF&margin=2`;
 
   target.innerHTML = `
     <div id="credencialCardPrint" class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-coffee-200 shadow-2xl relative overflow-hidden">
+      
+      <!-- Barra de Navegação: Voltar para Minhas Inscrições -->
+      <div class="flex items-center justify-between pb-3.5 mb-3 border-b border-coffee-100">
+        <button 
+          onclick="fecharCredencialModal(); abrirAreaDoAluno();" 
+          class="inline-flex items-center gap-1.5 text-xs font-bold text-coffee-800 hover:text-coffee-950 bg-stone-100 hover:bg-stone-200 px-3 py-1.5 rounded-xl transition active:scale-95 shadow-2xs"
+          title="Ver todas as minhas palestras e comprovantes"
+        >
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+          <span>Minhas Inscrições</span>
+        </button>
+        <div class="flex items-center gap-2">
+          ${eventoPassado ? `
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-100 text-stone-600 border border-stone-200">
+              ✓ Evento Concluído
+            </span>
+          ` : ''}
+          <span class="text-[11px] font-mono font-bold text-coffee-900 bg-coffee-50 px-2 py-0.5 rounded-md border border-coffee-200">
+            ${is11 ? '11ª Edição' : '10ª Edição'}
+          </span>
+        </div>
+      </div>
       
       <!-- Topo da Credencial -->
       <div class="flex items-center justify-between pb-4 border-b border-coffee-100">
@@ -691,6 +717,11 @@ function exibirCredencialSucesso(aluno) {
           <span>Imprimir / Salvar Credencial em PDF</span>
         </button>
 
+        <button onclick="fecharCredencialModal(); abrirAreaDoAluno();" class="w-full py-2.5 px-4 bg-amber-50 hover:bg-amber-100 text-coffee-950 font-bold text-xs rounded-xl border border-amber-300 transition flex items-center justify-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-amber-700"></i>
+          <span>Ver Todas as Minhas Inscrições</span>
+        </button>
+
         <div class="flex items-center justify-between pt-1 text-xs text-stone-500">
           <span>Identificação: ${aluno.protocolo}</span>
           <button onclick="window.LigaDB.fazerLogout()" class="text-red-600 font-semibold hover:underline">
@@ -796,7 +827,7 @@ function inicializarGoogleIdentityServices() {
               abrirPainelAdmin('inscricoes');
             } else if (usuario.protocolo) {
               mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
-              exibirCredencialSucesso(usuario);
+              abrirAreaDoAluno(usuario);
             } else {
               mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
               preencherFormularioComUsuario(usuario);
@@ -893,7 +924,7 @@ async function loginNativoGooglePopup() {
               abrirPainelAdmin('inscricoes');
             } else if (usuario.protocolo) {
               mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
-              exibirCredencialSucesso(usuario);
+              abrirAreaDoAluno(usuario);
             } else {
               mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
               preencherFormularioComUsuario(usuario);
@@ -1073,7 +1104,7 @@ async function selecionarContaGoogleRapida(nome, email, avatar = '') {
       abrirPainelAdmin('inscricoes');
     } else if (usuario.protocolo) {
       mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
-      exibirCredencialSucesso(usuario);
+      abrirAreaDoAluno(usuario);
     } else {
       mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
       preencherFormularioComUsuario(usuario);
@@ -1137,7 +1168,7 @@ async function confirmarLoginGooglePrompt() {
       abrirPainelAdmin('inscricoes');
     } else if (usuario.protocolo) {
       mostrarToast(`Bem-vindo, ${usuario.nome_completo.split(' ')[0]}!`);
-      exibirCredencialSucesso(usuario);
+      abrirAreaDoAluno(usuario);
     } else {
       mostrarToast(`Conta Google conectada com sucesso! Conclua sua inscrição.`);
       preencherFormularioComUsuario(usuario);
@@ -1155,34 +1186,301 @@ async function confirmarLoginGooglePrompt() {
 }
 
 // ============================================================================
-// SISTEMA DE CONTAS: ÁREA DO ALUNO (PAINEL PESSOAL & CREDENCIAL COMPLETA)
+// SISTEMA DE CONTAS: ÁREA DO ALUNO (PAINEL PESSOAL & MÚLTIPLAS INSCRIÇÕES)
 // ============================================================================
-async function abrirAreaDoAluno() {
-  const usuario = window.LigaDB.getUsuarioLogado();
+async function abrirAreaDoAluno(usuarioForcado = null) {
+  const usuario = usuarioForcado || window.LigaDB.getUsuarioLogado();
 
   if (!usuario) {
     abrirModalLogin();
     return;
   }
 
-  // Busca dados mais recentes no banco
-  let alunoAtualizado = usuario;
-  try {
-    const fresh = await window.LigaDB.buscarInscricao(usuario.protocolo || usuario.email);
-    if (fresh) alunoAtualizado = { ...usuario, ...fresh };
-  } catch (e) {}
-
-  // Se o aluno já tem inscrição registrada, abre DIRETAMENTE a credencial em tamanho real!
-  if (alunoAtualizado.protocolo) {
-    exibirCredencialSucesso(alunoAtualizado);
-    return;
-  }
-
-  // Se o usuário logou com Google antes de se inscrever, mostra o status pré-inscrito
   const modal = document.getElementById('areaAlunoModal');
   const content = document.getElementById('areaAlunoContent');
   if (!modal || !content) return;
 
+  // Exibe tela de carregamento rápida
+  content.innerHTML = `
+    <div class="py-12 text-center text-stone-500 space-y-3">
+      <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-coffee-600 mx-auto"></i>
+      <p class="text-sm font-semibold text-coffee-900">Carregando seus comprovantes e inscrições...</p>
+    </div>
+  `;
+  if (window.lucide) window.lucide.createIcons();
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  // Busca TODAS as inscrições deste aluno no banco
+  let inscricoes = [];
+  try {
+    inscricoes = await window.LigaDB.buscarTodasInscricoes(usuario.email || usuario.protocolo || '');
+  } catch (e) {
+    console.warn('Erro ao consultar inscrições:', e);
+  }
+
+  // Fallback caso não tenha achado pelo email mas o usuário tenha protocolo na sessão
+  if (inscricoes.length === 0 && usuario.protocolo) {
+    inscricoes = [usuario];
+  }
+
+  // Se o aluno não possui nenhuma inscrição (logou com Google antes de se inscrever)
+  if (inscricoes.length === 0) {
+    renderizarAreaAlunoSemInscricao(content, usuario);
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  // Se o aluno possui 1 ou mais inscrições, renderiza o hub completo com todos os comprovantes
+  renderizarAreaAlunoComInscricoes(content, usuario, inscricoes);
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
+  const nomeAluno = inscricoes[0]?.nome_completo || usuario.nome_completo || 'Participante';
+  const emailAluno = inscricoes[0]?.email || usuario.email || '';
+  const totalInscricoes = inscricoes.length;
+
+  // Verifica em quais edições está inscrito
+  const temEdicao10 = inscricoes.some(i => (i.protocolo && i.protocolo.startsWith('CC10-')) || (i.edicao && parseInt(i.edicao, 10) === 10));
+  const temEdicao11 = inscricoes.some(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || (i.edicao && parseInt(i.edicao, 10) === 11));
+
+  // Ordena para que 10 venha primeiro e 11 depois
+  const inscricoesOrdenadas = [...inscricoes].sort((a, b) => {
+    const edA = (a.protocolo && a.protocolo.startsWith('CC11-')) || parseInt(a.edicao, 10) === 11 ? 11 : 10;
+    const edB = (b.protocolo && b.protocolo.startsWith('CC11-')) || parseInt(b.edicao, 10) === 11 ? 11 : 10;
+    return edA - edB;
+  });
+
+  const cardsHtml = inscricoesOrdenadas.map(inscricao => {
+    const is11 = (inscricao.protocolo && inscricao.protocolo.startsWith('CC11-')) || (inscricao.edicao && parseInt(inscricao.edicao, 10) === 11);
+    const edicaoNum = is11 ? 11 : 10;
+    const tituloPalestra = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
+    const temaPalestra = is11 ? 'Diagnóstico e Planejamento na Reabilitação Oral' : 'Atendimento Odontológico de Pacientes Hospitalizados';
+    const palestrante = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
+    const dataHora = is11 ? '06 de Novembro · 16:00h' : '30 de Outubro · 15:00h';
+    const local = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
+    const dataEventoObj = is11 ? new Date(2026, 10, 6, 20, 0) : new Date(2026, 9, 30, 20, 0);
+    const eventoPassado = new Date() > dataEventoObj;
+
+    const statusPagamentoHtml = inscricao.status_pagamento === 'aprovado'
+      ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-300">
+           <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-600"></i> Pagamento Validado
+         </span>`
+      : `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-300">
+           <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-600"></i> Comprovante em Análise
+         </span>`;
+
+    const statusPresencaHtml = inscricao.presenca_confirmada
+      ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-300">
+           <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Presença Confirmada
+         </span>`
+      : '';
+
+    const badgeEventoHtml = eventoPassado
+      ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-100 text-stone-700 border border-stone-300">
+           ✓ Evento Realizado · Comprovante Arquivado
+         </span>`
+      : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+           ⏳ Próximo Evento · Apresente na Entrada
+         </span>`;
+
+    const certificadoLiberado = (window.LigaDB?.estaoCertificadosLiberados && window.LigaDB.estaoCertificadosLiberados()) || inscricao.presenca_confirmada;
+
+    return `
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 ${is11 ? 'border-amber-200 hover:border-amber-400' : 'border-coffee-200 hover:border-coffee-400'} shadow-sm transition space-y-3.5 text-left">
+        
+        <!-- Topo do Card -->
+        <div class="flex items-start justify-between gap-2 border-b border-stone-100 pb-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${is11 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-coffee-100 text-coffee-950 border border-coffee-300'}">
+                ${edicaoNum}ª Edição
+              </span>
+              ${badgeEventoHtml}
+            </div>
+            <h4 class="font-extrabold text-sm sm:text-base text-coffee-950 leading-snug">
+              ${tituloPalestra}: ${temaPalestra}
+            </h4>
+          </div>
+
+          <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-stone-100 text-stone-800 border border-stone-200 shrink-0">
+            ${inscricao.protocolo}
+          </span>
+        </div>
+
+        <!-- Detalhes do Evento -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-stone-600">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-coffee-600 shrink-0"></i>
+            <span><strong>Palestrante:</strong> ${palestrante}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="calendar" class="w-4 h-4 text-coffee-600 shrink-0"></i>
+            <span><strong>Data:</strong> ${dataHora}</span>
+          </div>
+          <div class="flex items-center gap-1.5 sm:col-span-2">
+            <i data-lucide="map-pin" class="w-4 h-4 text-coffee-600 shrink-0"></i>
+            <span><strong>Local:</strong> ${local}</span>
+          </div>
+        </div>
+
+        <!-- Status Pagamento e Presença -->
+        <div class="flex items-center gap-2 flex-wrap pt-1">
+          ${statusPagamentoHtml}
+          ${statusPresencaHtml}
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="pt-2 flex flex-col sm:flex-row gap-2">
+          <button 
+            onclick="abrirCredencialPorProtocolo('${inscricao.protocolo}')"
+            class="flex-1 py-2.5 px-3 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-98"
+          >
+            <i data-lucide="qr-code" class="w-4 h-4 text-amber-300"></i>
+            <span>Ver Comprovante & QR Code</span>
+          </button>
+
+          ${certificadoLiberado ? `
+            <a 
+              href="certificados.html?protocolo=${inscricao.protocolo}" 
+              target="_blank" 
+              class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+            >
+              <i data-lucide="award" class="w-4 h-4"></i>
+              <span>Baixar Certificado (4h)</span>
+            </a>
+          ` : `
+            <span class="py-2 px-3 bg-stone-100 text-stone-400 font-medium text-[11px] rounded-xl flex items-center justify-center gap-1 cursor-not-allowed" title="Certificado liberado após o evento e confirmação de presença">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i>
+              <span>Certificado 4h (Pós-evento)</span>
+            </span>
+          `}
+        </div>
+
+      </div>
+    `;
+  }).join('');
+
+  // Sugestão de inscrição na outra edição caso só tenha 1
+  let bannerOutraEdicaoHtml = '';
+  if (temEdicao10 && !temEdicao11) {
+    bannerOutraEdicaoHtml = `
+      <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 text-left space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">
+            Próxima Palestra Disponível
+          </span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-sm font-bold text-coffee-950">
+          11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral
+        </h5>
+        <p class="text-xs text-stone-600">
+          Com a <strong>Dra. Thaissa Calab</strong> no dia 06 de Novembro às 16:00h. Garanta seu certificado de mais 4 horas!
+        </p>
+        <a 
+          href="11cafe.html#inscricao" 
+          onclick="fecharAreaDoAluno()" 
+          class="inline-flex items-center gap-2 px-4 py-2 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow"
+        >
+          <span>Garantir Vaga no 11° Café (R$ 10)</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `;
+  } else if (temEdicao11 && !temEdicao10) {
+    bannerOutraEdicaoHtml = `
+      <div class="p-4 bg-gradient-to-r from-amber-50 to-stone-50 rounded-2xl border-2 border-amber-300 text-left space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">
+            Palestra Disponível
+          </span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-sm font-bold text-coffee-950">
+          10° Café com Ciência: Atendimento Odontológico de Pacientes Hospitalizados
+        </h5>
+        <p class="text-xs text-stone-600">
+          Com a <strong>Profa. Carolina Diniz</strong> no dia 30 de Outubro às 15:00h. Garanta seu certificado de 4 horas!
+        </p>
+        <a 
+          href="index.html#inscricao" 
+          onclick="fecharAreaDoAluno()" 
+          class="inline-flex items-center gap-2 px-4 py-2 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow"
+        >
+          <span>Garantir Vaga no 10° Café (R$ 10)</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `;
+  } else if (temEdicao10 && temEdicao11) {
+    bannerOutraEdicaoHtml = `
+      <div class="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-300 text-xs text-emerald-950 text-left flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+          <i data-lucide="award" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <p class="font-bold text-emerald-900">Ciclo Completo de Palestras!</p>
+          <p class="text-[11px] text-emerald-800">Você garantiu sua participação na 10ª e 11ª edição. Seus comprovantes e certificados de 8 horas no total ficam arquivados permanentemente aqui.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  content.innerHTML = `
+    <div class="space-y-5">
+      
+      <!-- Cabeçalho do Aluno -->
+      <div class="flex items-center justify-between border-b border-coffee-100 pb-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-900 font-black flex items-center justify-center border border-amber-300 shrink-0 text-base">
+            ${nomeAluno.charAt(0).toUpperCase()}
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-base sm:text-lg font-black text-coffee-950 leading-tight truncate">
+              ${nomeAluno}
+            </h3>
+            <p class="text-xs text-stone-500 font-mono truncate">${emailAluno}</p>
+          </div>
+        </div>
+
+        <button onclick="window.LigaDB.fazerLogout()" class="text-xs font-bold text-red-600 hover:text-red-800 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition shrink-0" title="Sair da conta">
+          Sair
+        </button>
+      </div>
+
+      <!-- Resumo Informativo -->
+      <div class="p-3.5 bg-stone-50 rounded-2xl border border-stone-200 text-xs text-stone-700 text-left flex items-center justify-between gap-3">
+        <div>
+          <p class="font-bold text-coffee-950">Seus Comprovantes de Inscrição (${totalInscricoes})</p>
+          <p class="text-[11px] text-stone-500 mt-0.5">
+            Acesse seus comprovantes com QR Code oficial e certificados a qualquer momento, mesmo após o término dos eventos.
+          </p>
+        </div>
+        <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-coffee-100 text-coffee-900 shrink-0">
+          ${totalInscricoes} ${totalInscricoes === 1 ? 'Palestra' : 'Palestras'}
+        </span>
+      </div>
+
+      <!-- Lista de Inscrições / Comprovantes -->
+      <div class="space-y-3.5">
+        ${cardsHtml}
+      </div>
+
+      <!-- Sugestão da Outra Palestra (se aplicável) -->
+      ${bannerOutraEdicaoHtml}
+
+      <!-- Rodapé -->
+      <div class="pt-2 text-center text-[11px] text-stone-400 border-t border-stone-100">
+        Café com Ciência · Liga Odontológica UniArnaldo
+      </div>
+
+    </div>
+  `;
+}
+
+function renderizarAreaAlunoSemInscricao(content, usuario) {
   content.innerHTML = `
     <div class="space-y-6 text-center py-2">
       <div class="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 flex items-center justify-center mx-auto">
@@ -1190,8 +1488,8 @@ async function abrirAreaDoAluno() {
       </div>
 
       <div>
-        <h3 class="text-xl font-black text-coffee-950">${alunoAtualizado.nome_completo}</h3>
-        <p class="text-xs text-stone-500 font-mono">${alunoAtualizado.email}</p>
+        <h3 class="text-xl font-black text-coffee-950">${usuario.nome_completo || 'Aluno Conectado'}</h3>
+        <p class="text-xs text-stone-500 font-mono">${usuario.email || ''}</p>
         <span class="inline-block mt-2 px-3 py-1 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-full text-xs font-semibold">
           ✓ Conta Google Conectada
         </span>
@@ -1200,28 +1498,46 @@ async function abrirAreaDoAluno() {
       <div class="p-4 bg-amber-50/90 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-2">
         <p class="font-bold flex items-center gap-1.5 text-amber-950">
           <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          Quase lá! Conclua sua inscrição:
+          Você ainda não se inscreveu nas palestras:
         </p>
         <p class="leading-relaxed">
-          Você já está conectado ao sistema, mas ainda não concluiu o pagamento do Pix de R$ 10,00 para gerar sua credencial oficial com o QR Code de entrada.
+          Sua conta está conectada, mas você ainda não concluiu o pagamento do Pix (R$ 10,00) para gerar sua credencial oficial com QR Code. Escolha a palestra abaixo para se inscrever:
         </p>
       </div>
 
-      <div class="space-y-2 pt-2">
-        <a href="#inscricao" onclick="fecharAreaDoAluno()" class="w-full py-3.5 px-4 gradient-cta text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-          <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
-          <span>Garantir Vaga e Fazer Inscrição Agora (R$ 10)</span>
+      <div class="space-y-3 pt-1 text-left">
+        <!-- Card 10° Café -->
+        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-stone-200 hover:border-coffee-500 hover:bg-stone-50 transition flex items-center justify-between gap-3 group">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-coffee-700 bg-coffee-50 px-2 py-0.5 rounded border border-coffee-200">10ª Edição · 30/Out</span>
+            <h5 class="text-xs font-bold text-stone-900 mt-1">Atendimento Odontológico de Pacientes Hospitalizados</h5>
+            <p class="text-[11px] text-stone-500">Profa. Carolina Diniz · 15:00h</p>
+          </div>
+          <span class="px-3 py-1.5 bg-coffee-800 group-hover:bg-coffee-900 text-white rounded-xl text-xs font-bold shrink-0">
+            Inscrever (R$ 10)
+          </span>
         </a>
+
+        <!-- Card 11° Café -->
+        <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-amber-200 hover:border-amber-500 hover:bg-amber-50/50 transition flex items-center justify-between gap-3 group">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">11ª Edição · 06/Nov</span>
+            <h5 class="text-xs font-bold text-stone-900 mt-1">Diagnóstico e Planejamento na Reabilitação Oral</h5>
+            <p class="text-[11px] text-stone-500">Dra. Thaissa Calab · 16:00h</p>
+          </div>
+          <span class="px-3 py-1.5 bg-amber-700 group-hover:bg-amber-800 text-white rounded-xl text-xs font-bold shrink-0">
+            Inscrever (R$ 10)
+          </span>
+        </a>
+      </div>
+
+      <div class="pt-2">
         <button onclick="window.LigaDB.fazerLogout()" class="w-full py-2 px-4 text-stone-400 hover:text-red-600 text-xs font-semibold transition">
           Sair da Conta Google
         </button>
       </div>
     </div>
   `;
-
-  if (window.lucide) window.lucide.createIcons();
-  modal.classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
 }
 
 function fecharAreaDoAluno() {
@@ -1265,7 +1581,7 @@ async function executarBuscaInscricao() {
   const termo = input?.value.trim();
 
   if (!termo) {
-    alert('Digite seu e-mail, telefone ou protocolo (ex: CC10-123456)');
+    alert('Digite seu e-mail, telefone ou protocolo (ex: CC10-123456 ou CC11-123456)');
     return;
   }
 
@@ -1279,9 +1595,9 @@ async function executarBuscaInscricao() {
   if (window.lucide) window.lucide.createIcons();
 
   try {
-    const aluno = await window.LigaDB.buscarInscricao(termo);
+    const inscricoes = await window.LigaDB.buscarTodasInscricoes(termo);
 
-    if (!aluno) {
+    if (!inscricoes || inscricoes.length === 0) {
       resultDiv.innerHTML = `
         <div class="p-4 bg-stone-50 border border-stone-200 rounded-2xl text-center space-y-2 text-xs">
           <i data-lucide="search-x" class="w-8 h-8 text-stone-400 mx-auto"></i>
@@ -1293,9 +1609,17 @@ async function executarBuscaInscricao() {
       return;
     }
 
-    // Fecha o modal de busca e exibe DIRETAMENTE a credencial em tamanho real com o grande QR code
+    // Se encontrou mais de 1 inscrição (ex: 10ª e 11ª edições)
+    if (inscricoes.length > 1) {
+      fecharModalConsulta();
+      abrirAreaDoAluno(inscricoes[0]);
+      mostrarToast(`Encontramos ${inscricoes.length} inscrições para os seus dados!`);
+      return;
+    }
+
+    // Se encontrou 1 inscrição: exibe a credencial diretamente
     fecharModalConsulta();
-    exibirCredencialSucesso(aluno);
+    exibirCredencialSucesso(inscricoes[0]);
     mostrarToast('Inscrição localizada! Sua credencial com QR Code está na tela.');
 
   } catch (err) {

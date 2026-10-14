@@ -144,9 +144,19 @@
         }
       }
 
+      const is11 = (aluno?.protocolo && aluno.protocolo.startsWith('CC11-')) || (aluno?.edicao && parseInt(aluno.edicao, 10) === 11) || params.get('edicao') === '11';
+      const nomeEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
+      const temaPalestra = is11 ? '"11º CAFÉ COM CIÊNCIA : Diagnóstico e Planejamento na Reabilitação Oral"' : '"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"';
+      const palestranteNome = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
+      const dataDefault = is11 ? '2026-11-06' : '2026-10-30';
+
+      document.title = `Certificado Oficial - ${nomeEvento}`;
+      const subtitleEl = document.querySelector('header p.text-stone-400');
+      if (subtitleEl) subtitleEl.textContent = `${nomeEvento}: ${is11 ? 'Diagnóstico e Planejamento na Reabilitação Oral' : 'Os Direitos dos Pacientes na Odontologia'}`;
+
       const nomeFinal = aluno ? aluno.nome_completo : (nomeParam || 'Participante Oficial');
-      const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-CC10-${Math.floor(100000 + Math.random() * 900000)}`;
-      const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || '2026-10-30');
+      const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-${is11 ? 'CC11' : 'CC10'}-${Math.floor(100000 + Math.random() * 900000)}`;
+      const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || dataDefault);
 
       // Verifica se a comissão da Liga liberou os certificados
       const isLiberado = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
@@ -164,14 +174,14 @@
             </div>
             <h2 class="text-xl font-bold text-stone-900 mb-2">Certificados em Processo de Emissão</h2>
             <p class="text-sm text-stone-600 leading-relaxed mb-6">
-              Os certificados oficiais do <strong>10° Café com Ciência</strong> estão em fase de coleta e autenticação de assinaturas pela coordenação acadêmica do UniArnaldo. Assim que a comissão organizadora liberar a emissão no sistema, o download da sua declaração oficial de 4 horas estará disponível nesta página.
+              Os certificados oficiais do <strong>${nomeEvento}</strong> estão em fase de coleta e autenticação de assinaturas pela coordenação acadêmica do UniArnaldo. Assim que a comissão organizadora liberar a emissão no sistema, o download da sua declaração oficial de 4 horas estará disponível nesta página.
             </p>
             <div class="p-4 bg-stone-50 rounded-2xl text-xs text-stone-600 mb-6 text-left space-y-1.5 border border-stone-200">
               <p><strong>Participante:</strong> ${nomeFinal}</p>
               ${aluno?.protocolo ? `<p><strong>Protocolo:</strong> ${aluno.protocolo}</p>` : ''}
               <p><strong>Status de Presença:</strong> ${aluno?.presenca_confirmada ? '✅ Presença Confirmada no Evento' : '⏳ Aguardando confirmação no dia da palestra'}</p>
             </div>
-            <a href="index.html" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
+            <a href="${is11 ? '11cafe.html' : 'index.html'}" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
               <span>Voltar para a Página do Evento</span>
             </a>
@@ -200,7 +210,7 @@
             <h1 class="text-4xl sm:text-5xl font-bold text-black mb-14 tracking-wide uppercase">Declaração</h1>
 
             <p class="text-lg sm:text-xl text-center text-black leading-relaxed max-w-4xl font-normal">
-              Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da palestra <strong>"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"</strong>, ministrada pela Profa. Carolina Diniz e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de 4 horas.
+              Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da palestra <strong>${temaPalestra}</strong>, ministrada pela ${palestranteNome} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de 4 horas.
             </p>
 
             <p class="text-base sm:text-lg text-center text-black mt-16 font-normal">

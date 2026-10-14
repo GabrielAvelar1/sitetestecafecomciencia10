@@ -625,9 +625,9 @@ async function buscarInscricao(termo) {
   const sb = getSupabase();
   if (sb) {
     try {
-      let query = sb.from(SUPABASE_CONFIG.tableName).select('*');
+      let query = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
 
-      if (termoLimpo.startsWith('cc10-')) {
+      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-')) {
         query = query.ilike('protocolo', termoLimpo);
       } else if (termoLimpo.includes('@')) {
         query = query.ilike('email', termoLimpo);
@@ -646,10 +646,50 @@ async function buscarInscricao(termo) {
   // Fallback Local
   const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
   return inscricoes.find(i => 
-    (i.protocolo && i.protocolo.toLowerCase() === termoLimpo) ||
-    (i.email && i.email.toLowerCase() === termoLimpo) ||
-    (i.telefone && i.telefone.replace(/\D/g, '') === termoTel && termoTel.length >= 8)
+    i.role !== 'organizador' && (
+      (i.protocolo && i.protocolo.toLowerCase() === termoLimpo) ||
+      (i.email && i.email.toLowerCase() === termoLimpo) ||
+      (i.telefone && i.telefone.replace(/\D/g, '') === termoTel && termoTel.length >= 8)
+    )
   ) || null;
+}
+
+// Retorna TODAS as inscrições de um participante (por e-mail, telefone ou protocolo)
+async function buscarTodasInscricoes(termo) {
+  if (!termo) return [];
+  const termoLimpo = termo.trim().toLowerCase();
+  const termoTel = termo.replace(/\D/g, '');
+
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      let query = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
+
+      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-')) {
+        query = query.ilike('protocolo', termoLimpo);
+      } else if (termoLimpo.includes('@')) {
+        query = query.ilike('email', termoLimpo);
+      } else {
+        query = query.or(`protocolo.ilike.%${termoLimpo}%,email.ilike.%${termoLimpo}%,telefone.ilike.%${termoTel || termoLimpo}%`);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) throw error;
+      if (data && data.length > 0) return data;
+    } catch (e) {
+      console.warn('Erro ao consultar Supabase:', e);
+    }
+  }
+
+  // Fallback Local
+  const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
+  return inscricoes.filter(i => 
+    i.role !== 'organizador' && (
+      (i.protocolo && i.protocolo.toLowerCase() === termoLimpo) ||
+      (i.email && i.email.toLowerCase() === termoLimpo) ||
+      (i.telefone && i.telefone.replace(/\D/g, '') === termoTel && termoTel.length >= 8)
+    )
+  );
 }
 
 // ============================================================================
@@ -1012,6 +1052,7 @@ window.LigaDB = {
   salvarContaGoogleRecente,
   registrarInscricao,
   buscarInscricao,
+  buscarTodasInscricoes,
   validarPresencaPorQRCode,
   listarInscricoes,
   atualizarStatusPagamento,
