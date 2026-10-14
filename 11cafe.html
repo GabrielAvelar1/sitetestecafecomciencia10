@@ -95,7 +95,10 @@
           <span class="hidden sm:inline">Calendário</span>
         </a>
 
-        <a href="admin.html" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded-xl border border-amber-300 transition">
+        <!-- Área da Conta do Usuário (Desktop) -->
+        <div id="userAreaDesktop"></div>
+
+        <a id="btnPainelLigaDesktop" href="admin.html" class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 rounded-xl border border-amber-300 transition">
           <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
           <span>Painel da Liga</span>
         </a>
@@ -174,10 +177,10 @@
               <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </a>
 
-            <a href="admin.html" class="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-xs sm:text-sm font-semibold text-stone-200 bg-white/10 hover:bg-white/15 border border-white/20 transition backdrop-blur-md">
-              <i data-lucide="shield-check" class="w-4 h-4 text-amber-300"></i>
-              <span>Gerenciar no Painel da Liga</span>
-            </a>
+            <button onclick="abrirAreaDoAluno()" class="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-xs sm:text-sm font-semibold text-stone-200 bg-white/10 hover:bg-white/15 border border-white/20 transition backdrop-blur-md">
+              <i data-lucide="user-check" class="w-4 h-4 text-amber-300"></i>
+              <span>Já me inscrevi (Ver Credencial)</span>
+            </button>
           </div>
 
           <div class="flex items-center gap-2 text-stone-300 text-xs pt-1">
@@ -753,7 +756,7 @@
           <a href="index.html" class="text-stone-300 hover:text-white">
             10ª Edição
           </a>
-          <a href="admin.html" class="text-stone-400 hover:text-white">
+          <a id="btnPainelLigaFooter" href="admin.html" class="hidden text-stone-400 hover:text-white">
             Painel da Liga
           </a>
         </div>

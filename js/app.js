@@ -45,7 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 // CONTROLE DE INTERFACE POR USUÁRIO (ALUNO VS ORGANIZADOR VS VISITANTE)
 // ============================================================================
 function atualizarInterfaceUsuario() {
-  const usuario = window.LigaDB.getUsuarioLogado();
+  const usuario = window.LigaDB?.getUsuarioLogado ? window.LigaDB.getUsuarioLogado() : null;
+  const isOrg = usuario && usuario.role === 'organizador';
+
+  // Ocultar ou exibir todos os elementos exclusivos da comissão da Liga
+  const elementosLiga = document.querySelectorAll('.liga-only, #btnPainelLigaDesktop, #btnPainelLigaMobile, #btnPainelLigaFooter, #sepPainelLigaFooter');
+  elementosLiga.forEach(el => {
+    if (isOrg) {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+    }
+  });
+
   const btnPainelLigaDesk = document.getElementById('btnPainelLigaDesktop');
   const btnPainelLigaMob = document.getElementById('btnPainelLigaMobile');
   const userAreaDesk = document.getElementById('userAreaDesktop');
@@ -55,7 +67,7 @@ function atualizarInterfaceUsuario() {
     const primeiroNome = usuario.nome_completo ? usuario.nome_completo.split(' ')[0] : 'Participante';
     preencherFormularioComUsuario(usuario);
 
-    if (usuario.role === 'organizador') {
+    if (isOrg) {
       // Organizador logado: mostra o Painel da Liga
       if (btnPainelLigaDesk) btnPainelLigaDesk.classList.remove('hidden');
       if (btnPainelLigaMob) btnPainelLigaMob.classList.remove('hidden');

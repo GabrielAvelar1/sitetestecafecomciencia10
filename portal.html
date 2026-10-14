@@ -78,8 +78,9 @@
         </a>
 
         <a 
+          id="btnPainelLigaDesktop"
           href="admin.html" 
-          class="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 transition" 
+          class="hidden inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 rounded-xl border border-amber-200 transition" 
           title="Acesso da Coordenação da Liga"
         >
           <i data-lucide="shield-check" class="w-4 h-4 text-amber-700"></i>
@@ -323,8 +324,8 @@
         <a href="index.html" class="hover:text-amber-300 transition">10ª Edição (30/10)</a>
         <span>·</span>
         <a href="11cafe.html" class="hover:text-amber-300 transition">11ª Edição (06/11)</a>
-        <span>·</span>
-        <a href="admin.html" class="hover:text-amber-300 transition">Painel da Liga</a>
+        <span id="sepPainelLigaFooter" class="hidden">·</span>
+        <a id="btnPainelLigaFooter" href="admin.html" class="hidden hover:text-amber-300 transition">Painel da Liga</a>
         <span>·</span>
         <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="hover:text-pink-400 transition">Instagram</a>
       </div>
@@ -334,8 +335,30 @@
     </div>
   </footer>
 
+  <!-- Scripts da Aplicação -->
+  <script src="js/supabase-client.js"></script>
   <script>
     if (window.lucide) window.lucide.createIcons();
+
+    function checarAcessoLigaPortal() {
+      const isOrg = window.LigaDB?.isOrganizadorLogado && window.LigaDB.isOrganizadorLogado();
+      const btnDesk = document.getElementById('btnPainelLigaDesktop');
+      const btnFoot = document.getElementById('btnPainelLigaFooter');
+      const sepFoot = document.getElementById('sepPainelLigaFooter');
+      if (isOrg) {
+        if (btnDesk) btnDesk.classList.remove('hidden');
+        if (btnFoot) btnFoot.classList.remove('hidden');
+        if (sepFoot) sepFoot.classList.remove('hidden');
+      } else {
+        if (btnDesk) btnDesk.classList.add('hidden');
+        if (btnFoot) btnFoot.classList.add('hidden');
+        if (sepFoot) sepFoot.classList.add('hidden');
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    document.addEventListener('DOMContentLoaded', checarAcessoLigaPortal);
+    window.addEventListener('auth_state_changed', checarAcessoLigaPortal);
   </script>
 
 </body>
