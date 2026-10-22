@@ -95,7 +95,7 @@ exports.handler = async (event, context) => {
         });
 
         const mailOptions = {
-          from: customFrom || `10° Café com Ciência <${gmailUser.trim()}>`,
+          from: customFrom || `Café com Ciência <${gmailUser.trim()}>`,
           to: Array.isArray(to) ? to.join(', ') : to,
           subject,
           html: html || undefined,

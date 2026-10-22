@@ -576,10 +576,10 @@ function exibirCredencialSucesso(aluno) {
                (aluno.edicao && parseInt(aluno.edicao, 10) === 11) ||
                (!aluno.protocolo?.startsWith('CC10-') && window.EDICAO_ATUAL === 11);
   const tituloEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
-  const dataEvento = is11 ? '06 de Novembro · 16:00 horas' : '30 de Outubro · 15:00 horas';
+  const dataEvento = is11 ? '18 de Novembro · 16:00 horas' : '30 de Outubro · 15:00 horas';
   const localEvento = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
   const palestranteEvento = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
-  const dataEventoObj = is11 ? new Date(2026, 10, 6, 20, 0) : new Date(2026, 9, 30, 20, 0);
+  const dataEventoObj = is11 ? new Date(2026, 10, 18, 20, 0) : new Date(2026, 9, 30, 20, 0);
   const eventoPassado = new Date() > dataEventoObj;
 
   // QR Code em alta definição (350x350) com margem adequada para leitura fácil por câmeras
@@ -1258,9 +1258,9 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
     const tituloPalestra = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
     const temaPalestra = is11 ? 'Diagnóstico e Planejamento na Reabilitação Oral' : 'Atendimento Odontológico de Pacientes Hospitalizados';
     const palestrante = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
-    const dataHora = is11 ? '06 de Novembro · 16:00h' : '30 de Outubro · 15:00h';
+    const dataHora = is11 ? '18 de Novembro · 16:00h' : '30 de Outubro · 15:00h';
     const local = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
-    const dataEventoObj = is11 ? new Date(2026, 10, 6, 20, 0) : new Date(2026, 9, 30, 20, 0);
+    const dataEventoObj = is11 ? new Date(2026, 10, 18, 20, 0) : new Date(2026, 9, 30, 20, 0);
     const eventoPassado = new Date() > dataEventoObj;
 
     const statusPagamentoHtml = inscricao.status_pagamento === 'aprovado'
@@ -1377,7 +1377,7 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
           11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral
         </h5>
         <p class="text-xs text-stone-600">
-          Com a <strong>Dra. Thaissa Calab</strong> no dia 06 de Novembro às 16:00h. Garanta seu certificado de mais 4 horas!
+          Com a <strong>Dra. Thaissa Calab</strong> no dia 18 de Novembro às 16:00h. Garanta seu certificado de mais 4 horas!
         </p>
         <a 
           href="11cafe.html#inscricao" 

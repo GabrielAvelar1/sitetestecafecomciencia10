@@ -226,7 +226,7 @@ function selecionarEdicaoAdmin(edicao) {
   } else if (edicao === '11' && btn11) {
     btn11.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btn11.classList.remove('text-stone-600', 'font-semibold');
-    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Dra. Thaissa Calab · 06/11)';
+    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Dra. Thaissa Calab · 18/11)';
   } else if (btnTodas) {
     btnTodas.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btnTodas.classList.remove('text-stone-600', 'font-semibold');
@@ -559,6 +559,10 @@ const MODELOS_LEMBRETES = {
   'hoje_portaria': {
     titulo: 'Lembrete: É hoje! Portaria aberta',
     texto: `Olá [NOME]! O *10° Café com Ciência* acontece HOJE às 15h00 na Sala 306 da UniArnaldo (Campus Anchieta)!\n\nChegue com 15 minutos de antecedência e apresente seu QR Code na entrada:\n[LINK_CREDENCIAL]\n\nAté logo!`
+  },
+  'mudanca_data': {
+    titulo: 'Comunicado: Alteração de Data (18/11)',
+    texto: `Olá [NOME]! Informamos que a data do *11° Café com Ciência* com a Dra. Thaissa Calab foi alterada para *18 de Novembro às 16:00 horas* (UniArnaldo - Campus Anchieta, Sala 306).\n\nSua inscrição e vaga continuam *100% garantidas* com o mesmo protocolo:\n[LINK_CREDENCIAL]\n\nContamos com sua presença!`
   },
   'certificado': {
     titulo: 'Aviso: Seu Certificado Oficial está disponível!',
@@ -1148,8 +1152,9 @@ async function enviarEmailIndividualAdmin(id) {
     `1: Credencial Oficial com QR Code (Confirmação de Inscrição)\n` +
     `2: Confirmação de Presença (Validação da Portaria)\n` +
     `3: Lembrete do Evento (Conforme modelo selecionado)\n` +
-    `4: Certificado Oficial de 4 Horas\n\n` +
-    `Digite o número da opção (1, 2, 3 ou 4):`;
+    `4: Certificado Oficial de 4 Horas\n` +
+    `5: Comunicado de Alteração de Data (18/11)\n\n` +
+    `Digite o número da opção (1, 2, 3, 4 ou 5):`;
 
   const opcao = prompt(msg, '1');
   if (!opcao) return;
@@ -1168,6 +1173,9 @@ async function enviarEmailIndividualAdmin(id) {
     } else if (opcao === '4') {
       await window.EmailService.enviarEmailCertificado(aluno);
       alert(`E-mail com o Certificado Oficial enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '5') {
+      await window.EmailService.enviarEmailMudancaData(aluno);
+      alert(`Comunicado de alteração de data enviado com sucesso para ${aluno.email}!`);
     } else {
       alert('Opção inválida.');
     }
@@ -1206,6 +1214,9 @@ async function dispararEmailsEmLoteResend() {
             await window.EmailService.enviarEmailCertificado(aluno);
             enviados++;
           }
+        } else if (tipo === 'mudanca_data') {
+          await window.EmailService.enviarEmailMudancaData(aluno);
+          enviados++;
         } else {
           await window.EmailService.enviarEmailLembrete(aluno, tipo);
           enviados++;

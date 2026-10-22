@@ -146,8 +146,8 @@
         tituloEdicao: '11° CAFÉ COM CIÊNCIA',
         subtituloEdicao: 'Diagnóstico e Planejamento na Reabilitação Oral',
         badgePadrao: '11ª Edição Especial · UniArnaldo',
-        dataHora: '06 de Novembro de 2026 às 16:00 horas',
-        dataCurta: '06/11 às 16h',
+        dataHora: '18 de Novembro de 2026 às 16:00 horas',
+        dataCurta: '18/11 às 16h',
         local: 'UniArnaldo · Campus Anchieta (Sala a definir)',
         palestrante: 'Dra. Thaissa Calab',
         urlPagina: '11cafe.html'
@@ -454,6 +454,54 @@
   /**
    * Mock para testes e prévias de e-mails
    */
+  /**
+   * 5. E-mail de Comunicado: Alteração de Data do Evento
+   */
+  async function enviarEmailMudancaData(aluno, novaDataFormatada = null) {
+    if (!aluno || !aluno.email) return;
+
+    const urlBase = getUrlBase();
+    const dados = obterDadosEdicao(aluno);
+    const linkCredencial = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
+    const dataAlvo = novaDataFormatada || dados.dataHora;
+
+    const conteudoHtml = `
+      <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
+      <p>A comissão organizadora do <strong>${dados.tituloEdicao}</strong> gostaria de comunicar uma importante atualização na programação da nossa palestra:</p>
+      
+      <div style="background-color: #fff9f3; border-left: 4px solid #d97706; padding: 16px 20px; margin: 22px 0; border-radius: 0 12px 12px 0;">
+        <div style="font-size: 11px; color: #92400e; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">📢 Nova Data Confirmada:</div>
+        <div style="font-size: 20px; font-weight: 800; color: #451a03; margin: 6px 0;">${dataAlvo}</div>
+        <div style="font-size: 13px; color: #78350f;"><strong>Tema:</strong> ${dados.subtituloEdicao}<br><strong>Palestrante:</strong> ${dados.palestrante}<br><strong>Local:</strong> ${dados.local}</div>
+      </div>
+
+      <p>Sua vaga e inscrição continuam <strong>100% ativas e garantidas</strong>. O seu protocolo oficial e QR Code continuam exatamente os mesmos, não sendo necessária nenhuma ação ou pagamento adicional:</p>
+
+      <div style="background-color: #f5f5f4; border: 1px dashed #d6d3d1; padding: 14px 18px; margin: 18px 0; border-radius: 10px; text-align: center;">
+        <div style="font-size: 11px; color: #78716c; text-transform: uppercase; font-weight: 700;">Seu Protocolo Oficial</div>
+        <div style="font-size: 22px; font-weight: 900; font-family: monospace; color: #292524; letter-spacing: 1px; margin: 4px 0;">${aluno.protocolo}</div>
+        <div style="font-size: 11px; color: #a8a29e;">Apresente sua credencial digital na portaria para check-in rápido</div>
+      </div>
+
+      <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 4 Horas</strong> complementares.</p>
+      <p>Agradecemos imensamente a sua compreensão e estamos à disposição para qualquer dúvida. Nos vemos no dia <strong>${dados.dataCurta}</strong>!</p>
+    `;
+
+    return enviarEmail({
+      to: aluno.email,
+      subject: `📢 Comunicado: Nova Data do ${dados.numeroOrdinal} Café com Ciência (${dados.dataCurta})`,
+      html: gerarLayoutHtmlBase({
+        preheader: `Atenção: A data do ${dados.numeroOrdinal} Café com Ciência foi alterada para ${dataAlvo}. Sua inscrição continua garantida!`,
+        titulo: 'Alteração na Data do Evento',
+        badge: `Comunicado Oficial · ${dados.numeroOrdinalFem} Edição`,
+        conteudoHtml,
+        botaoTexto: 'Visualizar Minha Credencial Atualizada',
+        botaoLink: linkCredencial,
+        aluno
+      })
+    });
+  }
+
   function criarAlunoMock(emailDestino = 'participante@teste.com', edicao = 10) {
     const is11 = parseInt(edicao, 10) === 11;
     return {
@@ -464,7 +512,7 @@
       qr_code: is11 ? 'CC11-TESTE26' : 'CC10-TESTE26',
       pix_status: 'aprovado',
       presenca_confirmada: true,
-      presenca_horario: is11 ? '2026-11-06T16:05:00.000Z' : '2026-10-30T15:05:00.000Z',
+      presenca_horario: is11 ? '2026-11-18T16:05:00.000Z' : '2026-10-30T15:05:00.000Z',
       edicao: is11 ? 11 : 10
     };
   }
@@ -581,6 +629,44 @@
         })
       };
     }
+    if (modelo === 'mudanca_data') {
+      const linkCredencial = `${urlBase}${dados.urlPagina}?consultar=${aluno.protocolo}`;
+      const conteudoHtml = `
+        <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
+        <p>A comissão organizadora do <strong>${dados.tituloEdicao}</strong> gostaria de comunicar uma importante atualização na programação da nossa palestra:</p>
+        
+        <div style="background-color: #fff9f3; border-left: 4px solid #d97706; padding: 16px 20px; margin: 22px 0; border-radius: 0 12px 12px 0;">
+          <div style="font-size: 11px; color: #92400e; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">📢 Nova Data Confirmada:</div>
+          <div style="font-size: 20px; font-weight: 800; color: #451a03; margin: 6px 0;">${dados.dataHora}</div>
+          <div style="font-size: 13px; color: #78350f;"><strong>Tema:</strong> ${dados.subtituloEdicao}<br><strong>Palestrante:</strong> ${dados.palestrante}<br><strong>Local:</strong> ${dados.local}</div>
+        </div>
+
+        <p>Sua vaga e inscrição continuam <strong>100% ativas e garantidas</strong>. O seu protocolo oficial e QR Code continuam exatamente os mesmos, não sendo necessária nenhuma ação ou pagamento adicional:</p>
+
+        <div style="background-color: #f5f5f4; border: 1px dashed #d6d3d1; padding: 14px 18px; margin: 18px 0; border-radius: 10px; text-align: center;">
+          <div style="font-size: 11px; color: #78716c; text-transform: uppercase; font-weight: 700;">Seu Protocolo Oficial</div>
+          <div style="font-size: 22px; font-weight: 900; font-family: monospace; color: #292524; letter-spacing: 1px; margin: 4px 0;">${aluno.protocolo}</div>
+          <div style="font-size: 11px; color: #a8a29e;">Apresente sua credencial digital na portaria para check-in rápido</div>
+        </div>
+
+        <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 4 Horas</strong> complementares.</p>
+        <p>Agradecemos imensamente a sua compreensão e estamos à disposição para qualquer dúvida. Nos vemos no dia <strong>${dados.dataCurta}</strong>!</p>
+      `;
+
+      return {
+        subject: `📢 Comunicado: Nova Data do ${dados.numeroOrdinal} Café com Ciência (${dados.dataCurta})`,
+        html: gerarLayoutHtmlBase({
+          preheader: `Atenção: A data do ${dados.numeroOrdinal} Café com Ciência foi alterada para ${dados.dataHora}. Sua inscrição continua garantida!`,
+          titulo: 'Alteração na Data do Evento',
+          badge: `Comunicado Oficial · ${dados.numeroOrdinalFem} Edição`,
+          conteudoHtml,
+          botaoTexto: 'Visualizar Minha Credencial Atualizada',
+          botaoLink: linkCredencial,
+          aluno
+        })
+      };
+    }
+
 
     if (modelo === 'certificado') {
       const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
@@ -653,6 +739,10 @@
     if (modelo === 'certificado') {
       return enviarEmailCertificado(alunoMock);
     }
+    if (modelo === 'mudanca_data') {
+      return enviarEmailMudancaData(alunoMock);
+    }
+
 
     const { subject, html } = obterHtmlModeloTeste('teste', destinatario, edicao);
     return enviarEmail({
@@ -692,6 +782,7 @@
     enviarEmailPresencaConfirmada,
     enviarEmailLembrete,
     enviarEmailCertificado,
+    enviarEmailMudancaData,
     testarEnvioEmail,
     obterHtmlModeloTeste,
     listarEmailsEnviados,
