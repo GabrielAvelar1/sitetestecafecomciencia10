@@ -171,8 +171,8 @@
         tituloEdicao: '11° CAFÉ COM CIÊNCIA',
         subtituloEdicao: '10 anos do projeto NAM em Belo Horizonte',
         badgePadrao: '11ª Edição Especial · UniArnaldo',
-        dataHora: '15 de Novembro de 2026 às 15:00 horas',
-        dataCurta: '15/11 às 15h',
+        dataHora: '13 de Novembro de 2026 às 15:00 horas',
+        dataCurta: '13/11 às 15h',
         local: 'UniArnaldo · Campus Anchieta (Sala 306)',
         palestrante: 'Prof. Dr. Henrique Pretti',
         urlPagina: '11cafe.html'
@@ -538,7 +538,7 @@
       qr_code: `${prefixo}-TESTE26`,
       pix_status: 'aprovado',
       presenca_confirmada: true,
-      presenca_horario: num === 12 ? '2026-11-18T16:05:00.000Z' : (num === 11 ? '2026-11-15T15:05:00.000Z' : '2026-10-30T15:05:00.000Z'),
+      presenca_horario: num === 12 ? '2026-11-18T16:05:00.000Z' : (num === 11 ? '2026-11-13T15:05:00.000Z' : '2026-10-30T15:05:00.000Z'),
       edicao: num
     };
   }

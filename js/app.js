@@ -607,12 +607,12 @@ function obterMetadadosEdicaoAluno(aluno) {
       edicao: 11,
       titulo: '11° Café com Ciência',
       tema: '10 anos do projeto NAM em Belo Horizonte',
-      dataHora: '15 de Novembro · 15:00 horas',
-      dataCurta: '15/11 às 15h',
+      dataHora: '13 de Novembro · 15:00 horas',
+      dataCurta: '13/11 às 15h',
       palestrante: 'Prof. Dr. Henrique Pretti',
       local: 'UniArnaldo - Campus Anchieta (Sala 306)',
       url: '11cafe.html',
-      dataObj: new Date(2026, 10, 15, 20, 0)
+      dataObj: new Date(2026, 10, 13, 20, 0)
     };
   }
 
@@ -1451,7 +1451,7 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
           <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
         </div>
         <h5 class="text-xs sm:text-sm font-bold text-coffee-950">11° Café: 10 anos do projeto NAM em Belo Horizonte</h5>
-        <p class="text-[11px] text-stone-600">Com o <strong>Prof. Dr. Henrique Pretti</strong> em 15 de Novembro às 15h. Certificado de 4 horas!</p>
+        <p class="text-[11px] text-stone-600">Com o <strong>Prof. Dr. Henrique Pretti</strong> em 13 de Novembro às 15h. Certificado de 4 horas!</p>
         <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
           <span>Garantir Vaga no 11° Café</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>

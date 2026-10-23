@@ -227,7 +227,7 @@ function selecionarEdicaoAdmin(edicao) {
   } else if (edicao === '11' && btn11) {
     btn11.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btn11.classList.remove('text-stone-600', 'font-semibold');
-    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Prof. Dr. Henrique Pretti · 15/11)';
+    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Prof. Dr. Henrique Pretti · 13/11)';
   } else if (edicao === '12' && btn12) {
     btn12.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btn12.classList.remove('text-stone-600', 'font-semibold');
