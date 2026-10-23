@@ -438,12 +438,14 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
   const protocolo = gerarProtocolo(numEdicao);
   const emailLimpo = email.trim().toLowerCase();
   const instituicaoLimpa = (instituicao && instituicao.trim()) ? instituicao.trim() : 'Faculdade Arnaldo';
+  
   const prefixoTag = numEdicao === 12 ? '[12° Café] ' : (numEdicao === 11 ? '[11° Café] ' : '');
   const obsValor = `${prefixoTag}${(instituicaoLimpa === 'Faculdade Arnaldo') ? 'Faculdade Arnaldo' : `Faculdade: ${instituicaoLimpa}`}`;
   const sb = getSupabase();
 
   if (sb) {
     try {
+      // 1. Verifica se já existe inscrição para ESTE e-mail NESTA MESMA edição
       const { data: existente } = await sb
         .from(SUPABASE_CONFIG.tableName)
         .select('id, email, protocolo')
@@ -458,24 +460,38 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         throw new Error(`Já existe uma inscrição registrada para este e-mail no ${numEdicao}° Café com Ciência. Acesse sua conta ou consulte sua credencial.`);
       }
 
+      // 2. Upload do Comprovante para o Supabase Storage (com tratamento de erro seguro)
       let comprovanteUrl = '';
       let comprovanteNome = comprovanteFile ? comprovanteFile.name : 'comprovante.jpg';
 
       if (comprovanteFile) {
-        const ext = comprovanteFile.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
-        const filePath = `comprovantes/${fileName}`;
+        try {
+          const ext = comprovanteFile.name.split('.').pop();
+          const fileName = `${numEdicao}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
+          const filePath = `comprovantes/${fileName}`;
 
-        const { error: uploadError } = await sb.storage
-          .from(SUPABASE_CONFIG.bucketName)
-          .upload(filePath, comprovanteFile);
-
-        if (!uploadError) {
-          const { data: publicUrlData } = sb.storage
+          const { error: uploadError } = await sb.storage
             .from(SUPABASE_CONFIG.bucketName)
-            .getPublicUrl(filePath);
-          comprovanteUrl = publicUrlData?.publicUrl || '';
+            .upload(filePath, comprovanteFile);
+
+          if (!uploadError) {
+            const { data: publicUrlData } = sb.storage
+              .from(SUPABASE_CONFIG.bucketName)
+              .getPublicUrl(filePath);
+            comprovanteUrl = publicUrlData?.publicUrl || '';
+          } else {
+            console.warn('Aviso no upload do Storage (prosseguindo com base64/fallback):', uploadError);
+          }
+        } catch (storageErr) {
+          console.warn('Storage indisponível, continuando cadastro:', storageErr);
         }
+      }
+
+      // Se o bucket falhou ou não foi configurado, converte para base64 para salvar na URL ou observações
+      if (!comprovanteUrl && comprovanteFile) {
+        try {
+          comprovanteUrl = await fileToBase64(comprovanteFile);
+        } catch (e) {}
       }
 
       const basePayload = {
@@ -486,7 +502,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         senha: 'google-oauth',
         role: 'aluno',
         valor: 10.00,
-        status_pagamento: 'pendente', // Comprovante em análise pela comissão
+        status_pagamento: 'pendente',
         comprovante_url: comprovanteUrl,
         comprovante_nome: comprovanteNome,
         presenca_confirmada: false,
@@ -495,58 +511,33 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         observacoes: obsValor
       };
 
-      // Tenta inserir incluindo 'instituicao'. Se houver erro de coluna ou restrição única legada, faz fallback transparente.
       let insertData = null;
+      
+      // Tenta inserir incluindo a coluna 'instituicao' e 'edicao' se existirem na tabela
+      let payloadFinal = { ...basePayload, instituicao: instituicaoLimpa };
+      if (numEdicao === 12 || numEdicao === 11) {
+        payloadFinal.edicao = numEdicao;
+      }
+
       let { data: dComInst, error: errComInst } = await sb
         .from(SUPABASE_CONFIG.tableName)
-        .insert([{ ...basePayload, instituicao: instituicaoLimpa }])
+        .insert([payloadFinal])
         .select();
 
       if (errComInst) {
-        // Fallback 1: se for erro de restrição única no e-mail (aluno que já estava cadastrado no 10° Café)
-        if (errComInst.code === '23505' && numEdicao === 11) {
-          const partes = emailLimpo.split('@');
-          const emailAlias = partes.length === 2 ? `${partes[0]}+11@${partes[1]}` : `${emailLimpo}.11`;
-          const { data: dAlias, error: errAlias } = await sb
-            .from(SUPABASE_CONFIG.tableName)
-            .insert([{ ...basePayload, email: emailAlias, instituicao: instituicaoLimpa }])
-            .select();
-          if (!errAlias && dAlias && dAlias.length > 0) {
-            insertData = dAlias;
-          } else {
-            console.error('Erro ao salvar no Supabase (alias):', errAlias);
-            throw new Error('Falha ao registrar inscrição no banco de dados.');
-          }
-        } else if (errComInst.code === '42703' || (errComInst.message && errComInst.message.toLowerCase().includes('instituicao'))) {
-          // Fallback 2: coluna 'instituicao' inexistente
-          const { data: dFallback, error: errFallback } = await sb
-            .from(SUPABASE_CONFIG.tableName)
-            .insert([basePayload])
-            .select();
-          if (errFallback) {
-            if (errFallback.code === '23505' && numEdicao === 11) {
-              const partes = emailLimpo.split('@');
-              const emailAlias = partes.length === 2 ? `${partes[0]}+11@${partes[1]}` : `${emailLimpo}.11`;
-              const { data: dAlias, error: errAlias } = await sb
-                .from(SUPABASE_CONFIG.tableName)
-                .insert([{ ...basePayload, email: emailAlias }])
-                .select();
-              if (!errAlias && dAlias && dAlias.length > 0) {
-                insertData = dAlias;
-              } else {
-                throw new Error('Falha ao registrar inscrição no banco de dados.');
-              }
-            } else {
-              console.error('Erro ao salvar no Supabase (fallback):', errFallback);
-              throw new Error('Falha ao registrar inscrição no banco de dados.');
-            }
-          } else {
-            insertData = dFallback;
-          }
-        } else {
-          console.error('Erro ao salvar no Supabase:', errComInst);
-          throw new Error('Falha ao registrar inscrição no banco de dados.');
+        console.warn('Tentativa com colunas estendidas falhou, tentando fallback padrão...', errComInst);
+        
+        // Fallback: insere apenas com o payload básico garantido
+        const { data: dFallback, error: errFallback } = await sb
+          .from(SUPABASE_CONFIG.tableName)
+          .insert([basePayload])
+          .select();
+
+        if (errFallback) {
+          console.error('Erro crítico ao salvar no Supabase:', errFallback);
+          throw new Error('Falha ao registrar inscrição no banco de dados: ' + (errFallback.message || 'Erro desconhecido'));
         }
+        insertData = dFallback;
       } else {
         insertData = dComInst;
       }
@@ -557,6 +548,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         instituicao: instituicaoLimpa,
         edicao: numEdicao
       };
+      
       salvarSessaoUsuario(novoUsuario);
 
       return {
@@ -564,12 +556,13 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         isDemo: false,
         data: novoUsuario
       };
+
     } catch (err) {
       console.error('Erro na integração Supabase:', err);
       throw err;
     }
   } else {
-    // Modo Local
+    // Modo Local (Fallback para testes sem Supabase conectado)
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
     const prefixoEsperado = `CC${numEdicao}-`;
     const existente = inscricoes.find(i => 
@@ -583,9 +576,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
     if (comprovanteFile) {
       try {
         comprovanteBase64 = await fileToBase64(comprovanteFile);
-      } catch (e) {
-        console.warn('Erro ao ler base64:', e);
-      }
+      } catch (e) {}
     }
 
     const novaInscricao = {
@@ -601,14 +592,11 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
       senha: 'google-oauth',
       role: 'aluno',
       valor: 10.00,
-      status_pagamento: 'pendente', // Comprovante em análise pela comissão
+      status_pagamento: 'pendente',
       comprovante_url: comprovanteBase64,
       comprovante_nome: comprovanteFile ? comprovanteFile.name : 'comprovante.jpg',
       presenca_confirmada: false,
-      presenca_horario: null,
-      presenca_validador: null,
       certificado_emitido: false,
-      certificado_codigo: null,
       lembrete_enviado: false,
       isDemo: true
     };
@@ -624,6 +612,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
     };
   }
 }
+
 
 // ============================================================================
 // 6. BUSCA E CONSULTA DE INSCRIÇÃO
