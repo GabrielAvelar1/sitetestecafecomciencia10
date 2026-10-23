@@ -668,7 +668,7 @@ function exibirCredencialSucesso(aluno) {
             </span>
           ` : ''}
           <span class="text-[11px] font-mono font-bold text-coffee-900 bg-coffee-50 px-2 py-0.5 rounded-md border border-coffee-200">
-            ${is11 ? '11ª Edição' : '10ª Edição'}
+            ${meta.edicao}ª Edição
           </span>
         </div>
       </div>
@@ -1351,13 +1351,13 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
     const certificadoLiberado = (window.LigaDB?.estaoCertificadosLiberados && window.LigaDB.estaoCertificadosLiberados()) || inscricao.presenca_confirmada;
 
     return `
-      <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 ${is11 ? 'border-amber-200 hover:border-amber-400' : 'border-coffee-200 hover:border-coffee-400'} shadow-sm transition space-y-3.5 text-left">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 ${edicaoNum >= 11 ? 'border-amber-200 hover:border-amber-400' : 'border-coffee-200 hover:border-coffee-400'} shadow-sm transition space-y-3.5 text-left">
         
         <!-- Topo do Card -->
         <div class="flex items-start justify-between gap-2 border-b border-stone-100 pb-3">
           <div class="space-y-1">
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${is11 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-coffee-100 text-coffee-950 border border-coffee-300'}">
+              <span class="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${edicaoNum >= 11 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-coffee-100 text-coffee-950 border border-coffee-300'}">
                 ${edicaoNum}ª Edição
               </span>
               ${badgeEventoHtml}
