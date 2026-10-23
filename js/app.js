@@ -214,21 +214,33 @@ function configurarPix() {
   const btnCopiarCopiaECola = document.getElementById('btnCopiarCopiaECola');
   const qrCodeImg = document.getElementById('pixQrCode');
 
-  const isEdicao11 = window.EDICAO_ATUAL === 11;
-  const config = isEdicao11 
-    ? (window.LigaDB?.PIX_CONFIG_11 || {
-        chave: 'e4dafbbe-4395-413b-aac8-8dd5878d1db9',
-        titular: 'ANA CAROLINA MESQUITA ARA',
-        cidade: 'Sao Paulo',
-        valor: '10.00',
-        payloadCopiaECola: '00020126580014br.gov.bcb.pix0136e4dafbbe-4395-413b-aac8-8dd5878d1db95204000053039865802BR5925ANA CAROLINA MESQUITA ARA6009Sao Paulo62290525REC6ACF6FE413C668839679276304BAF1'
-      })
-    : (window.LigaDB?.PIX_CONFIG || {
-        chave: 'cadumancia@gmail.com',
-        titular: 'Organização Café com Ciência',
-        cidade: 'Belo Horizonte',
-        valor: '10.00'
-      });
+  let config;
+  if (window.EDICAO_ATUAL === 12) {
+    config = window.LigaDB?.PIX_CONFIG_12 || {
+      chave: 'e4dafbbe-4395-413b-aac8-8dd5878d1db9',
+      tipoChave: 'Aleatória',
+      titular: 'ANA CAROLINA MESQUITA ARA',
+      cidade: 'Sao Paulo',
+      valor: '10.00',
+      payloadCopiaECola: '00020126580014br.gov.bcb.pix0136e4dafbbe-4395-413b-aac8-8dd5878d1db95204000053039865802BR5925ANA CAROLINA MESQUITA ARA6009Sao Paulo62290525REC6ACF6FE413C668839679276304BAF1'
+    };
+  } else if (window.EDICAO_ATUAL === 11) {
+    config = window.LigaDB?.PIX_CONFIG_11 || {
+      chave: '70014901641',
+      tipoChave: 'CPF',
+      titular: 'Organização Café com Ciência',
+      cidade: 'Belo Horizonte',
+      valor: '10.00'
+    };
+  } else {
+    config = window.LigaDB?.PIX_CONFIG || {
+      chave: 'cadumancia@gmail.com',
+      tipoChave: 'E-mail',
+      titular: 'Organização Café com Ciência',
+      cidade: 'Belo Horizonte',
+      valor: '10.00'
+    };
+  }
 
   const payloadPix = config.payloadCopiaECola || (window.LigaDB?.gerarPayloadPix 
     ? window.LigaDB.gerarPayloadPix(config) 
@@ -238,7 +250,6 @@ function configurarPix() {
   if (titularPixEl) titularPixEl.textContent = `${config.titular} (R$ ${config.valor})`;
 
   if (qrCodeImg) {
-    // Agora o QR Code contém o payload oficial BR Code reconhecido por qualquer app de banco
     const qrData = encodeURIComponent(payloadPix);
     qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${qrData}&color=2B1810&bgcolor=FFFFFF&margin=2`;
   }
@@ -563,6 +574,61 @@ function configurarFormulario() {
   });
 }
 
+
+function obterMetadadosEdicaoAluno(aluno) {
+  let edicao = 10;
+  if (aluno?.protocolo) {
+    const proto = aluno.protocolo.toUpperCase();
+    if (proto.startsWith('CC12-')) edicao = 12;
+    else if (proto.startsWith('CC11-')) edicao = 11;
+    else if (proto.startsWith('CC10-')) edicao = 10;
+  } else if (aluno?.edicao) {
+    edicao = parseInt(aluno.edicao, 10);
+  } else if (typeof window !== 'undefined' && window.EDICAO_ATUAL) {
+    edicao = window.EDICAO_ATUAL;
+  }
+
+  if (edicao === 12) {
+    return {
+      edicao: 12,
+      titulo: '12° Café com Ciência',
+      tema: 'Diagnóstico e Planejamento na Reabilitação Oral',
+      dataHora: '18 de Novembro · 16:00 horas',
+      dataCurta: '18/11 às 16h',
+      palestrante: 'Dra. Thaissa Calab',
+      local: 'UniArnaldo - Campus Anchieta (Sala 306)',
+      url: '12cafe.html',
+      dataObj: new Date(2026, 10, 18, 20, 0)
+    };
+  }
+
+  if (edicao === 11) {
+    return {
+      edicao: 11,
+      titulo: '11° Café com Ciência',
+      tema: '10 anos do projeto NAM em Belo Horizonte',
+      dataHora: '15 de Novembro · 15:00 horas',
+      dataCurta: '15/11 às 15h',
+      palestrante: 'Prof. Dr. Henrique Pretti',
+      local: 'UniArnaldo - Campus Anchieta (Sala 306)',
+      url: '11cafe.html',
+      dataObj: new Date(2026, 10, 15, 20, 0)
+    };
+  }
+
+  return {
+    edicao: 10,
+    titulo: '10° Café com Ciência',
+    tema: 'Atendimento Odontológico de Pacientes Hospitalizados',
+    dataHora: '30 de Outubro · 15:00 horas',
+    dataCurta: '30/10 às 15h',
+    palestrante: 'Profa. Carolina Diniz',
+    local: 'UniArnaldo - Campus Anchieta (Sala 306)',
+    url: 'index.html',
+    dataObj: new Date(2026, 9, 30, 20, 0)
+  };
+}
+
 // ============================================================================
 // EXIBIR CREDENCIAL DE INSCRIÇÃO COM QR CODE EM TAMANHO REAL (ALTA DEFINIÇÃO)
 // ============================================================================
@@ -572,15 +638,12 @@ function exibirCredencialSucesso(aluno) {
 
   if (!modal || !target || !aluno) return;
 
-  const is11 = (aluno.protocolo && aluno.protocolo.startsWith('CC11-')) ||
-               (aluno.edicao && parseInt(aluno.edicao, 10) === 11) ||
-               (!aluno.protocolo?.startsWith('CC10-') && window.EDICAO_ATUAL === 11);
-  const tituloEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
-  const dataEvento = is11 ? '18 de Novembro · 16:00 horas' : '30 de Outubro · 15:00 horas';
-  const localEvento = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
-  const palestranteEvento = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
-  const dataEventoObj = is11 ? new Date(2026, 10, 18, 20, 0) : new Date(2026, 9, 30, 20, 0);
-  const eventoPassado = new Date() > dataEventoObj;
+  const meta = obterMetadadosEdicaoAluno(aluno);
+  const tituloEvento = meta.titulo;
+  const dataEvento = meta.dataHora;
+  const localEvento = meta.local;
+  const palestranteEvento = meta.palestrante;
+  const eventoPassado = new Date() > meta.dataObj;
 
   // QR Code em alta definição (350x350) com margem adequada para leitura fácil por câmeras
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(aluno.protocolo)}&color=2B1810&bgcolor=FFFFFF&margin=2`;
@@ -1241,27 +1304,27 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
   const emailAluno = inscricoes[0]?.email || usuario.email || '';
   const totalInscricoes = inscricoes.length;
 
-  // Verifica em quais edições está inscrito
+  // Identifica inscrições do aluno por edição
   const temEdicao10 = inscricoes.some(i => (i.protocolo && i.protocolo.startsWith('CC10-')) || (i.edicao && parseInt(i.edicao, 10) === 10));
   const temEdicao11 = inscricoes.some(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || (i.edicao && parseInt(i.edicao, 10) === 11));
+  const temEdicao12 = inscricoes.some(i => (i.protocolo && i.protocolo.startsWith('CC12-')) || (i.edicao && parseInt(i.edicao, 10) === 12));
 
-  // Ordena para que 10 venha primeiro e 11 depois
+  // Ordena por edição cronológica: 10, 11 e 12
   const inscricoesOrdenadas = [...inscricoes].sort((a, b) => {
-    const edA = (a.protocolo && a.protocolo.startsWith('CC11-')) || parseInt(a.edicao, 10) === 11 ? 11 : 10;
-    const edB = (b.protocolo && b.protocolo.startsWith('CC11-')) || parseInt(b.edicao, 10) === 11 ? 11 : 10;
+    const edA = obterMetadadosEdicaoAluno(a).edicao;
+    const edB = obterMetadadosEdicaoAluno(b).edicao;
     return edA - edB;
   });
 
   const cardsHtml = inscricoesOrdenadas.map(inscricao => {
-    const is11 = (inscricao.protocolo && inscricao.protocolo.startsWith('CC11-')) || (inscricao.edicao && parseInt(inscricao.edicao, 10) === 11);
-    const edicaoNum = is11 ? 11 : 10;
-    const tituloPalestra = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
-    const temaPalestra = is11 ? 'Diagnóstico e Planejamento na Reabilitação Oral' : 'Atendimento Odontológico de Pacientes Hospitalizados';
-    const palestrante = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
-    const dataHora = is11 ? '18 de Novembro · 16:00h' : '30 de Outubro · 15:00h';
-    const local = is11 ? 'UniArnaldo - Campus Anchieta (Sala a definir)' : 'UniArnaldo - Campus Anchieta (Sala 306)';
-    const dataEventoObj = is11 ? new Date(2026, 10, 18, 20, 0) : new Date(2026, 9, 30, 20, 0);
-    const eventoPassado = new Date() > dataEventoObj;
+    const meta = obterMetadadosEdicaoAluno(inscricao);
+    const edicaoNum = meta.edicao;
+    const tituloPalestra = meta.titulo;
+    const temaPalestra = meta.tema;
+    const palestrante = meta.palestrante;
+    const dataHora = meta.dataHora;
+    const local = meta.local;
+    const eventoPassado = new Date() > meta.dataObj;
 
     const statusPagamentoHtml = inscricao.status_pagamento === 'aprovado'
       ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-300">
@@ -1362,59 +1425,61 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
     `;
   }).join('');
 
-  // Sugestão de inscrição na outra edição caso só tenha 1
+  // Sugestões de próximas edições ainda não inscritas
+  let bannersSugeridos = [];
+  if (!temEdicao10) {
+    bannersSugeridos.push(`
+      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-stone-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">10ª Edição · Inscrições Abertas</span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">10° Café: Os Direitos dos Pacientes na Odontologia</h5>
+        <p class="text-[11px] text-stone-600">Com a <strong>Profa. Carolina Diniz</strong> em 30 de Outubro às 15h. Certificado de 4 horas!</p>
+        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+          <span>Garantir Vaga no 10° Café</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `);
+  }
+  if (!temEdicao11) {
+    bannersSugeridos.push(`
+      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">11ª Edição · Inscrições Abertas</span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">11° Café: 10 anos do projeto NAM em Belo Horizonte</h5>
+        <p class="text-[11px] text-stone-600">Com o <strong>Prof. Dr. Henrique Pretti</strong> em 15 de Novembro às 15h. Certificado de 4 horas!</p>
+        <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+          <span>Garantir Vaga no 11° Café</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `);
+  }
+  if (!temEdicao12) {
+    bannersSugeridos.push(`
+      <div class="p-3.5 bg-gradient-to-r from-stone-50 to-amber-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">12ª Edição · Inscrições Abertas</span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">12° Café: Diagnóstico e Planejamento na Reabilitação Oral</h5>
+        <p class="text-[11px] text-stone-600">Com a <strong>Dra. Thaissa Calab</strong> em 18 de Novembro às 16h. Certificado de 4 horas!</p>
+        <a href="12cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+          <span>Garantir Vaga no 12° Café</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `);
+  }
+
   let bannerOutraEdicaoHtml = '';
-  if (temEdicao10 && !temEdicao11) {
-    bannerOutraEdicaoHtml = `
-      <div class="p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 text-left space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">
-            Próxima Palestra Disponível
-          </span>
-          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
-        </div>
-        <h5 class="text-sm font-bold text-coffee-950">
-          11° Café com Ciência: Diagnóstico e Planejamento na Reabilitação Oral
-        </h5>
-        <p class="text-xs text-stone-600">
-          Com a <strong>Dra. Thaissa Calab</strong> no dia 18 de Novembro às 16:00h. Garanta seu certificado de mais 4 horas!
-        </p>
-        <a 
-          href="11cafe.html#inscricao" 
-          onclick="fecharAreaDoAluno()" 
-          class="inline-flex items-center gap-2 px-4 py-2 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow"
-        >
-          <span>Garantir Vaga no 11° Café (R$ 10)</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </a>
-      </div>
-    `;
-  } else if (temEdicao11 && !temEdicao10) {
-    bannerOutraEdicaoHtml = `
-      <div class="p-4 bg-gradient-to-r from-amber-50 to-stone-50 rounded-2xl border-2 border-amber-300 text-left space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">
-            Palestra Disponível
-          </span>
-          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
-        </div>
-        <h5 class="text-sm font-bold text-coffee-950">
-          10° Café com Ciência: Atendimento Odontológico de Pacientes Hospitalizados
-        </h5>
-        <p class="text-xs text-stone-600">
-          Com a <strong>Profa. Carolina Diniz</strong> no dia 30 de Outubro às 15:00h. Garanta seu certificado de 4 horas!
-        </p>
-        <a 
-          href="index.html#inscricao" 
-          onclick="fecharAreaDoAluno()" 
-          class="inline-flex items-center gap-2 px-4 py-2 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow"
-        >
-          <span>Garantir Vaga no 10° Café (R$ 10)</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </a>
-      </div>
-    `;
-  } else if (temEdicao10 && temEdicao11) {
+  if (bannersSugeridos.length > 0) {
+    bannerOutraEdicaoHtml = `<div class="space-y-3 pt-1">${bannersSugeridos.join('')}</div>`;
+  } else {
     bannerOutraEdicaoHtml = `
       <div class="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-300 text-xs text-emerald-950 text-left flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
@@ -1422,7 +1487,7 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
         </div>
         <div>
           <p class="font-bold text-emerald-900">Ciclo Completo de Palestras!</p>
-          <p class="text-[11px] text-emerald-800">Você garantiu sua participação na 10ª e 11ª edição. Seus comprovantes e certificados de 8 horas no total ficam arquivados permanentemente aqui.</p>
+          <p class="text-[11px] text-emerald-800">Você garantiu sua participação na 10ª, 11ª e 12ª edição. Seus comprovantes e certificados de 12 horas no total ficam arquivados permanentemente aqui.</p>
         </div>
       </div>
     `;
@@ -1581,7 +1646,7 @@ async function executarBuscaInscricao() {
   const termo = input?.value.trim();
 
   if (!termo) {
-    alert('Digite seu e-mail, telefone ou protocolo (ex: CC10-123456 ou CC11-123456)');
+    alert('Digite seu e-mail, telefone ou protocolo (ex: CC10-123456, CC11-123456 ou CC12-123456)');
     return;
   }
 

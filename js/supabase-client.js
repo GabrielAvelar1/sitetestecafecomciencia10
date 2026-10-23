@@ -29,13 +29,22 @@ const PIX_CONFIG = {
 };
 
 const PIX_CONFIG_11 = {
+  chave: '70014901641',
+  tipoChave: 'CPF',
+  titular: 'Organização Café com Ciência',
+  cidade: 'Belo Horizonte',
+  valor: '10.00',
+  mensagem: '11 Cafe com Ciencia'
+};
+
+const PIX_CONFIG_12 = {
   payloadCopiaECola: '00020126580014br.gov.bcb.pix0136e4dafbbe-4395-413b-aac8-8dd5878d1db95204000053039865802BR5925ANA CAROLINA MESQUITA ARA6009Sao Paulo62290525REC6ACF6FE413C668839679276304BAF1',
   chave: 'e4dafbbe-4395-413b-aac8-8dd5878d1db9',
   tipoChave: 'Aleatória',
   titular: 'ANA CAROLINA MESQUITA ARA',
   cidade: 'Sao Paulo',
   valor: '10.00',
-  mensagem: '11 Cafe com Ciencia'
+  mensagem: '12 Cafe com Ciencia'
 };
 
 // ============================================================================
@@ -386,7 +395,8 @@ async function fazerLogin(email, senha) {
 // ============================================================================
 function gerarProtocolo(edicao = 10) {
   const aleatorio = Math.floor(100000 + Math.random() * 900000);
-  const prefixo = parseInt(edicao, 10) === 11 ? 'CC11' : 'CC10';
+  const n = parseInt(edicao, 10);
+  const prefixo = n === 12 ? 'CC12' : (n === 11 ? 'CC11' : 'CC10');
   return `${prefixo}-${aleatorio}`;
 }
 
@@ -423,11 +433,12 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
     throw new Error('O anexo do comprovante de pagamento Pix de R$ 10,00 é estritamente obrigatório.');
   }
 
-  const numEdicao = parseInt(edicao, 10) === 11 ? 11 : 10;
+  const n = parseInt(edicao, 10);
+  const numEdicao = (n === 12 || n === 11) ? n : 10;
   const protocolo = gerarProtocolo(numEdicao);
   const emailLimpo = email.trim().toLowerCase();
   const instituicaoLimpa = (instituicao && instituicao.trim()) ? instituicao.trim() : 'Faculdade Arnaldo';
-  const prefixoTag = numEdicao === 11 ? '[11° Café] ' : '';
+  const prefixoTag = numEdicao === 12 ? '[12° Café] ' : (numEdicao === 11 ? '[11° Café] ' : '');
   const obsValor = `${prefixoTag}${(instituicaoLimpa === 'Faculdade Arnaldo') ? 'Faculdade Arnaldo' : `Faculdade: ${instituicaoLimpa}`}`;
   const sb = getSupabase();
 
@@ -438,7 +449,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         .select('id, email, protocolo')
         .ilike('email', emailLimpo);
 
-      const prefixoEsperado = numEdicao === 11 ? 'CC11-' : 'CC10-';
+      const prefixoEsperado = `CC${numEdicao}-`;
       const jaInscritoNestaEdicao = (existente || []).some(item => 
         item.protocolo && item.protocolo.startsWith(prefixoEsperado)
       );
@@ -560,7 +571,7 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
   } else {
     // Modo Local
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
-    const prefixoEsperado = numEdicao === 11 ? 'CC11-' : 'CC10-';
+    const prefixoEsperado = `CC${numEdicao}-`;
     const existente = inscricoes.find(i => 
       i.email && i.email.toLowerCase() === emailLimpo && i.protocolo && i.protocolo.startsWith(prefixoEsperado)
     );
@@ -627,7 +638,7 @@ async function buscarInscricao(termo) {
     try {
       let query = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
 
-      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-')) {
+      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-') || termoLimpo.startsWith('cc12-') || termoLimpo.startsWith('cc12-')) {
         query = query.ilike('protocolo', termoLimpo);
       } else if (termoLimpo.includes('@')) {
         query = query.ilike('email', termoLimpo);
@@ -1037,6 +1048,7 @@ window.LigaDB = {
   SUPABASE_CONFIG,
   PIX_CONFIG,
   PIX_CONFIG_11,
+  PIX_CONFIG_12,
   ORGANIZADOR_PADRAO,
   getSupabase,
   getSupabaseCredentials,

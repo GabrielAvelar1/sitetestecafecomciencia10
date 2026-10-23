@@ -144,18 +144,37 @@
         }
       }
 
-      const is11 = (aluno?.protocolo && aluno.protocolo.startsWith('CC11-')) || (aluno?.edicao && parseInt(aluno.edicao, 10) === 11) || params.get('edicao') === '11';
-      const nomeEvento = is11 ? '11° Café com Ciência' : '10° Café com Ciência';
-      const temaPalestra = is11 ? '"11º CAFÉ COM CIÊNCIA : Diagnóstico e Planejamento na Reabilitação Oral"' : '"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"';
-      const palestranteNome = is11 ? 'Dra. Thaissa Calab' : 'Profa. Carolina Diniz';
-      const dataDefault = is11 ? '2026-11-18' : '2026-10-30';
+            const proto = (aluno?.protocolo || '').toUpperCase();
+      const edNum = aluno?.edicao ? parseInt(aluno.edicao, 10) : (params.get('edicao') ? parseInt(params.get('edicao'), 10) : 0);
+      const is12 = proto.startsWith('CC12-') || edNum === 12;
+      const is11 = proto.startsWith('CC11-') || edNum === 11;
+
+      let nomeEvento = '10° Café com Ciência';
+      let temaPalestra = '"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"';
+      let palestranteNome = 'Profa. Carolina Diniz';
+      let dataDefault = '2026-10-30';
+      let prefixoCert = 'CC10';
+
+      if (is12) {
+        nomeEvento = '12° Café com Ciência';
+        temaPalestra = '"12º CAFÉ COM CIÊNCIA : Diagnóstico e Planejamento na Reabilitação Oral"';
+        palestranteNome = 'Dra. Thaissa Calab';
+        dataDefault = '2026-11-18';
+        prefixoCert = 'CC12';
+      } else if (is11) {
+        nomeEvento = '11° Café com Ciência';
+        temaPalestra = '"11º CAFÉ COM CIÊNCIA : 10 anos do projeto NAM em Belo Horizonte"';
+        palestranteNome = 'Prof. Dr. Henrique Pretti';
+        dataDefault = '2026-11-15';
+        prefixoCert = 'CC11';
+      }
 
       document.title = `Certificado Oficial - ${nomeEvento}`;
       const subtitleEl = document.querySelector('header p.text-stone-400');
-      if (subtitleEl) subtitleEl.textContent = `${nomeEvento}: ${is11 ? 'Diagnóstico e Planejamento na Reabilitação Oral' : 'Os Direitos dos Pacientes na Odontologia'}`;
+      if (subtitleEl) subtitleEl.textContent = `${nomeEvento} · UniArnaldo`;
 
       const nomeFinal = aluno ? aluno.nome_completo : (nomeParam || 'Participante Oficial');
-      const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-${is11 ? 'CC11' : 'CC10'}-${Math.floor(100000 + Math.random() * 900000)}`;
+      const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-${prefixoCert}-${Math.floor(100000 + Math.random() * 900000)}`;
       const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || dataDefault);
 
       // Verifica se a comissão da Liga liberou os certificados

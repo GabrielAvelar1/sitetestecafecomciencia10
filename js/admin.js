@@ -202,17 +202,18 @@ function alternarLiberacaoCertificadosAdmin() {
   }
 }
 
-let edicaoFiltroAdmin = '10'; // '10', '11' ou 'todas'
+let edicaoFiltroAdmin = '10'; // '10', '11', '12' ou 'todas'
 
 function selecionarEdicaoAdmin(edicao) {
   edicaoFiltroAdmin = edicao;
 
   const btn10 = document.getElementById('btnEdicao_10');
   const btn11 = document.getElementById('btnEdicao_11');
+  const btn12 = document.getElementById('btnEdicao_12');
   const btnTodas = document.getElementById('btnEdicao_todas');
   const nomeLabel = document.getElementById('adminNomeEdicaoSelecionada');
 
-  [btn10, btn11, btnTodas].forEach(b => {
+  [btn10, btn11, btn12, btnTodas].forEach(b => {
     if (b) {
       b.classList.remove('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
       b.classList.add('text-stone-600', 'font-semibold');
@@ -222,11 +223,15 @@ function selecionarEdicaoAdmin(edicao) {
   if (edicao === '10' && btn10) {
     btn10.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btn10.classList.remove('text-stone-600', 'font-semibold');
-    if (nomeLabel) nomeLabel.textContent = '10° Café com Ciência (Palestra Atual · 30/10)';
+    if (nomeLabel) nomeLabel.textContent = '10° Café com Ciência (Profa. Carolina Diniz · 30/10)';
   } else if (edicao === '11' && btn11) {
     btn11.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btn11.classList.remove('text-stone-600', 'font-semibold');
-    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Dra. Thaissa Calab · 18/11)';
+    if (nomeLabel) nomeLabel.textContent = '11° Café com Ciência (Prof. Dr. Henrique Pretti · 15/11)';
+  } else if (edicao === '12' && btn12) {
+    btn12.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
+    btn12.classList.remove('text-stone-600', 'font-semibold');
+    if (nomeLabel) nomeLabel.textContent = '12° Café com Ciência (Dra. Thaissa Calab · 18/11)';
   } else if (btnTodas) {
     btnTodas.classList.add('bg-white', 'text-coffee-950', 'shadow-xs', 'font-bold');
     btnTodas.classList.remove('text-stone-600', 'font-semibold');
@@ -239,10 +244,16 @@ function selecionarEdicaoAdmin(edicao) {
 
 function obterInscricoesFiltradasPorEdicao(lista = inscricoesCache) {
   if (!lista) return [];
-  if (edicaoFiltroAdmin === '11') {
+  if (edicaoFiltroAdmin === '12') {
+    return lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC12-')) || i.edicao === 12);
+  } else if (edicaoFiltroAdmin === '11') {
     return lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
   } else if (edicaoFiltroAdmin === '10') {
-    return lista.filter(i => !i.protocolo || (!i.protocolo.startsWith('CC11-') && i.edicao !== 11));
+    return lista.filter(i => {
+      const proto = (i.protocolo || '').toUpperCase();
+      const ed = parseInt(i.edicao, 10);
+      return proto.startsWith('CC10-') || ed === 10 || (!proto.startsWith('CC11-') && !proto.startsWith('CC12-') && ed !== 11 && ed !== 12);
+    });
   }
   return lista;
 }
@@ -255,14 +266,21 @@ function atualizarMetricasPorEdicao() {
 
   const badge10 = document.getElementById('badgeContagemEdicao10');
   const badge11 = document.getElementById('badgeContagemEdicao11');
+  const badge12 = document.getElementById('badgeContagemEdicao12');
   const badgeTodas = document.getElementById('badgeContagemEdicaoTodas');
 
   if (inscricoesCache) {
-    const lista10 = inscricoesCache.filter(i => !i.protocolo || (!i.protocolo.startsWith('CC11-') && i.edicao !== 11));
+    const lista10 = inscricoesCache.filter(i => {
+      const proto = (i.protocolo || '').toUpperCase();
+      const ed = parseInt(i.edicao, 10);
+      return proto.startsWith('CC10-') || ed === 10 || (!proto.startsWith('CC11-') && !proto.startsWith('CC12-') && ed !== 11 && ed !== 12);
+    });
     const lista11 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    const lista12 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC12-')) || i.edicao === 12);
 
     if (badge10) badge10.textContent = `${lista10.length}`;
     if (badge11) badge11.textContent = `${lista11.length}`;
+    if (badge12) badge12.textContent = `${lista12.length}`;
     if (badgeTodas) badgeTodas.textContent = `${inscricoesCache.length}`;
 
     const listaAtual = obterInscricoesFiltradasPorEdicao(inscricoesCache);

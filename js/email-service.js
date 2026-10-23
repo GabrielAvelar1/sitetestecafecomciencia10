@@ -122,19 +122,44 @@
    */
   function obterDadosEdicao(alunoOuEdicao) {
     let edicao = 10;
+
     if (typeof alunoOuEdicao === 'number') {
       edicao = alunoOuEdicao;
     } else if (typeof alunoOuEdicao === 'string') {
       const str = alunoOuEdicao.toUpperCase();
-      edicao = str.startsWith('CC11-') || str === '11' ? 11 : 10;
+      if (str.startsWith('CC12-') || str === '12') edicao = 12;
+      else if (str.startsWith('CC11-') || str === '11') edicao = 11;
+      else edicao = 10;
     } else if (alunoOuEdicao && typeof alunoOuEdicao === 'object') {
-      if (alunoOuEdicao.protocolo && alunoOuEdicao.protocolo.toUpperCase().startsWith('CC11-')) {
+      const proto = (alunoOuEdicao.protocolo || '').toUpperCase();
+      if (proto.startsWith('CC12-')) {
+        edicao = 12;
+      } else if (proto.startsWith('CC11-')) {
         edicao = 11;
-      } else if (alunoOuEdicao.edicao && parseInt(alunoOuEdicao.edicao, 10) === 11) {
-        edicao = 11;
-      } else if (typeof window !== 'undefined' && window.EDICAO_ATUAL === 11 && !alunoOuEdicao.protocolo?.toUpperCase().startsWith('CC10-')) {
-        edicao = 11;
+      } else if (proto.startsWith('CC10-')) {
+        edicao = 10;
+      } else if (alunoOuEdicao.edicao) {
+        edicao = parseInt(alunoOuEdicao.edicao, 10);
+      } else if (typeof window !== 'undefined' && window.EDICAO_ATUAL) {
+        edicao = window.EDICAO_ATUAL;
       }
+    }
+
+    if (edicao === 12) {
+      return {
+        edicao: 12,
+        is12: true,
+        numeroOrdinal: '12°',
+        numeroOrdinalFem: '12ª',
+        tituloEdicao: '12° CAFÉ COM CIÊNCIA',
+        subtituloEdicao: 'Diagnóstico e Planejamento na Reabilitação Oral',
+        badgePadrao: '12ª Edição Especial · UniArnaldo',
+        dataHora: '18 de Novembro de 2026 às 16:00 horas',
+        dataCurta: '18/11 às 16h',
+        local: 'UniArnaldo · Campus Anchieta (Sala 306)',
+        palestrante: 'Dra. Thaissa Calab',
+        urlPagina: '12cafe.html'
+      };
     }
 
     if (edicao === 11) {
@@ -144,19 +169,19 @@
         numeroOrdinal: '11°',
         numeroOrdinalFem: '11ª',
         tituloEdicao: '11° CAFÉ COM CIÊNCIA',
-        subtituloEdicao: 'Diagnóstico e Planejamento na Reabilitação Oral',
+        subtituloEdicao: '10 anos do projeto NAM em Belo Horizonte',
         badgePadrao: '11ª Edição Especial · UniArnaldo',
-        dataHora: '18 de Novembro de 2026 às 16:00 horas',
-        dataCurta: '18/11 às 16h',
-        local: 'UniArnaldo · Campus Anchieta (Sala a definir)',
-        palestrante: 'Dra. Thaissa Calab',
+        dataHora: '15 de Novembro de 2026 às 15:00 horas',
+        dataCurta: '15/11 às 15h',
+        local: 'UniArnaldo · Campus Anchieta (Sala 306)',
+        palestrante: 'Prof. Dr. Henrique Pretti',
         urlPagina: '11cafe.html'
       };
     }
 
     return {
       edicao: 10,
-      is11: false,
+      is10: true,
       numeroOrdinal: '10°',
       numeroOrdinalFem: '10ª',
       tituloEdicao: '10° CAFÉ COM CIÊNCIA',
@@ -503,17 +528,18 @@
   }
 
   function criarAlunoMock(emailDestino = 'participante@teste.com', edicao = 10) {
-    const is11 = parseInt(edicao, 10) === 11;
+    const num = parseInt(edicao, 10);
+    const prefixo = num === 12 ? 'CC12' : (num === 11 ? 'CC11' : 'CC10');
     return {
-      id: is11 ? 'mock-teste-11' : 'mock-teste-10',
+      id: `mock-teste-${num}`,
       nome_completo: 'Dra. Gabriela Teste da Silva',
       email: emailDestino.trim(),
-      protocolo: is11 ? 'CC11-TESTE26' : 'CC10-TESTE26',
-      qr_code: is11 ? 'CC11-TESTE26' : 'CC10-TESTE26',
+      protocolo: `${prefixo}-TESTE26`,
+      qr_code: `${prefixo}-TESTE26`,
       pix_status: 'aprovado',
       presenca_confirmada: true,
-      presenca_horario: is11 ? '2026-11-18T16:05:00.000Z' : '2026-10-30T15:05:00.000Z',
-      edicao: is11 ? 11 : 10
+      presenca_horario: num === 12 ? '2026-11-18T16:05:00.000Z' : (num === 11 ? '2026-11-15T15:05:00.000Z' : '2026-10-30T15:05:00.000Z'),
+      edicao: num
     };
   }
 
@@ -789,7 +815,8 @@
     getGmailUser,
     getGmailAppPassword,
     salvarConfigGmail,
-    isGmailConfigurado
+    isGmailConfigurado,
+    obterDadosEdicao
   };
 
 })();
