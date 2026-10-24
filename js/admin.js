@@ -380,10 +380,15 @@ function renderizarLinhasTabelaAdmin(lista) {
     const instituicaoNome = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo');
     const isArnaldo = instituicaoNome.toLowerCase().includes('arnaldo');
 
-    const isEdicao11 = (item.protocolo && item.protocolo.startsWith('CC11-')) || item.edicao === 11;
-    const edicaoBadge = isEdicao11
-      ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="11° Café com Ciência (Dra. Thaissa Calab)">11° Café</span>`
-      : `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="10° Café com Ciência (Profa. Carolina Diniz)">10° Café</span>`;
+    const protoUpper = (item.protocolo || '').toUpperCase();
+    const edNum = parseInt(item.edicao, 10);
+    const isEdicao12 = protoUpper.startsWith('CC12-') || edNum === 12;
+    const isEdicao11 = protoUpper.startsWith('CC11-') || edNum === 11;
+    const edicaoBadge = isEdicao12
+      ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="12° Café com Ciência (Dra. Thaissa Calab · 18/11)">12° Café</span>`
+      : (isEdicao11
+        ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300" title="11° Café com Ciência (Prof. Dr. Henrique Pretti · 13/11)">11° Café</span>`
+        : `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="10° Café com Ciência (Profa. Carolina Diniz · 30/10)">10° Café</span>`);
 
     const instituicaoBadge = isArnaldo
       ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200" title="Aluno(a) Faculdade Arnaldo">
@@ -997,7 +1002,7 @@ async function testarEnvioResendAdmin() {
   }
 
   try {
-    const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10;
+    const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '12') ? 12 : ((typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10);
     const res = await window.EmailService.testarEnvioEmail(emailDestino.trim(), modelo, edicaoParaTeste);
     
     if (statusDiv) {
@@ -1052,7 +1057,7 @@ function abrirPreviaEmailAdmin() {
   const modelo = selectModelo ? selectModelo.value : 'vespera';
   const emailDestino = inputEmail ? inputEmail.value.trim() : 'participante@teste.com';
 
-  const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10;
+  const edicaoParaTeste = (typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '12') ? 12 : ((typeof edicaoFiltroAdmin !== 'undefined' && edicaoFiltroAdmin === '11') ? 11 : 10);
   const previewData = window.EmailService.obterHtmlModeloTeste(modelo, emailDestino, edicaoParaTeste);
   
   const modal = document.getElementById('modalPreviaEmail');

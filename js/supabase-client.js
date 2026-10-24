@@ -299,6 +299,7 @@ async function fazerLoginComGoogle(dadosGoogle = {}) {
       .from(SUPABASE_CONFIG.tableName)
       .select('*')
       .ilike('email', emailGoogle)
+      .order('created_at', { ascending: false })
       .limit(1);
 
     if (inscritos && inscritos.length > 0) {
@@ -460,45 +461,54 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
         throw new Error(`Já existe uma inscrição registrada para este e-mail no ${numEdicao}° Café com Ciência. Acesse sua conta ou consulte sua credencial.`);
       }
 
-      // 2. Upload do Comprovante para o Supabase Storage (com tratamento de erro seguro)
+      // 2. Upload do Comprovante para o Supabase Storage (com tratamento seguro e contentType)
       let comprovanteUrl = '';
-      let comprovanteNome = comprovanteFile ? comprovanteFile.name : 'comprovante.jpg';
+      let comprovanteNome = comprovanteFile ? (comprovanteFile.name || 'comprovante.jpg') : 'comprovante.jpg';
 
       if (comprovanteFile) {
         try {
-          const ext = comprovanteFile.name.split('.').pop();
+          const ext = (comprovanteFile.name && comprovanteFile.name.includes('.')) 
+            ? comprovanteFile.name.split('.').pop().toLowerCase() 
+            : 'jpg';
           const fileName = `${numEdicao}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${ext}`;
-          const filePath = `comprovantes/${fileName}`;
 
           const { error: uploadError } = await sb.storage
             .from(SUPABASE_CONFIG.bucketName)
-            .upload(filePath, comprovanteFile);
+            .upload(fileName, comprovanteFile, {
+              cacheControl: '3600',
+              upsert: true,
+              contentType: comprovanteFile.type || 'image/jpeg'
+            });
 
           if (!uploadError) {
             const { data: publicUrlData } = sb.storage
               .from(SUPABASE_CONFIG.bucketName)
-              .getPublicUrl(filePath);
+              .getPublicUrl(fileName);
             comprovanteUrl = publicUrlData?.publicUrl || '';
           } else {
-            console.warn('Aviso no upload do Storage (prosseguindo com base64/fallback):', uploadError);
+            console.warn('Aviso no upload do Storage (tentando fallback local):', uploadError);
           }
         } catch (storageErr) {
-          console.warn('Storage indisponível, continuando cadastro:', storageErr);
+          console.warn('Storage indisponível, prosseguindo com fallback:', storageErr);
         }
       }
 
-      // Se o bucket falhou ou não foi configurado, converte para base64 para salvar na URL ou observações
+      // Se o bucket falhou ou não gerou URL, converte para base64 como contingência
       if (!comprovanteUrl && comprovanteFile) {
         try {
           comprovanteUrl = await fileToBase64(comprovanteFile);
-        } catch (e) {}
+        } catch (e) {
+          console.warn('Falha na conversão base64 do comprovante:', e);
+        }
       }
 
+      // Payload base completo com 'instituicao' sempre inclusa
       const basePayload = {
         protocolo: protocolo,
         nome_completo: nome_completo.trim(),
         email: emailLimpo,
         telefone: telefone.trim(),
+        instituicao: instituicaoLimpa,
         senha: 'google-oauth',
         role: 'aluno',
         valor: 10.00,
@@ -512,34 +522,37 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
       };
 
       let insertData = null;
-      
-      // Tenta inserir incluindo a coluna 'instituicao' e 'edicao' se existirem na tabela
-      let payloadFinal = { ...basePayload, instituicao: instituicaoLimpa };
-      if (numEdicao === 12 || numEdicao === 11) {
-        payloadFinal.edicao = numEdicao;
-      }
 
-      let { data: dComInst, error: errComInst } = await sb
+      // 1ª Tentativa: Inserção com payload padrão garantido
+      let { data: dInsert, error: errInsert } = await sb
         .from(SUPABASE_CONFIG.tableName)
-        .insert([payloadFinal])
+        .insert([basePayload])
         .select();
 
-      if (errComInst) {
-        console.warn('Tentativa com colunas estendidas falhou, tentando fallback padrão...', errComInst);
-        
-        // Fallback: insere apenas com o payload básico garantido
-        const { data: dFallback, error: errFallback } = await sb
-          .from(SUPABASE_CONFIG.tableName)
-          .insert([basePayload])
-          .select();
+      if (errInsert) {
+        console.warn('Tentativa primária de inserção retornou erro:', errInsert);
 
-        if (errFallback) {
-          console.error('Erro crítico ao salvar no Supabase:', errFallback);
-          throw new Error('Falha ao registrar inscrição no banco de dados: ' + (errFallback.message || 'Erro desconhecido'));
+        // Fallback 1: Caso a coluna 'instituicao' não exista em versões antigas do schema
+        if (errInsert.code === '42703' || (errInsert.message && errInsert.message.toLowerCase().includes('instituicao'))) {
+          const payloadSemInst = { ...basePayload };
+          delete payloadSemInst.instituicao;
+          const { data: dSemInst, error: errSemInst } = await sb
+            .from(SUPABASE_CONFIG.tableName)
+            .insert([payloadSemInst])
+            .select();
+
+          if (!errSemInst && dSemInst && dSemInst.length > 0) {
+            insertData = dSemInst;
+          } else {
+            console.error('Erro crítico no Supabase (sem instituicao):', errSemInst);
+            throw new Error('Falha ao registrar inscrição no banco de dados: ' + (errSemInst?.message || 'Erro de conexão'));
+          }
+        } else {
+          console.error('Erro crítico no Supabase:', errInsert);
+          throw new Error('Falha ao registrar inscrição no banco de dados: ' + (errInsert?.message || 'Erro desconhecido'));
         }
-        insertData = dFallback;
       } else {
-        insertData = dComInst;
+        insertData = dInsert;
       }
 
       const novoUsuario = {
@@ -627,7 +640,7 @@ async function buscarInscricao(termo) {
     try {
       let query = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
 
-      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-') || termoLimpo.startsWith('cc12-') || termoLimpo.startsWith('cc12-')) {
+      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-') || termoLimpo.startsWith('cc12-')) {
         query = query.ilike('protocolo', termoLimpo);
       } else if (termoLimpo.includes('@')) {
         query = query.ilike('email', termoLimpo);
@@ -665,8 +678,19 @@ async function buscarTodasInscricoes(termo) {
     try {
       let query = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
 
-      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-')) {
-        query = query.ilike('protocolo', termoLimpo);
+      if (termoLimpo.startsWith('cc10-') || termoLimpo.startsWith('cc11-') || termoLimpo.startsWith('cc12-')) {
+        // Quando busca por protocolo, localiza o aluno e busca TODAS as suas inscrições pelo e-mail vinculado
+        const { data: dProto } = await sb.from(SUPABASE_CONFIG.tableName).select('*').ilike('protocolo', termoLimpo).limit(1);
+        if (dProto && dProto.length > 0 && dProto[0].email) {
+          const { data: todasDoAluno } = await sb
+            .from(SUPABASE_CONFIG.tableName)
+            .select('*')
+            .neq('role', 'organizador')
+            .ilike('email', dProto[0].email.trim())
+            .order('created_at', { ascending: false });
+          if (todasDoAluno && todasDoAluno.length > 0) return todasDoAluno;
+        }
+        if (dProto && dProto.length > 0) return dProto;
       } else if (termoLimpo.includes('@')) {
         query = query.ilike('email', termoLimpo);
       } else {

@@ -67,4 +67,11 @@ ON storage.objects FOR DELETE TO anon, authenticated USING (bucket_id = 'comprov
 ALTER TABLE public.inscricoes ADD COLUMN IF NOT EXISTS instituicao TEXT DEFAULT 'Faculdade Arnaldo';
 UPDATE public.inscricoes SET instituicao = 'Faculdade Arnaldo' WHERE instituicao IS NULL;
 
+-- 8. Opcional: Adicionar coluna 'edicao' para consultas SQL diretas (o sistema já deduz pelo protocolo CC10, CC11 e CC12)
+ALTER TABLE public.inscricoes ADD COLUMN IF NOT EXISTS edicao INTEGER DEFAULT 10;
+UPDATE public.inscricoes SET edicao = 12 WHERE protocolo LIKE 'CC12-%';
+UPDATE public.inscricoes SET edicao = 11 WHERE protocolo LIKE 'CC11-%';
+UPDATE public.inscricoes SET edicao = 10 WHERE protocolo LIKE 'CC10-%' OR edicao IS NULL;
+
+
 

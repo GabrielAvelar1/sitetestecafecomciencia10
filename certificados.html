@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js"></script>
+  <script src="js/supabase-client.js?v=3"></script>
 
   <style>
     body {
@@ -200,7 +200,7 @@
               ${aluno?.protocolo ? `<p><strong>Protocolo:</strong> ${aluno.protocolo}</p>` : ''}
               <p><strong>Status de Presença:</strong> ${aluno?.presenca_confirmada ? '✅ Presença Confirmada no Evento' : '⏳ Aguardando confirmação no dia da palestra'}</p>
             </div>
-            <a href="${is11 ? '11cafe.html' : 'index.html'}" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
+            <a href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : 'index.html')}" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
               <span>Voltar para a Página do Evento</span>
             </a>
