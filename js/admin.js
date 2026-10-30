@@ -153,6 +153,83 @@ function atualizarVisualStatusCertificados() {
   }
 }
 
+
+// ============================================================================
+// CONTROLE DE STATUS DAS INSCRIÇÕES (ENCERRAR / REABRIR)
+// ============================================================================
+function obterEdicaoAtivaAdmin() {
+  if (typeof edicaoFiltroAdmin !== 'undefined') {
+    if (edicaoFiltroAdmin === '12') return 12;
+    if (edicaoFiltroAdmin === '11') return 11;
+    if (edicaoFiltroAdmin === '10') return 10;
+  }
+  return 10;
+}
+
+function atualizarVisualStatusInscricoes() {
+  const edicao = obterEdicaoAtivaAdmin();
+  const isEncerrada = window.LigaDB?.estaoInscricoesEncerradas ? window.LigaDB.estaoInscricoesEncerradas(edicao) : false;
+
+  const banner = document.getElementById('bannerStatusInscricoes');
+  const icon = document.getElementById('iconStatusInscricoes');
+  const texto = document.getElementById('textoStatusInscricoes');
+  const desc = document.getElementById('descStatusInscricoes');
+  const btn = document.getElementById('btnAlternarInscricoes');
+  const labelBtn = document.getElementById('labelBtnAlternarInscricoes');
+
+  if (banner && texto && btn) {
+    if (isEncerrada) {
+      banner.className = 'p-4 sm:p-5 bg-red-50 rounded-2xl border-2 border-red-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs';
+      if (icon) {
+        icon.className = 'w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0';
+        icon.innerHTML = '<i data-lucide="lock" class="w-5 h-5"></i>';
+      }
+      texto.innerHTML = `Inscrições da ${edicao}ª Edição: <span class="text-red-700 font-black">🔴 ENCERRADAS (Bloqueadas no Site)</span>`;
+      if (desc) {
+        desc.textContent = `Novos cadastros e pagamentos Pix para o ${edicao}° Café estão bloqueados no site para visitantes.`;
+      }
+      btn.className = 'w-full sm:w-auto px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-95';
+      btn.innerHTML = `<i data-lucide="unlock" class="w-4 h-4"></i><span>Reabrir Inscrições do ${edicao}° Café</span>`;
+    } else {
+      banner.className = 'p-4 sm:p-5 bg-emerald-50/70 rounded-2xl border border-emerald-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs';
+      if (icon) {
+        icon.className = 'w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0';
+        icon.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i>';
+      }
+      texto.innerHTML = `Inscrições da ${edicao}ª Edição: <span class="text-emerald-700 font-black">🟢 ABERTAS NO SITE</span>`;
+      if (desc) {
+        desc.textContent = `O formulário de inscrição e o pagamento Pix estão ativos e aceitando novos participantes no site.`;
+      }
+      btn.className = 'w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-sm shrink-0 active:scale-95';
+      btn.innerHTML = `<i data-lucide="lock" class="w-4 h-4"></i><span>Encerrar Inscrições do ${edicao}° Café</span>`;
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
+}
+
+async function alternarInscricoesAdmin() {
+  const edicao = obterEdicaoAtivaAdmin();
+  const isEncerrada = window.LigaDB?.estaoInscricoesEncerradas ? window.LigaDB.estaoInscricoesEncerradas(edicao) : false;
+  const novoStatusEncerrada = !isEncerrada;
+
+  if (novoStatusEncerrada) {
+    const confirmMsg = `⚠️ ATENÇÃO: Deseja realmente ENCERRAR as inscrições do ${edicao}° Café com Ciência?\n\nIsso bloqueará novos cadastros e pagamentos Pix no site imediatamente para esta edição.`;
+    if (!confirm(confirmMsg)) return;
+  } else {
+    const confirmMsg = `Deseja REABRIR as inscrições do ${edicao}° Café com Ciência?\n\nO formulário e o Pix de R$ 10,00 voltarão a aceitar cadastros no site.`;
+    if (!confirm(confirmMsg)) return;
+  }
+
+  if (window.LigaDB?.alternarInscricoesEncerradas) {
+    await window.LigaDB.alternarInscricoesEncerradas(edicao, novoStatusEncerrada);
+  }
+
+  atualizarVisualStatusInscricoes();
+  if (typeof mostrarToast === 'function') {
+    mostrarToast(novoStatusEncerrada ? `Inscrições do ${edicao}° Café encerradas!` : `Inscrições do ${edicao}° Café reabertas!`);
+  }
+}
+
 function alternarLiberacaoCertificadosAdmin() {
   const atual = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
   const novo = !atual;
@@ -168,6 +245,16 @@ function alternarLiberacaoCertificadosAdmin() {
   }
 
   window.LigaDB.alternarLiberacaoCertificados(novo);
+  if (window.LigaDB?.obterConfiguracoesSistema) {
+    window.LigaDB.obterConfiguracoesSistema().then(() => {
+      atualizarVisualStatusInscricoes();
+      atualizarVisualStatusCertificados();
+    }).catch(() => {
+      atualizarVisualStatusInscricoes();
+    });
+  } else {
+    atualizarVisualStatusInscricoes();
+  }
   atualizarVisualStatusCertificados();
   carregarInscricoesAdmin();
   if (typeof mostrarToast === 'function') {
@@ -239,6 +326,7 @@ function selecionarEdicaoAdmin(edicao) {
   }
 
   atualizarMetricasPorEdicao();
+  atualizarVisualStatusInscricoes();
   filtrarInscricoesTabelaAdmin();
 }
 
@@ -566,6 +654,154 @@ function fecharVisualizadorComprovante() {
   const viewerModal = document.getElementById('comprovanteViewerModal');
   if (viewerModal) viewerModal.classList.add('hidden');
 }
+
+// ============================================================================
+// MODAL DE CREDENCIAL COM QR CODE (PAINEL ADMIN)
+// ============================================================================
+async function abrirCredencialPorProtocolo(protocolo) {
+  if (!protocolo) return;
+  
+  let aluno = (inscricoesCache || []).find(i => i.protocolo === protocolo);
+  if (!aluno && window.LigaDB?.buscarInscricao) {
+    try {
+      aluno = await window.LigaDB.buscarInscricao(protocolo);
+    } catch (e) {
+      console.warn('Erro ao buscar inscrição:', e);
+    }
+  }
+
+  if (!aluno) {
+    alert('Inscrição não encontrada para o protocolo: ' + protocolo);
+    return;
+  }
+
+  exibirCredencialAdmin(aluno);
+}
+
+function exibirCredencialAdmin(aluno) {
+  const modal = document.getElementById('modalCredencialAdmin');
+  const target = document.getElementById('conteudoCredencialAdmin');
+  if (!modal || !target || !aluno) return;
+
+  const proto = (aluno.protocolo || '').toUpperCase();
+  const edNum = parseInt(aluno.edicao, 10);
+  const is12 = proto.startsWith('CC12-') || edNum === 12;
+  const is11 = proto.startsWith('CC11-') || edNum === 11;
+  const edicao = is12 ? 12 : (is11 ? 11 : 10);
+
+  const instNome = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(aluno) : (aluno.instituicao || 'Faculdade Arnaldo');
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(aluno.protocolo)}&color=2B1810&bgcolor=FFFFFF&margin=2`;
+  const zapClean = (aluno.telefone || '').replace(/\D/g, '');
+
+  target.innerHTML = `
+    <div class="space-y-4 text-center">
+      <!-- Topo com badges -->
+      <div class="flex items-center justify-between gap-2 flex-wrap pb-3 border-b border-stone-100">
+        <span class="px-2.5 py-0.5 rounded-md text-[11px] font-black uppercase tracking-wider ${edicao >= 11 ? 'bg-amber-100 text-amber-950 border border-amber-300' : 'bg-coffee-100 text-coffee-950 border border-coffee-300'}">
+          ${edicao}ª Edição
+        </span>
+        <span class="font-mono text-xs font-bold px-2.5 py-1 rounded-lg bg-stone-100 text-stone-800 border border-stone-200">
+          ${aluno.protocolo}
+        </span>
+      </div>
+
+      <!-- Dados do Participante -->
+      <div class="space-y-1">
+        <h3 class="text-xl font-black text-coffee-950 leading-tight">${aluno.nome_completo}</h3>
+        <p class="text-xs text-stone-500 font-mono">${aluno.email}</p>
+        <div class="pt-1.5 flex items-center justify-center gap-2 flex-wrap">
+          <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-100 text-stone-700 border border-stone-200">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-stone-600"></i>
+            ${instNome}
+          </span>
+          ${zapClean ? `
+            <a href="https://wa.me/55${zapClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 transition">
+              <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
+              ${aluno.telefone}
+            </a>
+          ` : ''}
+        </div>
+      </div>
+
+      <!-- Status Pagamento & Presença -->
+      <div class="grid grid-cols-2 gap-2 text-xs pt-1 text-left">
+        <div class="p-2.5 rounded-xl border ${aluno.status_pagamento === 'aprovado' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900'}">
+          <span class="block text-[10px] uppercase font-bold text-stone-500">Pagamento Pix</span>
+          <span class="font-bold flex items-center gap-1 mt-0.5">
+            <i data-lucide="${aluno.status_pagamento === 'aprovado' ? 'check-circle' : 'clock'}" class="w-3.5 h-3.5 ${aluno.status_pagamento === 'aprovado' ? 'text-emerald-600' : 'text-amber-600'}"></i>
+            ${aluno.status_pagamento === 'aprovado' ? 'Aprovado (R$ 10)' : 'Pendente'}
+          </span>
+        </div>
+        <div class="p-2.5 rounded-xl border ${aluno.presenca_confirmada ? 'bg-blue-50 border-blue-200 text-blue-900' : 'bg-stone-50 border-stone-200 text-stone-700'}">
+          <span class="block text-[10px] uppercase font-bold text-stone-500">Status Check-in</span>
+          <span class="font-bold flex items-center gap-1 mt-0.5">
+            <i data-lucide="${aluno.presenca_confirmada ? 'check-check' : 'user-x'}" class="w-3.5 h-3.5 ${aluno.presenca_confirmada ? 'text-blue-600' : 'text-stone-400'}"></i>
+            ${aluno.presenca_confirmada ? 'Presença Confirmada' : 'Não Chegou'}
+          </span>
+        </div>
+      </div>
+
+      <!-- QR Code Oficial -->
+      <div class="bg-coffee-50/70 p-4 rounded-2xl border border-coffee-200 flex flex-col items-center justify-center my-1">
+        <div class="p-2.5 bg-white rounded-xl shadow-md border border-coffee-200 mb-2">
+          <img src="${qrUrl}" alt="QR Code Oficial" class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg mx-auto" />
+        </div>
+        <span class="text-xs font-mono font-bold text-coffee-950">${aluno.protocolo}</span>
+        <p class="text-[11px] text-stone-500 mt-0.5">Apresente este QR Code na portaria da Sala 306</p>
+      </div>
+
+      <!-- Botões de Ação Administrativa -->
+      <div class="flex items-center gap-2 pt-2">
+        ${!aluno.presenca_confirmada ? `
+          <button 
+            type="button"
+            onclick="validarPresencaAdmin('${aluno.protocolo}');" 
+            class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5 active:scale-95"
+          >
+            <i data-lucide="check-check" class="w-4 h-4"></i>
+            <span>Confirmar Presença</span>
+          </button>
+        ` : `
+          <span class="flex-1 py-2 px-3 bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5">
+            <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+            <span>Presença Já Validada</span>
+          </span>
+        `}
+
+        <button 
+          type="button"
+          onclick="fecharCredencialModalAdmin();" 
+          class="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl transition"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  `;
+
+  if (window.lucide) window.lucide.createIcons();
+  modal.classList.remove('hidden');
+}
+
+function fecharCredencialModalAdmin() {
+  const modal = document.getElementById('modalCredencialAdmin');
+  if (modal) modal.classList.add('hidden');
+}
+
+async function validarPresencaAdmin(protocolo) {
+  if (!protocolo) return;
+  if (!confirm(`Deseja confirmar a presença do participante (${protocolo}) no evento agora?`)) return;
+
+  try {
+    const res = await window.LigaDB.validarPresencaPorQRCode(protocolo, 'Painel da Liga');
+    alert(res.jaConfirmado ? res.mensagem : `Presença confirmada com sucesso para ${res.aluno.nome_completo}!`);
+    fecharCredencialModalAdmin();
+    carregarInscricoesAdmin();
+  } catch (err) {
+    alert('Erro ao confirmar presença: ' + err.message);
+  }
+}
+
 
 // ============================================================================
 // SISTEMA DE LEMBRETES AUTOMÁTICOS (WHATSAPP E E-MAIL)
@@ -1373,5 +1609,11 @@ window.reenviarCredenciaisTodosInscritosAdmin = reenviarCredenciaisTodosInscrito
 window.carregarConfiguracoesGmailAdmin = carregarConfiguracoesGmailAdmin;
 window.salvarConfiguracaoGmailAdmin = salvarConfiguracaoGmailAdmin;
 window.filtrarInscricoesTabelaAdmin = filtrarInscricoesTabelaAdmin;
+window.abrirCredencialPorProtocolo = abrirCredencialPorProtocolo;
+window.exibirCredencialAdmin = exibirCredencialAdmin;
+window.fecharCredencialModalAdmin = fecharCredencialModalAdmin;
+window.validarPresencaAdmin = validarPresencaAdmin;
+window.alternarInscricoesAdmin = alternarInscricoesAdmin;
+window.atualizarVisualStatusInscricoes = atualizarVisualStatusInscricoes;
 
 

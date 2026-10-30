@@ -375,6 +375,31 @@
            ==================================================================== -->
       <section id="tabView_inscricoes" class="space-y-5">
 
+        <!-- Banner de Encerramento / Reabertura de Inscrições -->
+        <div id="bannerStatusInscricoes" class="p-4 sm:p-5 bg-white rounded-2xl border border-stone-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs transition">
+          <div class="flex items-center gap-3.5">
+            <div id="iconStatusInscricoes" class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+              <i data-lucide="check-circle" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="font-bold text-sm sm:text-base text-stone-900" id="textoStatusInscricoes">
+                Inscrições da 10ª Edição: 🟢 Abertas no Site
+              </div>
+              <p class="text-xs text-stone-500 mt-0.5" id="descStatusInscricoes">
+                Os alunos conseguem acessar a página de inscrição, preencher seus dados e enviar o comprovante Pix normalmente.
+              </p>
+            </div>
+          </div>
+          <button 
+            id="btnAlternarInscricoes"
+            onclick="alternarInscricoesAdmin()"
+            class="w-full sm:w-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center justify-center gap-2 shadow-sm shrink-0"
+          >
+            <i data-lucide="ban" class="w-4 h-4"></i>
+            <span>Encerrar Inscrições Desta Edição</span>
+          </button>
+        </div>
+
         <!-- Banner de Liberação de Certificados -->
         <div id="bannerStatusCertificados" class="p-4 sm:p-5 bg-amber-50 rounded-2xl border border-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
           <div class="flex items-center gap-3.5">
@@ -1120,11 +1145,29 @@
     </div>
   </div>
 
+  <!-- ================= MODAL DE CREDENCIAL DO ALUNO (ADMIN) ================= -->
+  <div id="modalCredencialAdmin" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto p-6 relative border border-stone-200 shadow-2xl">
+      <button 
+        type="button"
+        onclick="fecharCredencialModalAdmin()" 
+        class="absolute top-5 right-5 text-stone-400 hover:text-stone-700 p-2 rounded-full hover:bg-stone-100 transition"
+        title="Fechar Credencial"
+      >
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div id="conteudoCredencialAdmin">
+        <!-- Preenchido dinamicamente por exibirCredencialAdmin -->
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts do Painel Administrativo -->
-  <script src="js/supabase-client.js?v=3"></script>
-  <script src="js/email-service.js?v=3"></script>
-  <script src="js/qr-scanner.js?v=3"></script>
-  <script src="js/admin.js?v=3"></script>
+  <script src="js/supabase-client.js?v=4"></script>
+  <script src="js/email-service.js?v=4"></script>
+  <script src="js/qr-scanner.js?v=4"></script>
+  <script src="js/admin.js?v=4"></script>
 
   <script>
     // Inicialização da Página Dedicada de Admin

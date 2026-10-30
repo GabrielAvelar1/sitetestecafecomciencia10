@@ -202,6 +202,108 @@ function alternarLiberacaoCertificados(novoStatus) {
 }
 
 // ============================================================================
+// CONTROLE DE CONFIGURAÇÕES GLOBAIS (INSCRIÇÕES ENCERRADAS & CERTIFICADOS)
+// ============================================================================
+let configSistemaCache = null;
+
+async function obterConfiguracoesSistema() {
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const { data, error } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('*')
+        .eq('protocolo', 'SISTEMA-CONFIG')
+        .limit(1);
+
+      if (!error && data && data.length > 0 && data[0].observacoes) {
+        try {
+          const cfg = JSON.parse(data[0].observacoes);
+          configSistemaCache = cfg;
+          if (cfg.inscricoes_10) localStorage.setItem('cafe_inscricoes_encerradas_10', cfg.inscricoes_10 === 'encerradas' ? 'true' : 'false');
+          if (cfg.inscricoes_11) localStorage.setItem('cafe_inscricoes_encerradas_11', cfg.inscricoes_11 === 'encerradas' ? 'true' : 'false');
+          if (cfg.inscricoes_12) localStorage.setItem('cafe_inscricoes_encerradas_12', cfg.inscricoes_12 === 'encerradas' ? 'true' : 'false');
+          if (typeof cfg.certificados_liberados === 'boolean') {
+            localStorage.setItem('cafe_certificados_liberados', cfg.certificados_liberados ? 'true' : 'false');
+          }
+          return cfg;
+        } catch (e) {}
+      }
+    } catch (e) {
+      console.warn('Aviso ao consultar configurações do sistema:', e);
+    }
+  }
+
+  return {
+    inscricoes_10: localStorage.getItem('cafe_inscricoes_encerradas_10') === 'true' ? 'encerradas' : 'abertas',
+    inscricoes_11: localStorage.getItem('cafe_inscricoes_encerradas_11') === 'true' ? 'encerradas' : 'abertas',
+    inscricoes_12: localStorage.getItem('cafe_inscricoes_encerradas_12') === 'true' ? 'encerradas' : 'abertas',
+    certificados_liberados: localStorage.getItem('cafe_certificados_liberados') === 'true'
+  };
+}
+
+function estaoInscricoesEncerradas(edicao = 10) {
+  const n = parseInt(edicao, 10);
+  const ed = (n === 12 || n === 11) ? n : 10;
+  return localStorage.getItem(`cafe_inscricoes_encerradas_${ed}`) === 'true';
+}
+
+async function alternarInscricoesEncerradas(edicao = 10, novoStatusEncerradas = true) {
+  const n = parseInt(edicao, 10);
+  const ed = (n === 12 || n === 11) ? n : 10;
+  const statusStr = novoStatusEncerradas ? 'encerradas' : 'abertas';
+
+  // 1. Atualiza localStorage local
+  localStorage.setItem(`cafe_inscricoes_encerradas_${ed}`, novoStatusEncerradas ? 'true' : 'false');
+
+  // 2. Atualiza Supabase na nuvem para sincronizar com todos os celulares e computadores
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const cfgAtual = (await obterConfiguracoesSistema()) || {};
+      cfgAtual[`inscricoes_${ed}`] = statusStr;
+
+      const { data: existente } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('id')
+        .eq('protocolo', 'SISTEMA-CONFIG')
+        .limit(1);
+
+      if (existente && existente.length > 0) {
+        await sb
+          .from(SUPABASE_CONFIG.tableName)
+          .update({
+            observacoes: JSON.stringify(cfgAtual),
+            ultimo_lembrete_em: new Date().toISOString()
+          })
+          .eq('protocolo', 'SISTEMA-CONFIG');
+      } else {
+        await sb
+          .from(SUPABASE_CONFIG.tableName)
+          .insert([{
+            protocolo: 'SISTEMA-CONFIG',
+            nome_completo: 'Configurações Globais do Sistema',
+            email: 'config.sistema@cafecomciencia.local',
+            telefone: '(00) 00000-0000',
+            senha: 'sistema-config',
+            role: 'organizador',
+            status_pagamento: 'aprovado',
+            observacoes: JSON.stringify(cfgAtual)
+          }]);
+      }
+    } catch (e) {
+      console.warn('Erro ao sincronizar status de inscrições no Supabase:', e);
+    }
+  }
+
+  window.dispatchEvent(new CustomEvent('inscricoes_status_changed', { 
+    detail: { edicao: ed, status: statusStr, encerradas: novoStatusEncerradas } 
+  }));
+
+  return novoStatusEncerradas;
+}
+
+// ============================================================================
 // 4. SISTEMA DE AUTENTICAÇÃO E SESSÃO COM GOOGLE
 // ============================================================================
 const ORGANIZADOR_PADRAO = {
@@ -436,6 +538,10 @@ async function registrarInscricao({ nome_completo, email, telefone, instituicao,
 
   const n = parseInt(edicao, 10);
   const numEdicao = (n === 12 || n === 11) ? n : 10;
+
+  if (estaoInscricoesEncerradas(numEdicao)) {
+    throw new Error(`As inscrições para o ${numEdicao}° Café com Ciência foram encerradas pela comissão organizadora.`);
+  }
   const protocolo = gerarProtocolo(numEdicao);
   const emailLimpo = email.trim().toLowerCase();
   const instituicaoLimpa = (instituicao && instituicao.trim()) ? instituicao.trim() : 'Faculdade Arnaldo';
@@ -1089,6 +1195,9 @@ window.LigaDB = {
   isGoogleConfigured,
   estaoCertificadosLiberados,
   alternarLiberacaoCertificados,
+  obterConfiguracoesSistema,
+  estaoInscricoesEncerradas,
+  alternarInscricoesEncerradas,
   extrairInstituicaoAluno
 };
 

@@ -14,6 +14,22 @@ document.addEventListener('DOMContentLoaded', () => {
   atualizarInterfaceUsuario();
   inicializarGoogleIdentityServices();
 
+  // Sincroniza configurações do sistema (ex: inscrições abertas ou encerradas)
+  if (window.LigaDB?.obterConfiguracoesSistema) {
+    window.LigaDB.obterConfiguracoesSistema().then(() => {
+      atualizarStatusInscricoesUI();
+    }).catch(err => {
+      console.warn('Erro ao carregar configurações de inscrição:', err);
+      atualizarStatusInscricoesUI();
+    });
+  } else {
+    atualizarStatusInscricoesUI();
+  }
+
+  window.addEventListener('inscricoes_status_changed', () => {
+    atualizarStatusInscricoesUI();
+  });
+
   window.addEventListener('auth_state_changed', () => {
     atualizarInterfaceUsuario();
   });
@@ -367,7 +383,8 @@ function configurarUploadComprovante() {
   ['dragenter', 'dragover'].forEach(eventName => {
     dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
-      dropzone.classList.add('dragover');
+
+          dropzone.classList.add('dragover');
     });
   });
 
@@ -475,6 +492,12 @@ function configurarFormulario() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    const edicaoForm = window.EDICAO_ATUAL || 10;
+    if (window.LigaDB?.estaoInscricoesEncerradas && window.LigaDB.estaoInscricoesEncerradas(edicaoForm)) {
+      alert("⚠️ As inscrições para a " + edicaoForm + "ª Edição do Café com Ciência estão encerradas.");
+      return;
+    }
 
     const nome = document.getElementById('nome').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -1747,3 +1770,96 @@ window.loginNativoGooglePopup = loginNativoGooglePopup;
 window.abrirTutorialGoogleOAuth = abrirTutorialGoogleOAuth;
 window.fecharTutorialGoogleOAuth = fecharTutorialGoogleOAuth;
 window.salvarGoogleClientIdFromTutorial = salvarGoogleClientIdFromTutorial;
+
+// ============================================================================
+// CONTROLE VISUAL DE ENCERRAMENTO DE INSCRIÇÕES (PUBLIC PAGES)
+// ============================================================================
+function atualizarStatusInscricoesUI() {
+  const edicao = window.EDICAO_ATUAL || 10;
+  const formInscricao = document.getElementById('formInscricao');
+  const btnSubmit = document.getElementById('btnSubmitInscricao');
+  
+  if (!formInscricao) return;
+
+  const encerradas = window.LigaDB?.estaoInscricoesEncerradas ? window.LigaDB.estaoInscricoesEncerradas(edicao) : false;
+  let avisoEl = document.getElementById('avisoInscricoesEncerradas');
+
+  if (encerradas) {
+    // Desabilita todos os inputs e botões do formulário exceto botões de consulta
+    const formElements = formInscricao.querySelectorAll('input, select, textarea, button');
+    formElements.forEach(el => {
+      if (el.id !== 'btnVerificarAcessoAluno' && !el.closest('#modalAreaAluno') && !el.closest('#modalCredencialOficial')) {
+        el.disabled = true;
+      }
+    });
+
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      if (!btnSubmit.dataset.originalHtml) {
+        btnSubmit.dataset.originalHtml = btnSubmit.innerHTML;
+      }
+      btnSubmit.className = 'w-full py-4 px-6 rounded-2xl bg-stone-300 text-stone-600 font-bold text-sm sm:text-base cursor-not-allowed shadow-none flex items-center justify-center gap-2 border border-stone-300';
+      btnSubmit.innerHTML = `
+        <i data-lucide="ban" class="w-5 h-5 text-red-500"></i>
+        <span>Inscrições Encerradas para a ${edicao}ª Edição</span>
+      `;
+    }
+
+    // Exibe banner chamativo no topo do formulário
+    if (!avisoEl) {
+      avisoEl = document.createElement('div');
+      avisoEl.id = 'avisoInscricoesEncerradas';
+      avisoEl.className = 'mb-6 p-5 sm:p-6 bg-red-50 border-2 border-red-300 rounded-3xl text-red-950 shadow-md animate-fade-in';
+      avisoEl.innerHTML = `
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-200 text-red-900">
+                Prazo Esgotado
+              </span>
+              <h4 class="text-base sm:text-lg font-black text-red-900">Inscrições Encerradas</h4>
+            </div>
+            <p class="text-xs sm:text-sm text-red-800 leading-relaxed font-medium">
+              As inscrições online para a <strong>${edicao}ª Edição do Café com Ciência</strong> foram encerradas pela comissão organizadora.
+            </p>
+            <div class="mt-3 pt-3 border-t border-red-200/80 flex flex-wrap items-center gap-3 text-xs text-red-900">
+              <span class="font-bold">Já realizou sua inscrição anteriormente?</span>
+              <a href="portal.html" class="inline-flex items-center gap-1 font-bold underline hover:text-red-950">
+                <span>Ver Minha Credencial no Portal</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+              </a>
+              <span class="text-red-400">•</span>
+              <span>Dúvidas: cafecomcienciaresend@gmail.com</span>
+            </div>
+          </div>
+        </div>
+      `;
+      formInscricao.parentNode.insertBefore(avisoEl, formInscricao);
+    }
+  } else {
+    // Reabre e restaura formulário
+    if (avisoEl) {
+      avisoEl.remove();
+    }
+
+    const formElements = formInscricao.querySelectorAll('input, select, textarea, button');
+    formElements.forEach(el => {
+      el.disabled = false;
+    });
+
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      if (btnSubmit.dataset.originalHtml) {
+        btnSubmit.innerHTML = btnSubmit.dataset.originalHtml;
+      }
+      btnSubmit.className = 'w-full py-4 px-6 rounded-2xl bg-coffee-800 hover:bg-coffee-900 text-amber-100 font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl hover:shadow-coffee-900/30 transition transform active:scale-[0.99] flex items-center justify-center gap-2 group border border-amber-600/30';
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+window.atualizarStatusInscricoesUI = atualizarStatusInscricoesUI;
