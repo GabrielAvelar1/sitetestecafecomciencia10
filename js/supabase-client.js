@@ -828,12 +828,30 @@ async function buscarTodasInscricoes(termo) {
 async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficial') {
   if (!codigo) throw new Error('Código do QR Code não fornecido.');
 
-  let protocolo = codigo.trim();
-  if (protocolo.includes('checkin=')) {
-    const urlParams = new URLSearchParams(protocolo.split('?')[1]);
-    protocolo = urlParams.get('checkin') || protocolo;
+  let protocolo = String(codigo).trim();
+
+  // 1. Extração robusta se for uma URL completa ou link com parâmetros
+  if (protocolo.includes('?')) {
+    try {
+      const urlQuery = protocolo.split('?')[1];
+      const urlParams = new URLSearchParams(urlQuery);
+      if (urlParams.get('protocolo')) {
+        protocolo = urlParams.get('protocolo');
+      } else if (urlParams.get('checkin')) {
+        protocolo = urlParams.get('checkin');
+      } else if (urlParams.get('codigo')) {
+        protocolo = urlParams.get('codigo');
+      }
+    } catch (e) {}
   }
-  protocolo = protocolo.toUpperCase();
+
+  // 2. Extração via Regex: localiza padrão oficial CC10-XXXXXX, CC11-XXXXXX ou CC12-XXXXXX
+  const matchOficial = protocolo.match(/CC\d{2}-[A-Z0-9]+/i);
+  if (matchOficial) {
+    protocolo = matchOficial[0];
+  }
+
+  protocolo = protocolo.toUpperCase().trim();
 
   const sb = getSupabase();
 
