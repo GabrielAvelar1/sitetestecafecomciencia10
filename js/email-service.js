@@ -404,12 +404,64 @@
       tituloLembrete = 'O Grande Dia é Amanhã!';
       textoIntro = `O <strong>${dados.tituloEdicao}</strong> acontece amanhã às <strong>${dados.dataHora} (${dados.local})</strong>!`;
     } else {
-      subject = `📍 É HOJE! ${dados.numeroOrdinal} Café com Ciência na UniArnaldo`;
+      subject = `📍 É HOJE! Seu Comprovante & QR Code de Entrada - ${dados.numeroOrdinal} Café com Ciência [${aluno.protocolo}]`;
       tituloLembrete = 'É Hoje! Portaria Aberta';
-      textoIntro = `Nosso evento acontece <strong>HOJE (${dados.dataHora})</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.`;
+      textoIntro = `O grande dia chegou! É <strong>HOJE (${dados.dataHora})</strong>, na <strong>${dados.local}</strong>! Chegue com alguns minutos de antecedência para fazer seu check-in e aproveitar o coffee break.`;
     }
 
-    const conteudoHtml = `
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(aluno.protocolo || '')}&color=2B1810&bgcolor=FFFFFF&margin=2`;
+    const instNome = (aluno.instituicao && aluno.instituicao.trim()) ? aluno.instituicao.trim() : 'Faculdade Arnaldo';
+
+    const conteudoHtml = (tipo === 'hoje_portaria') ? `
+      <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
+      <p>${textoIntro}</p>
+
+      <!-- CARD / TICKET OFICIAL DA CREDENCIAL -->
+      <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fcf9f5; border-radius: 18px; border: 2px solid #ebd9c8; overflow: hidden; margin: 20px 0 20px 0;">
+        <tr>
+          <td style="background-color: #2b1810; padding: 10px 18px; text-align: center;">
+            <span style="color: #f3d4b6; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">
+              ☕ COMPROVANTE OFICIAL & QR CODE DE PORTARIA
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 22px 18px 16px 18px; text-align: center;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #8c786a; font-weight: 700; margin-bottom: 4px;">
+              Participante Confirmado(a)
+            </div>
+            <div style="font-size: 19px; font-weight: 800; color: #2b1810; line-height: 1.3;">
+              ${aluno.nome_completo}
+            </div>
+            <div style="font-size: 12px; color: #6b5c4f; margin-top: 3px;">
+              ${instNome}
+            </div>
+
+            <!-- Protocolo em Destaque -->
+            <div style="display: inline-block; background-color: #ffffff; border: 1.5px dashed #a65824; border-radius: 10px; padding: 6px 16px; margin: 12px 0 16px 0;">
+              <span style="font-size: 11px; color: #733c1a; font-weight: 700; text-transform: uppercase; display: block;">Protocolo Oficial:</span>
+              <span style="font-size: 20px; font-weight: 900; font-family: monospace; color: #2b1810; letter-spacing: 1px;">${aluno.protocolo}</span>
+            </div>
+
+            <!-- Imagem do QR Code -->
+            <div style="background-color: #ffffff; border-radius: 14px; padding: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(45, 38, 33, 0.08); border: 1px solid #ebd9c8; margin-bottom: 10px;">
+              <img src="${qrUrl}" width="200" height="200" alt="QR Code - ${aluno.protocolo}" style="display: block; margin: 0 auto; border-radius: 8px;" />
+            </div>
+
+            <div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 10px; padding: 8px 12px; margin: 6px auto 0 auto; max-width: 420px;">
+              <p style="margin: 0; font-size: 12px; color: #1b5e20; font-weight: 600; line-height: 1.4;">
+                📲 <strong>Apresente este QR Code na portaria:</strong><br>
+                Ele será lido na entrada para validar sua presença e liberar seu Certificado de 4 Horas.
+              </p>
+            </div>
+          </td>
+        </tr>
+      </table>
+
+      <p style="font-size: 14px; color: #4a3f35; margin: 16px 0 0 0;">
+        Você também pode acessar sua credencial digital online a qualquer momento pelo botão abaixo:
+      </p>
+    ` : `
       <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
       <p>${textoIntro}</p>
 
