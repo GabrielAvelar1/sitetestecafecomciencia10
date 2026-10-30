@@ -53,6 +53,64 @@
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
+    /* Estilos de Certificado Oficial */
+    .certificate-page {
+      width: 100%;
+      max-width: 1122px; /* A4 width */
+      aspect-ratio: 1.414; /* A4 Landscape */
+      background-color: white;
+      position: relative;
+      margin: 1.5rem auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: #000;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+
+      body {
+        background-color: white !important;
+      }
+
+      .no-print, header, nav, footer, #adminLoginScreen, #adminMainDashboard > *:not(#areaImpressaoCertificados),
+      #tabView_inscricoes, #tabView_portaria, #tabView_lembretes, #tabView_resend_teste, #tabView_certificados,
+      #modalCredencialAdmin, #modalPreviaEmail, #modalConfirmarResetBanco {
+        display: none !important;
+      }
+
+      #areaImpressaoCertificados {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      .certificate-page {
+        width: 297mm !important;
+        height: 209mm !important;
+        max-width: none !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+
+      .certificate-page:last-child {
+        page-break-after: auto;
+      }
+    }
+
     .admin-card-glass {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(12px);
@@ -255,7 +313,15 @@
             </button>
 
             <button 
-              id="tabBtn_resend_teste" 
+              id="tabBtn_certificados" 
+              onclick="trocarAbaAdmin('certificados')" 
+              class="px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap text-stone-300 hover:text-white hover:bg-white/10"
+            >
+              <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+              <span>Gerador de Certificados</span>
+            </button>
+
+            <button id="tabBtn_resend_teste" 
               onclick="trocarAbaAdmin('resend_teste')" 
               class="px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap text-stone-300 hover:text-white hover:bg-white/10"
             >
@@ -990,6 +1056,357 @@
 
       </section>
 
+    
+      <!-- ====================================================================
+           ABA 5: GERADOR & EDITOR DE CERTIFICADOS OFICIAIS
+           ==================================================================== -->
+      <section id="tabView_certificados" class="hidden space-y-6">
+
+        <!-- Cabeçalho do Estúdio de Certificados -->
+        <div class="bg-white p-6 sm:p-7 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="flex items-start gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-lg shrink-0">
+              <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-base sm:text-lg font-black text-stone-900">Estúdio & Gerador de Certificados Oficiais</h3>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  Prévia em Tempo Real
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-300">
+                  Suporte Duplo (Membros da Liga)
+                </span>
+              </div>
+              <p class="text-xs text-stone-500 mt-1 max-w-3xl leading-relaxed">
+                Visualize, edite e personalize o texto dos certificados antes de imprimir ou disparar por e-mail. Membros da comissão organizadora podem receber dois certificados: um de participação (4h) e outro de organizador (6h).
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 self-stretch sm:self-auto shrink-0 flex-wrap">
+            <button 
+              type="button" 
+              onclick="imprimirCertificadosGerados()" 
+              class="flex-1 sm:flex-initial px-4 py-2.5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2"
+              title="Imprimir ou Salvar em PDF (Formato A4 Paisagem)"
+            >
+              <i data-lucide="printer" class="w-4 h-4 text-amber-300"></i>
+              <span>Imprimir / Salvar PDFs</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="enviarCertificadosEmailAdmin()" 
+              class="flex-1 sm:flex-initial px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2"
+              title="Disparar certificados por e-mail para os inscritos da lista"
+            >
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span>Enviar por E-mail</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel de Configurações e Edição -->
+        <div class="bg-white p-6 sm:p-7 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+
+          <!-- 1. Seleção de Edição e Modalidade -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-5 border-b border-stone-100">
+            
+            <!-- Seletor de Edição -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                1. Selecione a Edição do Evento:
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <button 
+                  type="button" 
+                  id="btnCertEdicao_10" 
+                  onclick="alternarEdicaoCertificado('10')" 
+                  class="p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-amber-50 border-amber-400 text-amber-950 shadow-xs"
+                >
+                  <span class="font-black">10° Café</span>
+                  <span class="text-[10px] text-amber-800 font-normal">Carolina Diniz (30/10)</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="btnCertEdicao_11" 
+                  onclick="alternarEdicaoCertificado('11')" 
+                  class="p-2.5 rounded-xl border border-stone-200 text-xs font-semibold hover:border-amber-400 text-stone-700 transition flex flex-col items-center gap-1 bg-white"
+                >
+                  <span class="font-black">11° Café</span>
+                  <span class="text-[10px] text-stone-500 font-normal">Henrique Pretti (13/11)</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="btnCertEdicao_12" 
+                  onclick="alternarEdicaoCertificado('12')" 
+                  class="p-2.5 rounded-xl border border-stone-200 text-xs font-semibold hover:border-amber-400 text-stone-700 transition flex flex-col items-center gap-1 bg-white"
+                >
+                  <span class="font-black">12° Café</span>
+                  <span class="text-[10px] text-stone-500 font-normal">Thaissa Calab (18/11)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Seletor de Modalidade -->
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                2. Tipo de Declaração / Certificado:
+              </label>
+              <div class="grid grid-cols-3 gap-2">
+                <button 
+                  type="button" 
+                  id="btnCertModalidade_participacao" 
+                  onclick="alternarModalidadeCertificado('participacao')" 
+                  class="p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-white border-stone-200 text-stone-700 hover:border-blue-400"
+                >
+                  <span class="font-bold">🎓 Participação</span>
+                  <span class="text-[10px] text-stone-500">4 Horas (Ouvinte)</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="btnCertModalidade_organizador" 
+                  onclick="alternarModalidadeCertificado('organizador')" 
+                  class="p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-white border-stone-200 text-stone-700 hover:border-amber-400"
+                >
+                  <span class="font-bold">🏆 Organizador</span>
+                  <span class="text-[10px] text-stone-500">6 Horas (Comissão)</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  id="btnCertModalidade_ambos" 
+                  onclick="alternarModalidadeCertificado('ambos')" 
+                  class="p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-purple-50 border-purple-400 text-purple-950 shadow-xs"
+                >
+                  <span class="font-black text-purple-900">🌟 Ambos (Membros)</span>
+                  <span class="text-[10px] text-purple-700 font-bold">2 Certificados!</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 2. Lista de Participantes (Nomes) -->
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700">
+                3. Nomes dos Participantes (Um por linha):
+              </label>
+
+              <!-- Botões de Importação Rápida -->
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <button 
+                  type="button" 
+                  onclick="carregarPresentesCertificados()" 
+                  class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition flex items-center gap-1"
+                  title="Puxar nomes de alunos com presença confirmada no Supabase"
+                >
+                  <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                  <span>Importar Presentes</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="carregarTodosInscritosCertificados()" 
+                  class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-stone-100 text-stone-800 border border-stone-200 hover:bg-stone-200 transition flex items-center gap-1"
+                  title="Puxar todos os inscritos aprovados"
+                >
+                  <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                  <span>Todos Inscritos</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="carregarMembrosLigaCertificados()" 
+                  class="px-2.5 py-1 text-[11px] font-bold rounded-lg bg-purple-50 text-purple-800 border border-purple-200 hover:bg-purple-100 transition flex items-center gap-1"
+                  title="Ativar modo membros da liga (2 certificados)"
+                >
+                  <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                  <span>Membros da Liga (Duplo)</span>
+                </button>
+
+                <button 
+                  type="button" 
+                  onclick="limparNomesCertificados()" 
+                  class="px-2 py-1 text-[11px] font-semibold rounded-lg text-red-600 hover:bg-red-50 transition"
+                >
+                  Limpar
+                </button>
+              </div>
+            </div>
+
+            <textarea 
+              id="certEditorNomes" 
+              rows="4" 
+              oninput="atualizarContagemNomesCertificados()"
+              placeholder="Digite ou cole um nome por linha&#10;Ex: Daniel Henrique da Silva Guimarães&#10;Maria de Souza Pereira..." 
+              class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:border-amber-600 focus:ring-2 focus:ring-amber-200 text-xs sm:text-sm font-sans outline-none leading-relaxed"
+            ></textarea>
+            <div class="flex items-center justify-between text-[11px] text-stone-500 mt-1">
+              <span id="badgeContagemNomesCertificados">0 participantes listados</span>
+              <span class="text-stone-400">Cada nome gerará suas páginas correspondentes automaticamente</span>
+            </div>
+          </div>
+
+          <!-- 3. Edição dos Textos da Declaração -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 pt-2 border-t border-stone-100">
+            
+            <!-- Texto Participação -->
+            <div id="containerTextoParticipacao">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                  Texto da Declaração de Participação:
+                </label>
+                <div class="flex items-center gap-1 text-xs text-stone-500">
+                  <span>Carga:</span>
+                  <input 
+                    type="number" 
+                    id="certEditorHorasParticipacao" 
+                    value="4" 
+                    class="w-12 px-1.5 py-0.5 text-xs text-center font-bold rounded border border-stone-300"
+                    oninput="gerarPreviaCertificados()"
+                  />
+                  <span>horas</span>
+                </div>
+              </div>
+              <textarea 
+                id="certEditorTextoParticipacao" 
+                rows="4" 
+                oninput="gerarPreviaCertificados()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-stone-300 focus:border-blue-500 text-xs text-stone-800 leading-relaxed outline-none"
+              ></textarea>
+              <p class="text-[10px] text-stone-400 mt-1">O texto começa logo após o nome do aluno em negrito e itálico.</p>
+            </div>
+
+            <!-- Texto Organizador -->
+            <div id="containerTextoOrganizador">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                  Texto da Declaração de Organizador (Membro da Liga):
+                </label>
+                <div class="flex items-center gap-1 text-xs text-stone-500">
+                  <span>Carga:</span>
+                  <input 
+                    type="number" 
+                    id="certEditorHorasOrganizador" 
+                    value="6" 
+                    class="w-12 px-1.5 py-0.5 text-xs text-center font-bold rounded border border-stone-300"
+                    oninput="gerarPreviaCertificados()"
+                  />
+                  <span>horas</span>
+                </div>
+              </div>
+              <textarea 
+                id="certEditorTextoOrganizador" 
+                rows="4" 
+                oninput="gerarPreviaCertificados()"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-purple-200 bg-purple-50/30 focus:border-purple-500 text-xs text-stone-800 leading-relaxed outline-none"
+              ></textarea>
+              <p class="text-[10px] text-purple-700 mt-1">Concedido aos membros que atuaram na comissão organizadora.</p>
+            </div>
+
+          </div>
+
+          <!-- 4. Metadados e Assinatura -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-stone-100">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+                Data de Emissão:
+              </label>
+              <input 
+                type="date" 
+                id="certEditorDataEmissao" 
+                onchange="atualizarDataExtensoCertificados(); gerarPreviaCertificados();"
+                class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-amber-600 outline-none"
+              />
+              <span id="certEditorDataExtensoPreview" class="block text-[11px] text-stone-500 mt-1 italic"></span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+                Coordenador / Assinante:
+              </label>
+              <input 
+                type="text" 
+                id="certEditorNomeCoordenador" 
+                value="Gerdal Roberto de Sousa" 
+                oninput="gerarPreviaCertificados()"
+                class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-amber-600 outline-none"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+                Cargo do Assinante:
+              </label>
+              <input 
+                type="text" 
+                id="certEditorCargoCoordenador" 
+                value="Coordenador do Curso de Odontologia" 
+                oninput="gerarPreviaCertificados()"
+                class="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-amber-600 outline-none"
+              />
+            </div>
+          </div>
+
+          <!-- 5. Barra Inferior de Ações -->
+          <div class="pt-4 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3">
+            <button 
+              type="button" 
+              onclick="restaurarTextosPadraoCertificados()" 
+              class="px-3.5 py-2 text-xs font-semibold text-stone-500 hover:text-stone-800 rounded-lg hover:bg-stone-100 transition flex items-center gap-1.5"
+            >
+              <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+              <span>Restaurar Textos Originais</span>
+            </button>
+
+            <div class="flex items-center gap-3">
+              <button 
+                type="button" 
+                onclick="gerarPreviaCertificados()" 
+                class="px-5 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+              >
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                <span>Atualizar Prévia Visual</span>
+              </button>
+
+              <button 
+                type="button" 
+                onclick="imprimirCertificadosGerados()" 
+                class="px-5 py-2.5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5"
+              >
+                <i data-lucide="printer" class="w-4 h-4 text-amber-300"></i>
+                <span>Imprimir Todas as Declarações</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================= ÁREA DE PRÉVIA VISUAL DOS CERTIFICADOS ================= -->
+        <div class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold uppercase tracking-wider text-stone-700 flex items-center gap-2">
+              <i data-lucide="eye" class="w-4 h-4 text-amber-600"></i>
+              <span>Prévia Visual dos Certificados (A4 Paisagem)</span>
+            </h4>
+            <span id="badgeTotalCertificadosGerados" class="text-xs font-bold text-stone-500">0 certificados gerados</span>
+          </div>
+
+          <div id="previewCertificadosContainer" class="space-y-8">
+            <!-- Certificados são injetados aqui dinamicamente -->
+          </div>
+        </div>
+
+      </section>
+
     </main>
 
     <!-- Rodapé do Dashboard -->
@@ -1164,10 +1581,10 @@
   </div>
 
   <!-- Scripts do Painel Administrativo -->
-  <script src="js/supabase-client.js?v=4"></script>
-  <script src="js/email-service.js?v=4"></script>
-  <script src="js/qr-scanner.js?v=4"></script>
-  <script src="js/admin.js?v=4"></script>
+  <script src="js/supabase-client.js?v=5"></script>
+  <script src="js/email-service.js?v=5"></script>
+  <script src="js/qr-scanner.js?v=5"></script>
+  <script src="js/admin.js?v=5"></script>
 
   <script>
     // Inicialização da Página Dedicada de Admin
@@ -1178,7 +1595,7 @@
 
       // Suporte a hash de aba (#portaria, #lembretes, #resend_teste)
       const hash = window.location.hash.replace('#', '');
-      if (['inscricoes', 'portaria', 'lembretes', 'resend_teste'].includes(hash)) {
+      if (['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados'].includes(hash)) {
         trocarAbaAdmin(hash);
       }
     });
@@ -1253,5 +1670,7 @@
       }
     }
   </script>
+  <!-- Área de Impressão de Certificados (@media print) -->
+  <div id="areaImpressaoCertificados" class="hidden"></div>
 </body>
 </html>

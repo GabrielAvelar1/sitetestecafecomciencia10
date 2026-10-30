@@ -492,36 +492,83 @@
   /**
    * 4. E-mail com Certificado Oficial Liberado
    */
-  async function enviarEmailCertificado(aluno) {
+  async function enviarEmailCertificado(aluno, tipo = 'participacao') {
     if (!aluno || !aluno.email) return;
 
     const urlBase = getUrlBase();
     const dados = obterDadosEdicao(aluno);
-    const linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
     const codigoCert = aluno.certificado_codigo || `CERT-${aluno.protocolo}`;
 
-    const conteudoHtml = `
-      <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
-      <p>Seu <strong>Certificado Oficial de Participação de 4 Horas Complementares</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
-      
-      <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
-        <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Código de Autenticidade Oficial:</div>
-        <div style="font-size: 20px; font-weight: 800; font-family: monospace; color: #166534; margin: 4px 0;">${codigoCert}</div>
-        <div style="font-size: 12px; color: #365314;">Válido para aproveitamento de horas complementares na graduação.</div>
-      </div>
+    let subject = `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`;
+    let preheader = `Seu certificado de 4 horas do ${dados.numeroOrdinal} Café foi liberado! Código: ${codigoCert}`;
+    let titulo = 'Seu Certificado Oficial está Pronto!';
+    let badge = `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`;
+    let botaoTexto = 'Visualizar e Baixar Meu Certificado';
+    let linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}`;
+    let conteudoHtml = '';
 
-      <p>Você pode visualizar seu certificado completo em alta resolução, salvar em PDF ou imprimir clicando no botão abaixo:</p>
-    `;
+    if (tipo === 'organizador') {
+      subject = `🏆 Seu Certificado de Organizador está Disponível! ${dados.numeroOrdinal} Café com Ciência`;
+      preheader = `Seu certificado de 6 horas da comissão organizadora do ${dados.numeroOrdinal} Café foi liberado!`;
+      titulo = 'Certificado de Comissão Organizadora';
+      badge = `Comissão da Liga · ${dados.numeroOrdinalFem} Edição`;
+      botaoTexto = 'Visualizar Certificado de Organizador';
+      linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}&tipo=organizador`;
+      conteudoHtml = `
+        <p>Prezado(a) membro da comissão organizadora, <strong>${aluno.nome_completo}</strong>!</p>
+        <p>Seu <strong>Certificado Oficial de Organizador(a) (6 Horas Complementares)</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi autenticado pela coordenação e já está disponível para emissão e download!</p>
+        <div style="background-color: #fefce8; border-left: 4px solid #eab308; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
+          <div style="font-size: 12px; color: #854d0e; text-transform: uppercase; font-weight: 700;">Código de Autenticidade (Organizador):</div>
+          <div style="font-size: 20px; font-weight: 800; font-family: monospace; color: #713f12; margin: 4px 0;">CERT-ORG-${aluno.protocolo}</div>
+          <div style="font-size: 12px; color: #713f12;">Comprovação oficial de atuação na organização do evento acadêmico.</div>
+        </div>
+        <p>Agradecemos imensamente pela sua dedicação e liderança no Café com Ciência!</p>
+      `;
+    } else if (tipo === 'ambos') {
+      subject = `🌟 Seus Certificados Oficiais (Participação + Organizador) estão Disponíveis!`;
+      preheader = `Seus 2 certificados oficiais do ${dados.numeroOrdinal} Café com Ciência foram liberados!`;
+      titulo = 'Seus Certificados da Liga (2 Certificados)';
+      badge = `Membro da Liga · ${dados.numeroOrdinalFem} Edição`;
+      botaoTexto = 'Acessar Meus 2 Certificados';
+      linkCertificado = `${urlBase}certificados.html?protocolo=${aluno.protocolo}&tipo=ambos`;
+      conteudoHtml = `
+        <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
+        <p>Como membro da Liga Acadêmica Café com Ciência, você tem direito a <strong>dois certificados oficiais</strong> referentes ao <strong>${dados.tituloEdicao}</strong>:</p>
+        <ul style="margin: 15px 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 1.8;">
+          <li>🎓 <strong>Certificado de Participação</strong> (4 Horas Complementares como ouvinte)</li>
+          <li>🏆 <strong>Certificado de Organizador(a)</strong> (6 Horas Complementares de comissão organizadora)</li>
+        </ul>
+        <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
+          <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Autenticidade Oficial dos Certificados:</div>
+          <div style="font-size: 18px; font-weight: 800; font-family: monospace; color: #166534; margin: 4px 0;">CERT-${aluno.protocolo} &bull; CERT-ORG-${aluno.protocolo}</div>
+          <div style="font-size: 12px; color: #365314;">Totalizando 10 horas complementares de atividades acadêmicas.</div>
+        </div>
+        <p>Você pode visualizar ambos na tela, alternar entre eles e imprimir os dois juntos em PDF clicando no botão abaixo:</p>
+      `;
+    } else {
+      conteudoHtml = `
+        <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
+        <p>Seu <strong>Certificado Oficial de Participação de 4 Horas Complementares</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
+        
+        <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
+          <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Código de Autenticidade Oficial:</div>
+          <div style="font-size: 20px; font-weight: 800; font-family: monospace; color: #166534; margin: 4px 0;">${codigoCert}</div>
+          <div style="font-size: 12px; color: #365314;">Válido para aproveitamento de horas complementares na graduação.</div>
+        </div>
+
+        <p>Você pode visualizar seu certificado completo em alta resolução, salvar em PDF ou imprimir clicando no botão abaixo:</p>
+      `;
+    }
 
     return enviarEmail({
       to: aluno.email,
-      subject: `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`,
+      subject,
       html: gerarLayoutHtmlBase({
-        preheader: `Seu certificado de 4 horas complementares do ${dados.numeroOrdinal} Café foi liberado! Código: ${codigoCert}`,
-        titulo: 'Seu Certificado Oficial está Pronto!',
-        badge: `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`,
+        preheader,
+        titulo,
+        badge,
         conteudoHtml,
-        botaoTexto: 'Visualizar e Baixar Meu Certificado',
+        botaoTexto,
         botaoLink: linkCertificado,
         aluno
       })

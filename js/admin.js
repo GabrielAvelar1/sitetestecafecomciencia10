@@ -84,7 +84,7 @@ function fecharPainelAdmin() {
 // Trocar Abas no Painel Admin
 function trocarAbaAdmin(aba) {
   abaAtivaAtual = aba;
-  const abas = ['inscricoes', 'portaria', 'lembretes', 'resend_teste'];
+  const abas = ['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados'];
   
   abas.forEach(nome => {
     const btn = document.getElementById(`tabBtn_${nome}`);
@@ -118,6 +118,8 @@ function trocarAbaAdmin(aba) {
   } else if (aba === 'resend_teste') {
     carregarConfiguracoesResendAdmin();
     carregarHistoricoEmailsResend();
+  } else if (aba === 'certificados') {
+    inicializarEstudioCertificados();
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -509,12 +511,17 @@ function renderizarLinhasTabelaAdmin(lista) {
          </button>`
       : `<span class="text-xs text-stone-400">Sem anexo</span>`;
 
-    // Botão Certificado Oficial
+    // Botão Certificado Oficial com Acesso Rápido ao Editor
     const certificadoBtn = item.presenca_confirmada
-      ? `<a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Abrir certificado oficial para impressão">
-           <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Certificado
-         </a>`
-      : `<span class="text-xs text-stone-300 italic" title="Disponível após o check-in por QR Code na portaria">Pós-Checkin</span>`;
+      ? `<div class="inline-flex items-center gap-1">
+           <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Abrir certificado oficial">
+             <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Certificado
+           </a>
+           <button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="p-1 rounded-lg text-amber-700 hover:bg-amber-100 transition" title="Editar certificado deste aluno antes de emitir">
+             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+           </button>
+         </div>`
+      : `<button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Gerar ou editar declaração personalizada">Personalizar</button>`;
 
     return `
       <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
@@ -1411,9 +1418,11 @@ async function enviarEmailIndividualAdmin(id) {
     `1: Credencial Oficial com QR Code (Confirmação de Inscrição)\n` +
     `2: Confirmação de Presença (Validação da Portaria)\n` +
     `3: Lembrete do Evento (Conforme modelo selecionado)\n` +
-    `4: Certificado Oficial de 4 Horas\n` +
-    `5: Comunicado de Alteração de Data (18/11)\n\n` +
-    `Digite o número da opção (1, 2, 3, 4 ou 5):`;
+    `4: Certificado Oficial de Participação (4 Horas)\n` +
+    `5: Certificado de Organizador (6 Horas - Membro da Liga)\n` +
+    `6: Ambos os Certificados (Participação + Organizador - 2 Certificados)\n` +
+    `7: Comunicado de Alteração de Data (18/11)\n\n` +
+    `Digite o número da opção (1 a 7):`;
 
   const opcao = prompt(msg, '1');
   if (!opcao) return;
@@ -1430,9 +1439,15 @@ async function enviarEmailIndividualAdmin(id) {
       await window.EmailService.enviarEmailLembrete(aluno, tipo);
       alert(`E-mail de lembrete enviado com sucesso para ${aluno.email}!`);
     } else if (opcao === '4') {
-      await window.EmailService.enviarEmailCertificado(aluno);
-      alert(`E-mail com o Certificado Oficial enviado com sucesso para ${aluno.email}!`);
+      await window.EmailService.enviarEmailCertificado(aluno, 'participacao');
+      alert(`E-mail com o Certificado de Participação enviado com sucesso para ${aluno.email}!`);
     } else if (opcao === '5') {
+      await window.EmailService.enviarEmailCertificado(aluno, 'organizador');
+      alert(`E-mail com o Certificado de Organizador enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '6') {
+      await window.EmailService.enviarEmailCertificado(aluno, 'ambos');
+      alert(`E-mail com os 2 Certificados (Participação + Organizador) enviado com sucesso para ${aluno.email}!`);
+    } else if (opcao === '7') {
       await window.EmailService.enviarEmailMudancaData(aluno);
       alert(`Comunicado de alteração de data enviado com sucesso para ${aluno.email}!`);
     } else {
@@ -1617,3 +1632,577 @@ window.alternarInscricoesAdmin = alternarInscricoesAdmin;
 window.atualizarVisualStatusInscricoes = atualizarVisualStatusInscricoes;
 
 
+
+// ============================================================================
+// ESTÚDIO & GERADOR DE CERTIFICADOS OFICIAIS (VISUALIZAR, EDITAR & IMPRIMIR)
+// ============================================================================
+
+const EDICOES_CERTIFICADOS = {
+  '10': {
+    titulo: '10° Café com Ciência',
+    tema: '"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"',
+    palestrante: 'Profa. Carolina Diniz',
+    data: '2026-10-30',
+    prefixo: 'CC10'
+  },
+  '11': {
+    titulo: '11° Café com Ciência',
+    tema: '"11º CAFÉ COM CIÊNCIA : 10 anos do projeto NAM em Belo Horizonte"',
+    palestrante: 'Prof. Dr. Henrique Pretti',
+    data: '2026-11-13',
+    prefixo: 'CC11'
+  },
+  '12': {
+    titulo: '12° Café com Ciência',
+    tema: '"12º CAFÉ COM CIÊNCIA : Diagnóstico e Planejamento na Reabilitação Oral"',
+    palestrante: 'Dra. Thaissa Calab',
+    data: '2026-11-18',
+    prefixo: 'CC12'
+  }
+};
+
+let certEdicaoAtiva = '10';
+let certModalidadeAtiva = 'ambos'; // Padrão 'ambos' para já destacar o suporte aos 2 certificados de membros da liga
+let certItensGeradosCache = [];
+
+function formatarDataPorExtensoPt(dataStr) {
+  if (!dataStr) return "____ de ______________ de 20__";
+  const partes = dataStr.split('-');
+  if (partes.length !== 3) return dataStr;
+  const [year, month, day] = partes;
+  const meses = [
+    "janeiro", "fevereiro", "março", "abril", "maio", "junho", 
+    "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
+  ];
+  return `${parseInt(day, 10)} de ${meses[parseInt(month, 10) - 1]} de ${year}`;
+}
+
+function atualizarDataExtensoCertificados() {
+  const input = document.getElementById('certEditorDataEmissao');
+  const span = document.getElementById('certEditorDataExtensoPreview');
+  if (input && span) {
+    span.textContent = 'Belo Horizonte, ' + formatarDataPorExtensoPt(input.value) + '.';
+  }
+}
+
+function obterTextoPadraoParticipacao(ed, horas = 4) {
+  const info = EDICOES_CERTIFICADOS[ed] || EDICOES_CERTIFICADOS['10'];
+  return `participou efetivamente da palestra ${info.tema}, ministrada pela ${info.palestrante} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de ${horas} horas.`;
+}
+
+function obterTextoPadraoOrganizador(ed, horas = 6) {
+  const info = EDICOES_CERTIFICADOS[ed] || EDICOES_CERTIFICADOS['10'];
+  return `participou efetivamente da comissão organizadora do evento ${info.tema}, promovido pelas professoras Patricia Drummond e Camila Mundim e pela Liga Acadêmica Café com Ciência, no Centro Universitário Arnaldo Janssen, com carga horária de ${horas} horas.`;
+}
+
+function inicializarEstudioCertificados() {
+  const inputData = document.getElementById('certEditorDataEmissao');
+  if (inputData && !inputData.value) {
+    const info = EDICOES_CERTIFICADOS[certEdicaoAtiva] || EDICOES_CERTIFICADOS['10'];
+    inputData.value = info.data || new Date().toISOString().split('T')[0];
+  }
+  atualizarDataExtensoCertificados();
+
+  const txtPart = document.getElementById('certEditorTextoParticipacao');
+  const txtOrg = document.getElementById('certEditorTextoOrganizador');
+  if (txtPart && !txtPart.value.trim()) {
+    txtPart.value = obterTextoPadraoParticipacao(certEdicaoAtiva, 4);
+  }
+  if (txtOrg && !txtOrg.value.trim()) {
+    txtOrg.value = obterTextoPadraoOrganizador(certEdicaoAtiva, 6);
+  }
+
+  // Preencher com exemplos se estiver vazio
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  if (nomesTextarea && !nomesTextarea.value.trim()) {
+    // Carregar presentes da edição ativa automaticamente
+    carregarPresentesCertificados(false);
+  } else {
+    atualizarContagemNomesCertificados();
+    gerarPreviaCertificados();
+  }
+}
+
+function alternarEdicaoCertificado(ed) {
+  certEdicaoAtiva = ed;
+  ['10', '11', '12'].forEach(item => {
+    const btn = document.getElementById(`btnCertEdicao_${item}`);
+    if (btn) {
+      if (item === ed) {
+        btn.className = 'p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-amber-50 border-amber-400 text-amber-950 shadow-xs';
+      } else {
+        btn.className = 'p-2.5 rounded-xl border border-stone-200 text-xs font-semibold hover:border-amber-400 text-stone-700 transition flex flex-col items-center gap-1 bg-white';
+      }
+    }
+  });
+
+  const info = EDICOES_CERTIFICADOS[ed];
+  if (info) {
+    const inputData = document.getElementById('certEditorDataEmissao');
+    if (inputData) inputData.value = info.data;
+    atualizarDataExtensoCertificados();
+
+    const txtPart = document.getElementById('certEditorTextoParticipacao');
+    const txtOrg = document.getElementById('certEditorTextoOrganizador');
+    const horasPart = document.getElementById('certEditorHorasParticipacao')?.value || 4;
+    const horasOrg = document.getElementById('certEditorHorasOrganizador')?.value || 6;
+
+    if (txtPart) txtPart.value = obterTextoPadraoParticipacao(ed, horasPart);
+    if (txtOrg) txtOrg.value = obterTextoPadraoOrganizador(ed, horasOrg);
+  }
+
+  gerarPreviaCertificados();
+}
+
+function alternarModalidadeCertificado(mod) {
+  certModalidadeAtiva = mod;
+  ['participacao', 'organizador', 'ambos'].forEach(item => {
+    const btn = document.getElementById(`btnCertModalidade_${item}`);
+    if (btn) {
+      if (item === mod) {
+        btn.className = item === 'ambos'
+          ? 'p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-purple-50 border-purple-400 text-purple-950 shadow-xs'
+          : 'p-2.5 rounded-xl border text-xs font-bold transition flex flex-col items-center gap-1 bg-amber-50 border-amber-400 text-amber-950 shadow-xs';
+      } else {
+        btn.className = 'p-2.5 rounded-xl border border-stone-200 text-xs font-semibold hover:border-stone-400 text-stone-700 transition flex flex-col items-center gap-1 bg-white';
+      }
+    }
+  });
+
+  const cPart = document.getElementById('containerTextoParticipacao');
+  const cOrg = document.getElementById('containerTextoOrganizador');
+
+  if (mod === 'participacao') {
+    if (cPart) cPart.classList.remove('hidden');
+    if (cOrg) cOrg.classList.add('hidden');
+  } else if (mod === 'organizador') {
+    if (cPart) cPart.classList.add('hidden');
+    if (cOrg) cOrg.classList.remove('hidden');
+  } else {
+    // Ambos (Membros da Liga)
+    if (cPart) cPart.classList.remove('hidden');
+    if (cOrg) cOrg.classList.remove('hidden');
+  }
+
+  gerarPreviaCertificados();
+}
+
+function carregarPresentesCertificados(showFeedback = true) {
+  if (!inscricoesCache || inscricoesCache.length === 0) {
+    if (showFeedback) alert('Nenhum dado de inscrição carregado ainda.');
+    return;
+  }
+
+  const presentes = inscricoesCache.filter(aluno => {
+    const isPresente = aluno.presenca_confirmada === true;
+    if (certEdicaoAtiva === '10') {
+      const p = (aluno.protocolo || '').toUpperCase();
+      const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
+      return isPresente && (p.startsWith('CC10-') || ed === 10 || (!p.startsWith('CC11-') && !p.startsWith('CC12-') && ed !== 11 && ed !== 12));
+    } else if (certEdicaoAtiva === '11') {
+      const p = (aluno.protocolo || '').toUpperCase();
+      const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
+      return isPresente && (p.startsWith('CC11-') || ed === 11);
+    } else if (certEdicaoAtiva === '12') {
+      const p = (aluno.protocolo || '').toUpperCase();
+      const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
+      return isPresente && (p.startsWith('CC12-') || ed === 12);
+    }
+    return isPresente;
+  });
+
+  const nomes = presentes.map(p => p.nome_completo).filter(Boolean);
+  const nomesTextarea = document.getElementById('certEditorNomes');
+
+  if (nomes.length > 0) {
+    if (nomesTextarea) nomesTextarea.value = nomes.join('\n');
+    atualizarContagemNomesCertificados();
+    gerarPreviaCertificados();
+    if (showFeedback) alert(`${nomes.length} participantes com presença confirmada foram carregados para emissão!`);
+  } else {
+    // Se ainda não houver presenças na portaria hoje, carrega os inscritos aprovados
+    const aprovados = inscricoesCache.filter(a => a.status_pagamento === 'aprovado').map(a => a.nome_completo).filter(Boolean);
+    if (nomesTextarea && aprovados.length > 0) {
+      nomesTextarea.value = aprovados.slice(0, 10).join('\n');
+      atualizarContagemNomesCertificados();
+      gerarPreviaCertificados();
+      if (showFeedback) alert(`Ainda não há presenças validadas nesta edição. Carregamos uma amostra de inscritos para visualização.`);
+    } else if (nomesTextarea && !nomesTextarea.value.trim()) {
+      nomesTextarea.value = "Daniel Henrique da Silva Guimarães\nMaria de Souza Pereira";
+      atualizarContagemNomesCertificados();
+      gerarPreviaCertificados();
+    }
+  }
+}
+
+function carregarTodosInscritosCertificados() {
+  if (!inscricoesCache || inscricoesCache.length === 0) {
+    alert('Nenhum dado de inscrição disponível.');
+    return;
+  }
+  const nomes = inscricoesCache.map(a => a.nome_completo).filter(Boolean);
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  if (nomesTextarea) {
+    nomesTextarea.value = nomes.join('\n');
+    atualizarContagemNomesCertificados();
+    gerarPreviaCertificados();
+    alert(`${nomes.length} inscritos carregados no gerador!`);
+  }
+}
+
+function carregarMembrosLigaCertificados() {
+  alternarModalidadeCertificado('ambos');
+  const nomesTextarea = document.getElementById('certEditorNomes');
+
+  // Nomes de organizadores encontrados ou lista da comissão
+  const orgs = inscricoesCache.filter(a => a.role === 'organizador').map(a => a.nome_completo).filter(Boolean);
+  
+  if (orgs.length > 0) {
+    if (nomesTextarea) nomesTextarea.value = orgs.join('\n');
+  } else {
+    if (nomesTextarea && !nomesTextarea.value.trim()) {
+      nomesTextarea.value = "Membro da Comissão 1\nMembro da Comissão 2\nMembro da Comissão 3";
+    }
+  }
+
+  atualizarContagemNomesCertificados();
+  gerarPreviaCertificados();
+  alert('⭐ Modo DUPLO ativado! Cada membro listado receberá 2 certificados: Participação (4h) e Organizador (6h).');
+}
+
+function limparNomesCertificados() {
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  if (nomesTextarea) nomesTextarea.value = '';
+  atualizarContagemNomesCertificados();
+  gerarPreviaCertificados();
+}
+
+function atualizarContagemNomesCertificados() {
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  const badge = document.getElementById('badgeContagemNomesCertificados');
+  if (!nomesTextarea || !badge) return;
+  const nomes = nomesTextarea.value.split('\n').map(n => n.trim()).filter(Boolean);
+  const modLabel = certModalidadeAtiva === 'ambos' ? ` (${nomes.length * 2} certificados no total)` : '';
+  badge.textContent = `${nomes.length} participante(s) listado(s)${modLabel}`;
+}
+
+function restaurarTextosPadraoCertificados() {
+  const txtPart = document.getElementById('certEditorTextoParticipacao');
+  const txtOrg = document.getElementById('certEditorTextoOrganizador');
+  const hPart = document.getElementById('certEditorHorasParticipacao');
+  const hOrg = document.getElementById('certEditorHorasOrganizador');
+
+  if (hPart) hPart.value = 4;
+  if (hOrg) hOrg.value = 6;
+  if (txtPart) txtPart.value = obterTextoPadraoParticipacao(certEdicaoAtiva, 4);
+  if (txtOrg) txtOrg.value = obterTextoPadraoOrganizador(certEdicaoAtiva, 6);
+
+  gerarPreviaCertificados();
+  alert('Textos originais restaurados!');
+}
+
+function gerarPreviaCertificados() {
+  const container = document.getElementById('previewCertificadosContainer');
+  const badgeTotal = document.getElementById('badgeTotalCertificadosGerados');
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  if (!container) return;
+
+  const rawNomes = nomesTextarea ? nomesTextarea.value.split('\n').map(n => n.trim()).filter(Boolean) : [];
+  const nomes = rawNomes.length > 0 ? rawNomes : ['Participante Exemplo'];
+
+  const dataInput = document.getElementById('certEditorDataEmissao')?.value;
+  const dataFormatada = formatarDataPorExtensoPt(dataInput);
+
+  const nomeCoord = document.getElementById('certEditorNomeCoordenador')?.value.trim() || 'Gerdal Roberto de Sousa';
+  const cargoCoord = document.getElementById('certEditorCargoCoordenador')?.value.trim() || 'Coordenador do Curso de Odontologia';
+
+  let txtPart = document.getElementById('certEditorTextoParticipacao')?.value.trim() || obterTextoPadraoParticipacao(certEdicaoAtiva, 4);
+  let txtOrg = document.getElementById('certEditorTextoOrganizador')?.value.trim() || obterTextoPadraoOrganizador(certEdicaoAtiva, 6);
+
+  if (!txtPart.startsWith(' ') && !txtPart.startsWith(',')) txtPart = ' ' + txtPart;
+  if (!txtOrg.startsWith(' ') && !txtOrg.startsWith(',')) txtOrg = ' ' + txtOrg;
+
+  const edInfo = EDICOES_CERTIFICADOS[certEdicaoAtiva] || EDICOES_CERTIFICADOS['10'];
+  const prefixo = edInfo.prefixo || 'CC10';
+
+  certItensGeradosCache = [];
+  container.innerHTML = '';
+
+  let totalPaginas = 0;
+
+  nomes.forEach((nome, idx) => {
+    const codHash = Math.abs((nome.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0))).toString(36).toUpperCase().padStart(6, '0').slice(-6);
+
+    // 1. Se for 'participacao' ou 'ambos', gera o certificado de Participação
+    if (certModalidadeAtiva === 'participacao' || certModalidadeAtiva === 'ambos') {
+      const certId = `cert_part_${idx}`;
+      const codAutenticidade = `CERT-${prefixo}-${codHash}`;
+      const htmlCert = `
+        <div class="certificate-page flex flex-col justify-between" id="${certId}">
+          <!-- Forma Geométrica Azul -->
+          <svg class="absolute top-0 left-0 w-[400px] sm:w-[450px] h-auto" viewBox="0 0 450 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="0,0 450,0 180,150 0,60" fill="#009ce4" />
+          </svg>
+
+          <!-- Logo Oficial UniArnaldo -->
+          <img src="logo_arnaldo.png" alt="Logo UniArnaldo" class="absolute top-8 right-12 h-20 sm:h-24 object-contain" 
+               onerror="this.onerror=null; this.src='certificados-site/logo.png';" />
+
+          <!-- Conteúdo Central -->
+          <div class="pt-40 sm:pt-48 px-16 sm:px-24 flex-1 flex flex-col items-center">
+            <h1 class="text-4xl sm:text-5xl font-bold text-black mb-14 tracking-wide uppercase">Declaração</h1>
+
+            <p class="text-lg sm:text-xl text-center text-black leading-relaxed max-w-4xl font-normal">
+              Declaramos que <b class="italic font-bold">${nome}</b>${txtPart}
+            </p>
+
+            <p class="text-base sm:text-lg text-center text-black mt-16 font-normal">
+              Belo Horizonte, ${dataFormatada}.
+            </p>
+          </div>
+
+          <!-- Assinatura Oficial -->
+          <div class="pb-14 w-full flex flex-col items-center z-10 relative">
+            <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
+                 onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+            
+            <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
+            <p class="text-center text-black text-base sm:text-lg font-normal">${nomeCoord}</p>
+            <p class="text-center text-black text-base sm:text-lg font-normal">${cargoCoord}</p>
+
+            <div class="absolute bottom-4 right-8 text-[11px] text-stone-500 font-mono">
+              Autenticação: ${codAutenticidade}
+            </div>
+          </div>
+        </div>
+      `;
+
+      certItensGeradosCache.push({ nome, tipo: 'participacao', html: htmlCert });
+      totalPaginas++;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bg-stone-100/70 p-4 sm:p-6 rounded-3xl border border-stone-200 relative';
+      wrapper.innerHTML = `
+        <div class="no-print flex items-center justify-between pb-3 mb-2 border-b border-stone-200 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full font-bold bg-blue-100 text-blue-900 border border-blue-200 flex items-center gap-1">
+              <i data-lucide="award" class="w-3.5 h-3.5 text-blue-700"></i>
+              Certificado de Participação (4 Horas)
+            </span>
+            <span class="font-bold text-stone-800">${nome}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="imprimirCertificadosGerados(${certItensGeradosCache.length - 1})" class="px-3 py-1.5 bg-white border border-stone-300 hover:bg-stone-50 font-bold text-stone-700 rounded-lg shadow-2xs flex items-center gap-1 transition">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>Imprimir Este</span>
+            </button>
+          </div>
+        </div>
+        ${htmlCert}
+      `;
+      container.appendChild(wrapper);
+    }
+
+    // 2. Se for 'organizador' ou 'ambos', gera o certificado de Organizador
+    if (certModalidadeAtiva === 'organizador' || certModalidadeAtiva === 'ambos') {
+      const certId = `cert_org_${idx}`;
+      const codAutenticidade = `CERT-ORG-${prefixo}-${codHash}`;
+      const htmlCert = `
+        <div class="certificate-page flex flex-col justify-between" id="${certId}">
+          <!-- Forma Geométrica Azul -->
+          <svg class="absolute top-0 left-0 w-[400px] sm:w-[450px] h-auto" viewBox="0 0 450 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="0,0 450,0 180,150 0,60" fill="#009ce4" />
+          </svg>
+
+          <!-- Logo Oficial UniArnaldo -->
+          <img src="logo_arnaldo.png" alt="Logo UniArnaldo" class="absolute top-8 right-12 h-20 sm:h-24 object-contain" 
+               onerror="this.onerror=null; this.src='certificados-site/logo.png';" />
+
+          <!-- Conteúdo Central -->
+          <div class="pt-40 sm:pt-48 px-16 sm:px-24 flex-1 flex flex-col items-center">
+            <h1 class="text-4xl sm:text-5xl font-bold text-black mb-14 tracking-wide uppercase">Declaração</h1>
+
+            <p class="text-lg sm:text-xl text-center text-black leading-relaxed max-w-4xl font-normal">
+              Declaramos que <b class="italic font-bold">${nome}</b>${txtOrg}
+            </p>
+
+            <p class="text-base sm:text-lg text-center text-black mt-16 font-normal">
+              Belo Horizonte, ${dataFormatada}.
+            </p>
+          </div>
+
+          <!-- Assinatura Oficial -->
+          <div class="pb-14 w-full flex flex-col items-center z-10 relative">
+            <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
+                 onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+            
+            <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
+            <p class="text-center text-black text-base sm:text-lg font-normal">${nomeCoord}</p>
+            <p class="text-center text-black text-base sm:text-lg font-normal">${cargoCoord}</p>
+
+            <div class="absolute bottom-4 right-8 text-[11px] text-purple-700 font-mono font-bold">
+              Autenticação: ${codAutenticidade}
+            </div>
+          </div>
+        </div>
+      `;
+
+      certItensGeradosCache.push({ nome, tipo: 'organizador', html: htmlCert });
+      totalPaginas++;
+
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bg-purple-50/50 p-4 sm:p-6 rounded-3xl border border-purple-200 relative';
+      wrapper.innerHTML = `
+        <div class="no-print flex items-center justify-between pb-3 mb-2 border-b border-purple-200 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full font-bold bg-purple-100 text-purple-900 border border-purple-300 flex items-center gap-1">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-700"></i>
+              Certificado de Organizador (6 Horas - Membro da Liga)
+            </span>
+            <span class="font-bold text-stone-800">${nome}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="imprimirCertificadosGerados(${certItensGeradosCache.length - 1})" class="px-3 py-1.5 bg-white border border-purple-300 hover:bg-purple-100 font-bold text-purple-900 rounded-lg shadow-2xs flex items-center gap-1 transition">
+              <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+              <span>Imprimir Este</span>
+            </button>
+          </div>
+        </div>
+        ${htmlCert}
+      `;
+      container.appendChild(wrapper);
+    }
+  });
+
+  if (badgeTotal) {
+    badgeTotal.textContent = `${totalPaginas} declaração(ões) pronta(s) para impressão`;
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function imprimirCertificadosGerados(index = null) {
+  const printArea = document.getElementById('areaImpressaoCertificados');
+  if (!printArea) {
+    alert('Área de impressão não encontrada.');
+    return;
+  }
+
+  if (certItensGeradosCache.length === 0) {
+    gerarPreviaCertificados();
+  }
+
+  if (index !== null && certItensGeradosCache[index]) {
+    printArea.innerHTML = certItensGeradosCache[index].html;
+  } else {
+    printArea.innerHTML = certItensGeradosCache.map(c => c.html).join('\n');
+  }
+
+  window.print();
+}
+
+async function enviarCertificadosEmailAdmin() {
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  const nomes = nomesTextarea ? nomesTextarea.value.split('\n').map(n => n.trim().toLowerCase()).filter(Boolean) : [];
+
+  if (nomes.length === 0) {
+    alert('Insira pelo menos um nome para envio de e-mails.');
+    return;
+  }
+
+  if (!inscricoesCache || inscricoesCache.length === 0) {
+    alert('Nenhuma inscrição encontrada para associar os e-mails.');
+    return;
+  }
+
+  // Filtrar alunos cadastrados que correspondam aos nomes da lista
+  const correspondentes = inscricoesCache.filter(aluno => {
+    const nomeAluno = (aluno.nome_completo || '').toLowerCase();
+    return nomes.some(n => nomeAluno.includes(n) || n.includes(nomeAluno));
+  });
+
+  if (correspondentes.length === 0) {
+    alert('Nenhum participante da lista foi encontrado na base de dados com e-mail cadastrado.');
+    return;
+  }
+
+  const tipoStr = certModalidadeAtiva === 'ambos' 
+    ? 'os 2 certificados (Participação + Organizador)' 
+    : (certModalidadeAtiva === 'organizador' ? 'o Certificado de Organizador (6h)' : 'o Certificado de Participação (4h)');
+
+  const confirma = confirm(`Deseja enviar por e-mail ${tipoStr} para ${correspondentes.length} participantes encontrados?\n\nDestinatários:\n${correspondentes.map(c => c.nome_completo + ' (' + c.email + ')').join('\n')}`);
+  if (!confirma) return;
+
+  let enviados = 0;
+  let erros = 0;
+
+  for (const aluno of correspondentes) {
+    try {
+      await window.EmailService.enviarEmailCertificado(aluno, certModalidadeAtiva);
+      enviados++;
+      await new Promise(r => setTimeout(r, 200));
+    } catch (e) {
+      console.warn('Erro ao enviar certificado para ' + aluno.email, e);
+      erros++;
+    }
+  }
+
+  alert(`Envio concluído!\n\nSucesso: ${enviados} e-mails entregues\nFalhas: ${erros}`);
+}
+
+function abrirEditorCertificadoParaAluno(protocolo) {
+  const aluno = inscricoesCache.find(a => a.protocolo === protocolo);
+  if (!aluno) {
+    alert('Inscrição não encontrada.');
+    return;
+  }
+
+  trocarAbaAdmin('certificados');
+
+  // Ajustar edição
+  const p = (aluno.protocolo || '').toUpperCase();
+  const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
+  if (p.startsWith('CC12-') || ed === 12) {
+    alternarEdicaoCertificado('12');
+  } else if (p.startsWith('CC11-') || ed === 11) {
+    alternarEdicaoCertificado('11');
+  } else {
+    alternarEdicaoCertificado('10');
+  }
+
+  // Preencher nome
+  const nomesTextarea = document.getElementById('certEditorNomes');
+  if (nomesTextarea) {
+    nomesTextarea.value = aluno.nome_completo;
+    atualizarContagemNomesCertificados();
+  }
+
+  // Se o aluno tiver perfil de organizador, ativa modo 'ambos'
+  if (aluno.role === 'organizador') {
+    alternarModalidadeCertificado('ambos');
+  } else {
+    alternarModalidadeCertificado('participacao');
+  }
+
+  gerarPreviaCertificados();
+
+  setTimeout(() => {
+    const sec = document.getElementById('tabView_certificados');
+    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+// Exportações para o objeto window
+window.inicializarEstudioCertificados = inicializarEstudioCertificados;
+window.alternarEdicaoCertificado = alternarEdicaoCertificado;
+window.alternarModalidadeCertificado = alternarModalidadeCertificado;
+window.carregarPresentesCertificados = carregarPresentesCertificados;
+window.carregarTodosInscritosCertificados = carregarTodosInscritosCertificados;
+window.carregarMembrosLigaCertificados = carregarMembrosLigaCertificados;
+window.limparNomesCertificados = limparNomesCertificados;
+window.atualizarContagemNomesCertificados = atualizarContagemNomesCertificados;
+window.atualizarDataExtensoCertificados = atualizarDataExtensoCertificados;
+window.restaurarTextosPadraoCertificados = restaurarTextosPadraoCertificados;
+window.gerarPreviaCertificados = gerarPreviaCertificados;
+window.imprimirCertificadosGerados = imprimirCertificadosGerados;
+window.enviarCertificadosEmailAdmin = enviarCertificadosEmailAdmin;
+window.abrirEditorCertificadoParaAluno = abrirEditorCertificadoParaAluno;
