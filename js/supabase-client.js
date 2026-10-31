@@ -195,9 +195,28 @@ function estaoCertificadosLiberados() {
   return localStorage.getItem('cafe_certificados_liberados') === 'true';
 }
 
-function alternarLiberacaoCertificados(novoStatus) {
+async function alternarLiberacaoCertificados(novoStatus) {
   localStorage.setItem('cafe_certificados_liberados', novoStatus ? 'true' : 'false');
   window.dispatchEvent(new CustomEvent('certificados_status_changed', { detail: novoStatus }));
+
+  // Sincroniza com o Supabase na nuvem
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const cfgAtual = (await obterConfiguracoesSistema()) || {};
+      cfgAtual.certificados_liberados = !!novoStatus;
+      await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .update({
+          observacoes: JSON.stringify(cfgAtual),
+          ultimo_lembrete_em: new Date().toISOString()
+        })
+        .eq('protocolo', 'SISTEMA-CONFIG');
+    } catch (e) {
+      console.warn('Erro ao sincronizar status de certificados no Supabase:', e);
+    }
+  }
+
   return novoStatus;
 }
 

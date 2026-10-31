@@ -1,3 +1,4 @@
+const ASSINATURA_BASE64_GLOBAL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+kAAAMfCAIAAAAllAEsAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAA+zSURBVHhe7dYBDQAADMOg+ze962gCKrgBAAAF7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAF2wOJLiuC3XRxcAAAAABJRU5ErkJggg==';
 /**
  * Painel Administrativo Completo da Liga - Café com Ciência
  * Inscrições, Portaria QR Code, Certificados e Disparador de Lembretes
@@ -512,12 +513,14 @@ function renderizarLinhasTabelaAdmin(lista) {
       : `<span class="text-xs text-stone-400">Sem anexo</span>`;
 
     // Botão Certificado Oficial com Acesso Rápido ao Editor
+    const jaEnviado = item.certificado_emitido === true || item.presenca_confirmada === true;
     const certificadoBtn = item.presenca_confirmada
       ? `<div class="inline-flex items-center gap-1">
-           <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition" title="Abrir certificado oficial">
-             <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Certificado
+           <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${jaEnviado ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'} transition shadow-2xs" title="${jaEnviado ? 'Declaração oficial emitida e enviada por e-mail (2 horas)' : 'Abrir declaração oficial'}">
+             <i data-lucide="award" class="w-3.5 h-3.5 ${jaEnviado ? 'text-emerald-600' : 'text-blue-600'}"></i>
+             <span>${jaEnviado ? 'Enviado (2h)' : 'Declaração'}</span>
            </a>
-           <button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="p-1 rounded-lg text-amber-700 hover:bg-amber-100 transition" title="Editar certificado deste aluno antes de emitir">
+           <button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="p-1 rounded-lg text-stone-600 hover:bg-stone-200 transition" title="Visualizar / Editar no Estúdio">
              <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
            </button>
          </div>`
@@ -1643,7 +1646,10 @@ const EDICOES_CERTIFICADOS = {
     tema: '"10º CAFÉ COM CIÊNCIA : Os Direitos dos Pacientes na Odontologia"',
     palestrante: 'Profa. Carolina Diniz',
     data: '2026-10-30',
-    prefixo: 'CC10'
+    prefixo: 'CC10',
+    horasPart: 2,
+    coordenador: 'Jhonathan Lopes Silva',
+    cargo: 'Coordenador do Curso de Odontologia'
   },
   '11': {
     titulo: '11° Café com Ciência',
@@ -1685,9 +1691,10 @@ function atualizarDataExtensoCertificados() {
   }
 }
 
-function obterTextoPadraoParticipacao(ed, horas = 4) {
+function obterTextoPadraoParticipacao(ed, horas = null) {
   const info = EDICOES_CERTIFICADOS[ed] || EDICOES_CERTIFICADOS['10'];
-  return `participou efetivamente da palestra ${info.tema}, ministrada pela ${info.palestrante} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de ${horas} horas.`;
+  const horasFinais = horas !== null ? horas : (info.horasPart || 2);
+  return `participou efetivamente da palestra ${info.tema}, ministrada pela ${info.palestrante} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de ${horasFinais} horas.`;
 }
 
 function obterTextoPadraoOrganizador(ed, horas = 6) {
@@ -1706,7 +1713,7 @@ function inicializarEstudioCertificados() {
   const txtPart = document.getElementById('certEditorTextoParticipacao');
   const txtOrg = document.getElementById('certEditorTextoOrganizador');
   if (txtPart && !txtPart.value.trim()) {
-    txtPart.value = obterTextoPadraoParticipacao(certEdicaoAtiva, 4);
+    txtPart.value = obterTextoPadraoParticipacao(certEdicaoAtiva, 2);
   }
   if (txtOrg && !txtOrg.value.trim()) {
     txtOrg.value = obterTextoPadraoOrganizador(certEdicaoAtiva, 6);
@@ -1913,7 +1920,7 @@ function gerarPreviaCertificados() {
   const dataInput = document.getElementById('certEditorDataEmissao')?.value;
   const dataFormatada = formatarDataPorExtensoPt(dataInput);
 
-  const nomeCoord = document.getElementById('certEditorNomeCoordenador')?.value.trim() || 'Gerdal Roberto de Sousa';
+  const nomeCoord = document.getElementById('certEditorNomeCoordenador')?.value.trim() || 'Jhonathan Lopes Silva';
   const cargoCoord = document.getElementById('certEditorCargoCoordenador')?.value.trim() || 'Coordenador do Curso de Odontologia';
 
   let txtPart = document.getElementById('certEditorTextoParticipacao')?.value.trim() || obterTextoPadraoParticipacao(certEdicaoAtiva, 4);
@@ -1964,7 +1971,7 @@ function gerarPreviaCertificados() {
           <!-- Assinatura Oficial -->
           <div class="pb-14 w-full flex flex-col items-center z-10 relative">
             <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
-                 onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+                 onerror="this.onerror=null; this.src=ASSINATURA_BASE64_GLOBAL;" />
             
             <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
             <p class="text-center text-black text-base sm:text-lg font-normal">${nomeCoord}</p>
@@ -2034,7 +2041,7 @@ function gerarPreviaCertificados() {
           <!-- Assinatura Oficial -->
           <div class="pb-14 w-full flex flex-col items-center z-10 relative">
             <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
-                 onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+                 onerror="this.onerror=null; this.src=ASSINATURA_BASE64_GLOBAL;" />
             
             <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
             <p class="text-center text-black text-base sm:text-lg font-normal">${nomeCoord}</p>

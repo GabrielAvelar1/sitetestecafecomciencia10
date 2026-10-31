@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=8"></script>
+  <script src="js/supabase-client.js?v=9"></script>
 
   <style>
     body {
@@ -154,6 +154,9 @@
       let palestranteNome = 'Profa. Carolina Diniz';
       let dataDefault = '2026-10-30';
       let prefixoCert = 'CC10';
+      let horasParticipacao = 2; // 2 Horas conforme declaração oficial enviada
+      let nomeCoordenador = 'Jhonathan Lopes Silva'; // Coordenador Oficial do 10° Café
+      let cargoCoordenador = 'Coordenador do Curso de Odontologia';
 
       if (is12) {
         nomeEvento = '12° Café com Ciência';
@@ -161,12 +164,18 @@
         palestranteNome = 'Dra. Thaissa Calab';
         dataDefault = '2026-11-18';
         prefixoCert = 'CC12';
+        horasParticipacao = 4;
+        nomeCoordenador = 'Jhonathan Lopes Silva';
+        cargoCoordenador = 'Coordenador do Curso de Odontologia';
       } else if (is11) {
         nomeEvento = '11° Café com Ciência';
         temaPalestra = '"11º CAFÉ COM CIÊNCIA : 10 anos do projeto NAM em Belo Horizonte"';
         palestranteNome = 'Prof. Dr. Henrique Pretti';
         dataDefault = '2026-11-13';
         prefixoCert = 'CC11';
+        horasParticipacao = 4;
+        nomeCoordenador = 'Jhonathan Lopes Silva';
+        cargoCoordenador = 'Coordenador do Curso de Odontologia';
       }
 
       document.title = `Certificado Oficial - ${nomeEvento}`;
@@ -177,11 +186,13 @@
       const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-${prefixoCert}-${Math.floor(100000 + Math.random() * 900000)}`;
       const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || dataDefault);
 
-      // Verifica se a comissão da Liga liberou os certificados
-      const isLiberado = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : false;
+      // Verifica se a comissão da Liga liberou os certificados ou se o aluno já teve certificado emitido
+      const isLiberadoConfig = window.LigaDB?.estaoCertificadosLiberados ? window.LigaDB.estaoCertificadosLiberados() : true;
+      const jaEmitido = aluno?.certificado_emitido === true || aluno?.presenca_confirmada === true;
       const isAdminPreview = params.get('admin') === 'true' || (window.LigaDB?.isOrganizadorLogado && window.LigaDB.isOrganizadorLogado());
+      const isLiberado = isLiberadoConfig || jaEmitido || isAdminPreview;
 
-      if (!isLiberado && !isAdminPreview) {
+      if (!isLiberado) {
         loading.classList.add('hidden');
         const btnPrint = document.getElementById('btnPrintCertificado');
         if (btnPrint) btnPrint.classList.add('hidden');
@@ -220,7 +231,7 @@
         const isOrg = tipo === 'organizador';
         const textoCorpo = isOrg
           ? `Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da comissão organizadora do evento <strong>${temaPalestra}</strong>, promovido pelas professoras Patricia Drummond e Camila Mundim e pela Liga Acadêmica Café com Ciência, no Centro Universitário Arnaldo Janssen, com carga horária de 6 horas.`
-          : `Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da palestra <strong>${temaPalestra}</strong>, ministrada pela ${palestranteNome} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de 4 horas.`;
+          : `Declaramos que <b class="italic font-bold">${nomeFinal}</b> participou efetivamente da palestra <strong>${temaPalestra}</strong>, ministrada pela ${palestranteNome} e promovida pela Liga Acadêmica Café com Ciência, realizada no Centro Universitário Arnaldo Janssen, com carga horária de ${horasParticipacao} horas.`;
 
         return `
           <div class="certificate-page flex flex-col justify-between">
@@ -249,11 +260,11 @@
             <!-- Assinatura Oficial do Coordenador -->
             <div class="pb-14 w-full flex flex-col items-center z-10 relative">
               <img src="assinatura.png" alt="Assinatura Coordenação" class="h-16 sm:h-20 object-contain mb-2" 
-                   onerror="this.onerror=null; this.src='certificados-site/assinatura.png';" />
+                   onerror="this.onerror=null; this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA+kAAAMfCAIAAAAllAEsAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAA+zSURBVHhe7dYBDQAADMOg+ze962gCKrgBAAAF7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAN7g4AAA3uDgAADe4OAAAF2wOJLiuC3XRxcAAAAABJRU5ErkJggg==';" />
               
               <div class="border-t border-black w-2/5 sm:w-[450px] mb-2"></div>
-              <p class="text-center text-black text-base sm:text-lg font-normal">Gerdal Roberto de Sousa</p>
-              <p class="text-center text-black text-base sm:text-lg font-normal">Coordenador do Curso de Odontologia</p>
+              <p class="text-center text-black text-base sm:text-lg font-normal">${nomeCoordenador}</p>
+              <p class="text-center text-black text-base sm:text-lg font-normal">${cargoCoordenador}</p>
 
               <!-- Código de Validação no Rodapé -->
               <div class="absolute bottom-4 right-8 text-[11px] ${isOrg ? 'text-purple-700 font-bold' : 'text-stone-500'} font-mono">
