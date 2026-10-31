@@ -19,6 +19,8 @@
   },
   "homepage": "https://github.com/GabrielAvelar1/sitetestecafecomciencia10#readme",
   "dependencies": {
-    "nodemailer": "^10.0.16"
+    "nodemailer": "^10.0.16",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^2.4.5"
   }
 }

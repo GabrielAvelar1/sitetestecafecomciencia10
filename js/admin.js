@@ -2081,22 +2081,120 @@ function gerarPreviaCertificados() {
 }
 
 function imprimirCertificadosGerados(index = null) {
-  const printArea = document.getElementById('areaImpressaoCertificados');
-  if (!printArea) {
-    alert('Área de impressão não encontrada.');
-    return;
-  }
-
   if (certItensGeradosCache.length === 0) {
     gerarPreviaCertificados();
   }
 
-  if (index !== null && certItensGeradosCache[index]) {
-    printArea.innerHTML = certItensGeradosCache[index].html;
-  } else {
-    printArea.innerHTML = certItensGeradosCache.map(c => c.html).join('\n');
+  const itens = (index !== null && certItensGeradosCache[index])
+    ? [certItensGeradosCache[index]]
+    : certItensGeradosCache;
+
+  if (itens.length === 0) {
+    alert('Nenhuma declaração foi encontrada para impressão. Digite os nomes ou importe os presentes.');
+    return;
   }
 
+  // Preenche a área de impressão da própria página para fallback
+  const printArea = document.getElementById('areaImpressaoCertificados');
+  if (printArea) {
+    printArea.innerHTML = itens.map(c => c.html).join('\n');
+  }
+
+  // Abre janela isolada de impressão (mesmo padrão limpo que funciona no certificados-site)
+  try {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Declarações Oficiais - Impressão</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: white;
+    }
+    .certificate-page {
+      width: 100%;
+      max-width: 1122px;
+      aspect-ratio: 1.414;
+      background-color: white;
+      position: relative;
+      margin: 2rem auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      color: #000;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+      body {
+        background-color: white;
+        margin: 0;
+        padding: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .certificate-page {
+        width: 297mm;
+        height: 209mm;
+        max-width: none;
+        margin: 0 auto;
+        box-shadow: none;
+        page-break-after: always;
+        page-break-inside: avoid;
+      }
+      .certificate-page:last-child {
+        page-break-after: auto;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+  <div class="no-print bg-stone-900 text-white p-4 text-center sticky top-0 z-50 flex items-center justify-between px-8 shadow-md">
+    <div class="flex items-center gap-3">
+      <span class="text-sm font-bold">Prévia para Impressão Oficial (${itens.length} declaração/ões)</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center gap-1.5">
+        <span>🖨️ Imprimir / Salvar em PDF</span>
+      </button>
+      <button onclick="window.close()" class="px-3 py-2 bg-stone-700 hover:bg-stone-600 text-stone-200 text-xs rounded-xl transition">
+        Fechar
+      </button>
+    </div>
+  </div>
+  <div id="certificates-container" class="w-full flex flex-col items-center">
+    ${itens.map(c => c.html).join('\n')}
+  </div>
+  <script>
+    window.onload = function() {
+      setTimeout(function() { window.print(); }, 400);
+    };
+  </script>
+</body>
+</html>`);
+      printWindow.document.close();
+      return;
+    }
+  } catch (err) {
+    console.warn('Pop-up bloqueado, acionando impressão local com CSS corrigido:', err);
+  }
+
+  // Se pop-up for bloqueado, aciona window.print() na própria página
   window.print();
 }
 

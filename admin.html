@@ -76,38 +76,47 @@
         margin: 0;
       }
 
-      body {
+      html, body {
+        display: block !important;
         background-color: white !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        overflow: visible !important;
       }
 
-      .no-print, header, nav, footer, #adminLoginScreen, #adminMainDashboard > *:not(#areaImpressaoCertificados),
-      #tabView_inscricoes, #tabView_portaria, #tabView_lembretes, #tabView_resend_teste, #tabView_certificados,
-      #modalCredencialAdmin, #modalPreviaEmail, #modalConfirmarResetBanco {
+      /* Oculta interface e elementos não imprimíveis */
+      .no-print, header, nav, footer, #adminLoginScreen, #adminMainDashboard,
+      #modalCredencialAdmin, #modalPreviaEmail, #modalConfirmarResetBanco,
+      #modalConsultaAdmin, #toastContainer {
         display: none !important;
       }
 
       #areaImpressaoCertificados {
         display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        margin: 0;
-        padding: 0;
+        position: static !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
       }
 
       .certificate-page {
         width: 297mm !important;
         height: 209mm !important;
         max-width: none !important;
-        margin: 0 !important;
+        margin: 0 auto !important;
         box-shadow: none !important;
-        page-break-after: always;
-        page-break-inside: avoid;
+        page-break-after: always !important;
+        page-break-inside: avoid !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
 
       .certificate-page:last-child {
-        page-break-after: auto;
+        page-break-after: auto !important;
       }
     }
 
@@ -1581,10 +1590,10 @@
   </div>
 
   <!-- Scripts do Painel Administrativo -->
-  <script src="js/supabase-client.js?v=7"></script>
-  <script src="js/email-service.js?v=7"></script>
-  <script src="js/qr-scanner.js?v=7"></script>
-  <script src="js/admin.js?v=7"></script>
+  <script src="js/supabase-client.js?v=8"></script>
+  <script src="js/email-service.js?v=8"></script>
+  <script src="js/qr-scanner.js?v=8"></script>
+  <script src="js/admin.js?v=8"></script>
 
   <script>
     // Inicialização da Página Dedicada de Admin
@@ -1671,6 +1680,6 @@
     }
   </script>
   <!-- Área de Impressão de Certificados (@media print) -->
-  <div id="areaImpressaoCertificados" class="hidden"></div>
+  <div id="areaImpressaoCertificados" style="display: none;"></div>
 </body>
 </html>
