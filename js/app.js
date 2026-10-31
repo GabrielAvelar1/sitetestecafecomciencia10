@@ -1788,7 +1788,7 @@ function atualizarStatusInscricoesUI() {
     // Desabilita todos os inputs e botões do formulário exceto botões de consulta
     const formElements = formInscricao.querySelectorAll('input, select, textarea, button');
     formElements.forEach(el => {
-      if (el.id !== 'btnVerificarAcessoAluno' && !el.closest('#modalAreaAluno') && !el.closest('#modalCredencialOficial')) {
+      if (el.id !== 'btnVerificarAcessoAluno' && !el.closest('#modalAreaAluno') && !el.closest('#modalCredencialOficial') && !el.closest('#consultaModal')) {
         el.disabled = true;
       }
     });
@@ -1813,7 +1813,7 @@ function atualizarStatusInscricoesUI() {
       avisoEl.innerHTML = `
         <div class="flex items-start gap-4">
           <div class="w-12 h-12 rounded-2xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            <i data-lucide="lock" class="w-6 h-6"></i>
           </div>
           <div class="flex-1">
             <div class="flex items-center gap-2 mb-1">
@@ -1823,22 +1823,63 @@ function atualizarStatusInscricoesUI() {
               <h4 class="text-base sm:text-lg font-black text-red-900">Inscrições Encerradas</h4>
             </div>
             <p class="text-xs sm:text-sm text-red-800 leading-relaxed font-medium">
-              As inscrições online para a <strong>${edicao}ª Edição do Café com Ciência</strong> foram encerradas pela comissão organizadora.
+              As inscrições online para a <strong>${edicao}ª Edição do Café com Ciência</strong> foram encerradas pela comissão organizadora. Você pode continuar conferindo os detalhes da palestra abaixo ou consultar sua credencial e declaração oficial.
             </p>
             <div class="mt-3 pt-3 border-t border-red-200/80 flex flex-wrap items-center gap-3 text-xs text-red-900">
-              <span class="font-bold">Já realizou sua inscrição anteriormente?</span>
-              <a href="portal.html" class="inline-flex items-center gap-1 font-bold underline hover:text-red-950">
-                <span>Ver Minha Credencial no Portal</span>
+              <span class="font-bold">Já está inscrito?</span>
+              <button type="button" onclick="abrirModalConsulta()" class="inline-flex items-center gap-1 font-bold underline hover:text-red-950 cursor-pointer">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-700"></i>
+                <span>Consultar Inscrição / Declaração</span>
+              </button>
+              <span class="text-red-400">•</span>
+              <a href="portal.html" class="inline-flex items-center gap-1 font-bold text-coffee-800 hover:underline">
+                <span>Ver Próximas Palestras no Portal</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
               </a>
-              <span class="text-red-400">•</span>
-              <span>Dúvidas: cafecomcienciaresend@gmail.com</span>
             </div>
           </div>
         </div>
       `;
       formInscricao.parentNode.insertBefore(avisoEl, formInscricao);
     }
+
+    // Adaptar botões de chamada de ação (Hero e Navbar) para consulta
+    const ctaHero = document.querySelector('a[href="#inscricao"].gradient-cta.text-base');
+    if (ctaHero && !ctaHero.dataset.modificado) {
+      ctaHero.dataset.modificado = 'true';
+      ctaHero.innerHTML = `
+        <i data-lucide="award" class="w-5 h-5 text-amber-300"></i>
+        <span>Consultar Inscrição / Declaração</span>
+      `;
+      ctaHero.onclick = (e) => {
+        e.preventDefault();
+        if (typeof abrirModalConsulta === 'function') abrirModalConsulta();
+      };
+    }
+
+    const ctaNavDesk = document.querySelector('header a[href="#inscricao"].gradient-cta');
+    if (ctaNavDesk && !ctaNavDesk.dataset.modificado) {
+      ctaNavDesk.dataset.modificado = 'true';
+      ctaNavDesk.innerHTML = `
+        <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+        <span>Consultar Inscrição</span>
+      `;
+      ctaNavDesk.onclick = (e) => {
+        e.preventDefault();
+        if (typeof abrirModalConsulta === 'function') abrirModalConsulta();
+      };
+    }
+
+    const ctaNavMob = document.querySelector('header .lg\\:hidden a[href="#inscricao"].gradient-cta');
+    if (ctaNavMob && !ctaNavMob.dataset.modificado) {
+      ctaNavMob.dataset.modificado = 'true';
+      ctaNavMob.innerHTML = 'Consultar';
+      ctaNavMob.onclick = (e) => {
+        e.preventDefault();
+        if (typeof abrirModalConsulta === 'function') abrirModalConsulta();
+      };
+    }
+
   } else {
     // Reabre e restaura formulário
     if (avisoEl) {
