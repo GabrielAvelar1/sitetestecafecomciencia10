@@ -548,7 +548,7 @@
 
   <!-- Scripts da Aplicação -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=10"></script>
+  <script src="js/supabase-client.js?v=11"></script>
   <script>
     if (window.lucide) window.lucide.createIcons();
 
@@ -659,19 +659,30 @@
 
                   <div class="pt-2 border-t border-stone-200/60 flex flex-wrap gap-2">
                     ${(() => {
-                      const pdfLink = window.LigaDB?.obterLinkDeclaracaoPdf 
-                        ? (window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(item.email))
+                      const itemProto = (item.protocolo || '').toUpperCase();
+                      const isItem10 = itemProto.startsWith('CC10-') || edNum === 10;
+                      const pdfLink = isItem10 && window.LigaDB?.obterLinkDeclaracaoPdf 
+                        ? window.LigaDB.obterLinkDeclaracaoPdf(itemProto)
                         : null;
-                      const destino = pdfLink || `certificados.html?protocolo=${item.protocolo}`;
+
+                      if (isItem10 && pdfLink) {
+                        return `
+                          <a 
+                            href="${pdfLink}" 
+                            target="_blank"
+                            class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                          >
+                            <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                            <span>Ver / Baixar Declaração (PDF Oficial)</span>
+                          </a>
+                        `;
+                      }
+
                       return `
-                        <a 
-                          href="${destino}" 
-                          target="_blank"
-                          class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
-                        >
-                          <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
-                          <span>Ver / Baixar Declaração (PDF Oficial)</span>
-                        </a>
+                        <div class="flex-1 py-2.5 px-3 bg-stone-100 text-stone-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-stone-200">
+                          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
+                          <span>Inscrição Confirmada · Palestra em ${edNum === 11 ? '13/11' : (edNum === 12 ? '18/11' : 'breve')}</span>
+                        </div>
                       `;
                     })()}
 

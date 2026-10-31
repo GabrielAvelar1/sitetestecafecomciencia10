@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=10"></script>
+  <script src="js/supabase-client.js?v=11"></script>
 
   <style>
     body {
@@ -195,9 +195,11 @@
       if (!isLiberado) {
         loading.classList.add('hidden');
 
-      // 1. SE EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL, EXIBE O PDF DIRETO E OFERECE DOWNLOAD
-      const pdfEnviadoUrl = window.LigaDB?.obterLinkDeclaracaoPdf 
-        ? (window.LigaDB.obterLinkDeclaracaoPdf(protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(aluno?.email))
+      // 1. SE FOR DO 10° CAFÉ (CC10-) E EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL, EXIBE O PDF DIRETO
+      const protoUpperBusca = (aluno?.protocolo || protocolo || '').toUpperCase();
+      const isApenasEdicao10 = protoUpperBusca.startsWith('CC10-');
+      const pdfEnviadoUrl = isApenasEdicao10 && window.LigaDB?.obterLinkDeclaracaoPdf 
+        ? window.LigaDB.obterLinkDeclaracaoPdf(protoUpperBusca)
         : null;
 
       if (pdfEnviadoUrl) {

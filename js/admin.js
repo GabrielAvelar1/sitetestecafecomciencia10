@@ -512,14 +512,15 @@ function renderizarLinhasTabelaAdmin(lista) {
          </button>`
       : `<span class="text-xs text-stone-400">Sem anexo</span>`;
 
-    // Botão Certificado Oficial com Acesso Rápido ao PDF Enviado por E-mail
-    const pdfEnviado = window.LigaDB?.obterLinkDeclaracaoPdf 
-      ? (window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(item.email))
+    // Apenas a 10ª edição possui declarações emitidas e enviadas
+    const isEdicao10 = !isEdicao11 && !isEdicao12 && protoUpper.startsWith('CC10-');
+    const pdfEnviado = isEdicao10 && window.LigaDB?.obterLinkDeclaracaoPdf 
+      ? window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) 
       : null;
 
     const certificadoBtn = pdfEnviado
       ? `<div class="inline-flex items-center gap-1">
-           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail">
+           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail (10° Café)">
              <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-700"></i>
              <span>PDF Enviado</span>
            </a>
@@ -527,14 +528,14 @@ function renderizarLinhasTabelaAdmin(lista) {
              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
            </a>
          </div>`
-      : (item.presenca_confirmada
+      : (isEdicao10 && item.presenca_confirmada
           ? `<div class="inline-flex items-center gap-1">
                <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs">
                  <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i>
                  <span>Declaração</span>
                </a>
              </div>`
-          : `<button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Personalizar declaração">Personalizar</button>`);
+          : `<span class="text-xs text-stone-400 font-medium">${isEdicao10 ? 'Aguardando pres.' : 'Aguardando palestra'}</span>`);
 
     return `
       <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
