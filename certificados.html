@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,600;0,700;1,700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=9"></script>
+  <script src="js/supabase-client.js?v=10"></script>
 
   <style>
     body {
@@ -194,6 +194,68 @@
 
       if (!isLiberado) {
         loading.classList.add('hidden');
+
+      // 1. SE EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL, EXIBE O PDF DIRETO E OFERECE DOWNLOAD
+      const pdfEnviadoUrl = window.LigaDB?.obterLinkDeclaracaoPdf 
+        ? (window.LigaDB.obterLinkDeclaracaoPdf(protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(aluno?.email))
+        : null;
+
+      if (pdfEnviadoUrl) {
+        target.innerHTML = `
+          <div class="w-full max-w-5xl mx-auto my-6 space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-stone-200">
+              <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-stone-200">
+                <div>
+                  <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 inline-flex items-center gap-1.5 shadow-2xs">
+                    <i data-lucide="check-check" class="w-4 h-4 text-emerald-600"></i>
+                    Declaração Oficial Enviada por E-mail
+                  </span>
+                  <h2 class="text-xl sm:text-2xl font-black text-stone-900 mt-2 font-serif">${nomeFinal}</h2>
+                  <p class="text-xs font-mono text-coffee-800 font-bold mt-0.5">Protocolo: ${aluno?.protocolo || protocolo || 'CC10'}</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                  <a 
+                    href="${pdfEnviadoUrl}" 
+                    download 
+                    class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-2"
+                  >
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Baixar PDF Oficial</span>
+                  </a>
+                  <a 
+                    href="${pdfEnviadoUrl}" 
+                    target="_blank" 
+                    class="px-4 py-3 bg-stone-900 hover:bg-black text-white font-bold text-xs sm:text-sm rounded-xl transition flex items-center gap-2"
+                  >
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                    <span>Abrir em Tela Cheia</span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Visualizador Embutido do PDF Oficial Enviado -->
+              <div class="mt-6 rounded-2xl overflow-hidden border border-stone-300 bg-stone-100 shadow-inner">
+                <iframe 
+                  src="${pdfEnviadoUrl}#view=FitH" 
+                  class="w-full h-[650px] sm:h-[820px] border-0" 
+                  title="Declaração Oficial de Participação - ${nomeFinal}"
+                ></iframe>
+              </div>
+
+              <div class="mt-4 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-2">
+                <span class="flex items-center gap-1 text-emerald-700 font-semibold">
+                  <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                  Documento oficial autenticado de 2 horas complementares (UniArnaldo)
+                </span>
+                <span>Caso o documento não apareça no quadro acima, clique em <strong>Baixar PDF Oficial</strong>.</span>
+              </div>
+            </div>
+          </div>
+        `;
+        if (window.lucide) window.lucide.createIcons();
+        return;
+      }
         const btnPrint = document.getElementById('btnPrintCertificado');
         if (btnPrint) btnPrint.classList.add('hidden');
 

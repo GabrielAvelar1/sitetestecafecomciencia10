@@ -548,7 +548,7 @@
 
   <!-- Scripts da Aplicação -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=9"></script>
+  <script src="js/supabase-client.js?v=10"></script>
   <script>
     if (window.lucide) window.lucide.createIcons();
 
@@ -658,14 +658,22 @@
                   </div>
 
                   <div class="pt-2 border-t border-stone-200/60 flex flex-wrap gap-2">
-                    <a 
-                      href="certificados.html?protocolo=${item.protocolo}" 
-                      target="_blank"
-                      class="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
-                    >
-                      <i data-lucide="award" class="w-3.5 h-3.5"></i>
-                      <span>Ver / Baixar Declaração</span>
-                    </a>
+                    ${(() => {
+                      const pdfLink = window.LigaDB?.obterLinkDeclaracaoPdf 
+                        ? (window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(item.email))
+                        : null;
+                      const destino = pdfLink || `certificados.html?protocolo=${item.protocolo}`;
+                      return `
+                        <a 
+                          href="${destino}" 
+                          target="_blank"
+                          class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                        >
+                          <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
+                          <span>Ver / Baixar Declaração (PDF Oficial)</span>
+                        </a>
+                      `;
+                    })()}
 
                     <a 
                       href="${edNum === 12 ? '12cafe.html' : (edNum === 11 ? '11cafe.html' : 'index.html')}" 

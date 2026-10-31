@@ -1199,6 +1199,85 @@ async function resetarBancoDeDados(senha) {
   return resultados;
 }
 
+
+// ============================================================================
+// MAPEAMENTO OFICIAL DAS DECLARAÇÕES EM PDF ENVIADAS POR E-MAIL
+// ============================================================================
+const DECLARACOES_PDF_MAP = {
+  "CC10-650626": "declaracoes_individuais/declaracao_CC10-650626_Ghaya_Maryeva_Boaventura_Alves.pdf",
+  "ghayamaryeva17@gmail.com": "declaracoes_individuais/declaracao_CC10-650626_Ghaya_Maryeva_Boaventura_Alves.pdf",
+  "CC10-977044": "declaracoes_individuais/declaracao_CC10-977044_Maira_Pinheiro_Neves.pdf",
+  "mairapinheironeves@gmail.com": "declaracoes_individuais/declaracao_CC10-977044_Maira_Pinheiro_Neves.pdf",
+  "CC10-710439": "declaracoes_individuais/declaracao_CC10-710439_Bruno_Oliveira_Meireles.pdf",
+  "brunomeireles2003@gmail.com": "declaracoes_individuais/declaracao_CC10-710439_Bruno_Oliveira_Meireles.pdf",
+  "CC10-347357": "declaracoes_individuais/declaracao_CC10-347357_Amanda_Marcia_Almeida_Mesquita.pdf",
+  "mandinha8@outlook.com": "declaracoes_individuais/declaracao_CC10-347357_Amanda_Marcia_Almeida_Mesquita.pdf",
+  "CC10-756168": "declaracoes_individuais/declaracao_CC10-756168_Camila_silva_de_Paulo.pdf",
+  "silvacamila1710@gmail.com": "declaracoes_individuais/declaracao_CC10-756168_Camila_silva_de_Paulo.pdf",
+  "CC10-200915": "declaracoes_individuais/declaracao_CC10-200915_Junia_Paula_Andrade_Furtado.pdf",
+  "juniaandradef@icloud.com": "declaracoes_individuais/declaracao_CC10-200915_Junia_Paula_Andrade_Furtado.pdf",
+  "CC10-508082": "declaracoes_individuais/declaracao_CC10-508082_Beatriz_da_Silva_Duarte.pdf",
+  "bibisilvaduarte2013@gmail.com": "declaracoes_individuais/declaracao_CC10-508082_Beatriz_da_Silva_Duarte.pdf",
+  "CC10-936401": "declaracoes_individuais/declaracao_CC10-936401_Gabriel_Avelar_de_Oliveira.pdf",
+  "gabriel.avlr@outlook.com": "declaracoes_individuais/declaracao_CC10-936401_Gabriel_Avelar_de_Oliveira.pdf",
+  "CC10-684680": "declaracoes_individuais/declaracao_CC10-684680_Pedro_Henrique_da_Silva_Cota.pdf",
+  "pedrohenriquedasilvacota@gmail.com": "declaracoes_individuais/declaracao_CC10-684680_Pedro_Henrique_da_Silva_Cota.pdf",
+  "CC10-330135": "declaracoes_individuais/declaracao_CC10-330135_Sara_Emanuely_de_Oliveira_Tadeu.pdf",
+  "saraemanuely.oliveira@gmail.com": "declaracoes_individuais/declaracao_CC10-330135_Sara_Emanuely_de_Oliveira_Tadeu.pdf",
+  "CC10-719037": "declaracoes_individuais/declaracao_CC10-719037_clara_becalli.pdf",
+  "claraabecallis@gmail.com": "declaracoes_individuais/declaracao_CC10-719037_clara_becalli.pdf",
+  "CC10-669098": "declaracoes_individuais/declaracao_CC10-669098_Thales_Wilson.pdf",
+  "thaleswilson.gomes@gmail.com": "declaracoes_individuais/declaracao_CC10-669098_Thales_Wilson.pdf",
+  "CC10-873560": "declaracoes_individuais/declaracao_CC10-873560_Alice_Rodrigues_de_Oliveira_Barros.pdf",
+  "alicerodsb17@gmail.com": "declaracoes_individuais/declaracao_CC10-873560_Alice_Rodrigues_de_Oliveira_Barros.pdf",
+  "CC10-205127": "declaracoes_individuais/declaracao_CC10-205127_Giovanna_Maria_Carvalho_Leao_Magno.pdf",
+  "giovannamagno21042006@gmail.com": "declaracoes_individuais/declaracao_CC10-205127_Giovanna_Maria_Carvalho_Leao_Magno.pdf",
+  "CC10-157895": "declaracoes_individuais/declaracao_CC10-157895_Bianca_da_Silva_Monteiro.pdf",
+  "biancasilvamonteiro213@gmail.com": "declaracoes_individuais/declaracao_CC10-157895_Bianca_da_Silva_Monteiro.pdf",
+  "CC10-293141": "declaracoes_individuais/declaracao_CC10-293141_Laura_Avila_Soares.pdf",
+  "lauravillas2003@gmail.com": "declaracoes_individuais/declaracao_CC10-293141_Laura_Avila_Soares.pdf",
+  "CC10-293974": "declaracoes_individuais/declaracao_CC10-293974_Fernando_Angelo_Silva_Almeida.pdf",
+  "feangelo.2005@gmail.com": "declaracoes_individuais/declaracao_CC10-293974_Fernando_Angelo_Silva_Almeida.pdf",
+  "CC10-651812": "declaracoes_individuais/declaracao_CC10-651812_Thais_Suellen_Cesar_Rocha.pdf",
+  "thaissuellen22@outlook.com": "declaracoes_individuais/declaracao_CC10-651812_Thais_Suellen_Cesar_Rocha.pdf",
+  "CC10-278341": "declaracoes_individuais/declaracao_CC10-278341_Aimee_Germano_Torres_Sales.pdf",
+  "aimeesales21@gmail.com": "declaracoes_individuais/declaracao_CC10-278341_Aimee_Germano_Torres_Sales.pdf",
+  "CC10-162029": "declaracoes_individuais/declaracao_CC10-162029_Karoline_Sathler_Rocha_Godinho.pdf",
+  "karolinesathlerr@gmail.com": "declaracoes_individuais/declaracao_CC10-162029_Karoline_Sathler_Rocha_Godinho.pdf",
+  "CC10-812167": "declaracoes_individuais/declaracao_CC10-812167_Julia_Soares_Souto.pdf",
+  "jusoaressouto06@gmail.com": "declaracoes_individuais/declaracao_CC10-812167_Julia_Soares_Souto.pdf",
+  "CC10-190206": "declaracoes_individuais/declaracao_CC10-190206_AILA_FERNANDES_RAMOS_E_SILVA.pdf",
+  "ailafrs@gmail.com": "declaracoes_individuais/declaracao_CC10-190206_AILA_FERNANDES_RAMOS_E_SILVA.pdf",
+  "CC10-534963": "declaracoes_individuais/declaracao_CC10-534963_Geovana_Oliveira_Ferreira.pdf",
+  "geovanaof14@gmail.com": "declaracoes_individuais/declaracao_CC10-534963_Geovana_Oliveira_Ferreira.pdf",
+  "CC10-449586": "declaracoes_individuais/declaracao_CC10-449586_Ana_Beatriz_Assuncao_Moreira.pdf",
+  "beatrizassm@gmail.com": "declaracoes_individuais/declaracao_CC10-449586_Ana_Beatriz_Assuncao_Moreira.pdf",
+  "CC10-989324": "declaracoes_individuais/declaracao_CC10-989324_Yasmim_Pereira_dos_Santos_Morais.pdf",
+  "yasmimpereira128@gmail.com": "declaracoes_individuais/declaracao_CC10-989324_Yasmim_Pereira_dos_Santos_Morais.pdf",
+  "CC10-158891": "declaracoes_individuais/declaracao_CC10-158891_Iasmin_Gomes_de_Almeida.pdf",
+  "mimgomes845@gmail.com": "declaracoes_individuais/declaracao_CC10-158891_Iasmin_Gomes_de_Almeida.pdf",
+  "CC10-352983": "declaracoes_individuais/declaracao_CC10-352983_Istefany_Gomes_de_Almeida.pdf",
+  "istefanygalmeida@gmail.com": "declaracoes_individuais/declaracao_CC10-352983_Istefany_Gomes_de_Almeida.pdf",
+  "CC10-175382": "declaracoes_individuais/declaracao_CC10-175382_Chelsea_Lyssa_de_Souza_Lino.pdf",
+  "chelsealyssa03@gmail.com": "declaracoes_individuais/declaracao_CC10-175382_Chelsea_Lyssa_de_Souza_Lino.pdf",
+  "CC10-385765": "declaracoes_individuais/declaracao_CC10-385765_Gabriele_dos_Reis_Beato.pdf",
+  "gabrielereis402@gmail.com": "declaracoes_individuais/declaracao_CC10-385765_Gabriele_dos_Reis_Beato.pdf",
+  "NÃO ENCONTRADO": "declaracoes_individuais/declaracao_SEM-PROTOCOLO-PAG30_Carlos_Eduardo_Figueira_Mancia.pdf",
+  "cadumancia@gmail.com": "declaracoes_individuais/declaracao_SEM-PROTOCOLO-PAG30_Carlos_Eduardo_Figueira_Mancia.pdf",
+  "CC10-ORG-CADU": "declaracoes_individuais/declaracao_SEM-PROTOCOLO-PAG30_Carlos_Eduardo_Figueira_Mancia.pdf"
+};
+
+function obterLinkDeclaracaoPdf(protocoloOuEmail) {
+  if (!protocoloOuEmail) return null;
+  const termo = String(protocoloOuEmail).trim();
+  if (DECLARACOES_PDF_MAP[termo]) return DECLARACOES_PDF_MAP[termo];
+  const termoUpper = termo.toUpperCase();
+  if (DECLARACOES_PDF_MAP[termoUpper]) return DECLARACOES_PDF_MAP[termoUpper];
+  const termoLower = termo.toLowerCase();
+  if (DECLARACOES_PDF_MAP[termoLower]) return DECLARACOES_PDF_MAP[termoLower];
+  return null;
+}
+
 // Expõe globalmente
 window.LigaDB = {
   SUPABASE_CONFIG,
@@ -1235,6 +1314,8 @@ window.LigaDB = {
   obterConfiguracoesSistema,
   estaoInscricoesEncerradas,
   alternarInscricoesEncerradas,
-  extrairInstituicaoAluno
+  extrairInstituicaoAluno,
+  obterLinkDeclaracaoPdf,
+  DECLARACOES_PDF_MAP
 };
 

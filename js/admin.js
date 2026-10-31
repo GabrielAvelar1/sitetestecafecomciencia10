@@ -512,19 +512,29 @@ function renderizarLinhasTabelaAdmin(lista) {
          </button>`
       : `<span class="text-xs text-stone-400">Sem anexo</span>`;
 
-    // Botão Certificado Oficial com Acesso Rápido ao Editor
-    const jaEnviado = item.certificado_emitido === true || item.presenca_confirmada === true;
-    const certificadoBtn = item.presenca_confirmada
+    // Botão Certificado Oficial com Acesso Rápido ao PDF Enviado por E-mail
+    const pdfEnviado = window.LigaDB?.obterLinkDeclaracaoPdf 
+      ? (window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) || window.LigaDB.obterLinkDeclaracaoPdf(item.email))
+      : null;
+
+    const certificadoBtn = pdfEnviado
       ? `<div class="inline-flex items-center gap-1">
-           <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold ${jaEnviado ? 'bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100' : 'bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100'} transition shadow-2xs" title="${jaEnviado ? 'Declaração oficial emitida e enviada por e-mail (2 horas)' : 'Abrir declaração oficial'}">
-             <i data-lucide="award" class="w-3.5 h-3.5 ${jaEnviado ? 'text-emerald-600' : 'text-blue-600'}"></i>
-             <span>${jaEnviado ? 'Enviado (2h)' : 'Declaração'}</span>
+           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail">
+             <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-700"></i>
+             <span>PDF Enviado</span>
            </a>
-           <button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="p-1 rounded-lg text-stone-600 hover:bg-stone-200 transition" title="Visualizar / Editar no Estúdio">
-             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-           </button>
+           <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="p-1 rounded-lg text-stone-600 hover:bg-stone-200 transition" title="Ver no site">
+             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+           </a>
          </div>`
-      : `<button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Gerar ou editar declaração personalizada">Personalizar</button>`;
+      : (item.presenca_confirmada
+          ? `<div class="inline-flex items-center gap-1">
+               <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs">
+                 <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i>
+                 <span>Declaração</span>
+               </a>
+             </div>`
+          : `<button onclick="abrirEditorCertificadoParaAluno('${item.protocolo}')" class="text-xs text-stone-400 hover:text-stone-700 underline" title="Personalizar declaração">Personalizar</button>`);
 
     return `
       <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
