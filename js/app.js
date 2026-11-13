@@ -661,6 +661,14 @@ function exibirCredencialSucesso(aluno) {
 
   if (!modal || !target || !aluno) return;
 
+  // Fecha modais anteriores que possam sobrepor a credencial na tela
+  const areaModal = document.getElementById('areaAlunoModal');
+  if (areaModal) areaModal.classList.add('hidden');
+  const consultaModal = document.getElementById('consultaModal');
+  if (consultaModal) consultaModal.classList.add('hidden');
+  const loginModal = document.getElementById('loginModal');
+  if (loginModal) loginModal.classList.add('hidden');
+
   const meta = obterMetadadosEdicaoAluno(aluno);
   const tituloEvento = meta.titulo;
   const dataEvento = meta.dataHora;
@@ -838,6 +846,8 @@ async function abrirCredencialPorProtocolo(protocolo) {
   try {
     const aluno = await window.LigaDB.buscarInscricao(protocolo);
     if (aluno) {
+      fecharAreaDoAluno();
+      fecharModalConsulta();
       exibirCredencialSucesso(aluno);
     } else {
       alert('Inscrição não encontrada para o protocolo: ' + protocolo);
@@ -1286,6 +1296,10 @@ async function abrirAreaDoAluno(usuarioForcado = null) {
   const content = document.getElementById('areaAlunoContent');
   if (!modal || !content) return;
 
+  // Garante fechamento da credencial ao voltar para a lista de inscrições
+  const credModal = document.getElementById('credencialModal');
+  if (credModal) credModal.classList.add('hidden');
+
   // Exibe tela de carregamento rápida
   content.innerHTML = `
     <div class="py-12 text-center text-stone-500 space-y-3">
@@ -1697,7 +1711,20 @@ async function executarBuscaInscricao() {
       return;
     }
 
-    // Se encontrou mais de 1 inscrição (ex: 10ª e 11ª edições)
+    // Se a busca foi feita por um protocolo específico (ex: CC11-XXXXXX)
+    const termoUpper = termo.toUpperCase();
+    if (termoUpper.startsWith('CC10-') || termoUpper.startsWith('CC11-') || termoUpper.startsWith('CC12-')) {
+      const matchExato = inscricoes.find(i => (i.protocolo || '').toUpperCase() === termoUpper);
+      if (matchExato) {
+        fecharModalConsulta();
+        fecharAreaDoAluno();
+        exibirCredencialSucesso(matchExato);
+        mostrarToast('Credencial localizada! Seu QR Code está na tela.');
+        return;
+      }
+    }
+
+    // Se encontrou mais de 1 inscrição (ex: busca por e-mail com 10ª e 11ª edições)
     if (inscricoes.length > 1) {
       fecharModalConsulta();
       abrirAreaDoAluno(inscricoes[0]);
@@ -1707,6 +1734,7 @@ async function executarBuscaInscricao() {
 
     // Se encontrou 1 inscrição: exibe a credencial diretamente
     fecharModalConsulta();
+    fecharAreaDoAluno();
     exibirCredencialSucesso(inscricoes[0]);
     mostrarToast('Inscrição localizada! Sua credencial com QR Code está na tela.');
 

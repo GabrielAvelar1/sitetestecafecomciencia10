@@ -548,7 +548,7 @@
 
   <!-- Scripts da Aplicação -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=11"></script>
+  <script src="js/supabase-client.js?v=12"></script>
   <script>
     if (window.lucide) window.lucide.createIcons();
 
@@ -679,10 +679,14 @@
                       }
 
                       return `
-                        <div class="flex-1 py-2.5 px-3 bg-stone-100 text-stone-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-stone-200">
-                          <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i>
-                          <span>Inscrição Confirmada · Palestra em ${edNum === 11 ? '13/11' : (edNum === 12 ? '18/11' : 'breve')}</span>
-                        </div>
+                        <a 
+                          href="${edNum === 11 ? '11cafe.html' : (edNum === 12 ? '12cafe.html' : 'index.html')}?consultar=${item.protocolo}"
+                          class="flex-1 py-2.5 px-3 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                          title="Abrir credencial oficial com QR Code"
+                        >
+                          <i data-lucide="qr-code" class="w-3.5 h-3.5 text-amber-300"></i>
+                          <span>Ver Credencial & QR Code</span>
+                        </a>
                       `;
                     })()}
 
