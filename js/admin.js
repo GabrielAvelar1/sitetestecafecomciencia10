@@ -519,15 +519,15 @@ function renderizarLinhasTabelaAdmin(lista) {
          </button>`
       : `<span class="text-xs text-stone-400">Sem anexo</span>`;
 
-    // Apenas a 10ª edição possui declarações emitidas e enviadas
-    const isEdicao10 = !isEdicao11 && !isEdicao12 && protoUpper.startsWith('CC10-');
-    const pdfEnviado = isEdicao10 && window.LigaDB?.obterLinkDeclaracaoPdf 
+    // Declarações emitidas e enviadas para 10ª e 11ª edições
+    const isEdicaoComPdf = (isEdicao10 || isEdicao11) && (protoUpper.startsWith('CC10-') || protoUpper.startsWith('CC11-'));
+    const pdfEnviado = isEdicaoComPdf && window.LigaDB?.obterLinkDeclaracaoPdf 
       ? window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) 
       : null;
 
     const certificadoBtn = pdfEnviado
       ? `<div class="inline-flex items-center gap-1">
-           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail (10° Café)">
+           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail (${isEdicao11 ? '11° Café' : '10° Café'})">
              <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-700"></i>
              <span>PDF Enviado</span>
            </a>
@@ -535,14 +535,14 @@ function renderizarLinhasTabelaAdmin(lista) {
              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
            </a>
          </div>`
-      : (isEdicao10 && item.presenca_confirmada
+      : ((isEdicao10 || isEdicao11) && item.presenca_confirmada
           ? `<div class="inline-flex items-center gap-1">
                <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs">
                  <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i>
                  <span>Declaração</span>
                </a>
              </div>`
-          : `<span class="text-xs text-stone-400 font-medium">${isEdicao10 ? 'Aguardando pres.' : 'Aguardando palestra'}</span>`);
+          : `<span class="text-xs text-stone-400 font-medium">${(isEdicao10 || isEdicao11) ? 'Aguardando pres.' : 'Aguardando palestra'}</span>`);
 
     return `
       <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">

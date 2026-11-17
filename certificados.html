@@ -195,10 +195,10 @@
       if (!isLiberado) {
         loading.classList.add('hidden');
 
-      // 1. SE FOR DO 10° CAFÉ (CC10-) E EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL, EXIBE O PDF DIRETO
+      // 1. SE EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL (10° ou 11° CAFÉ), EXIBE O PDF DIRETO
       const protoUpperBusca = (aluno?.protocolo || protocolo || '').toUpperCase();
-      const isApenasEdicao10 = protoUpperBusca.startsWith('CC10-');
-      const pdfEnviadoUrl = isApenasEdicao10 && window.LigaDB?.obterLinkDeclaracaoPdf 
+      const isEdicaoComPdf = protoUpperBusca.startsWith('CC10-') || protoUpperBusca.startsWith('CC11-');
+      const pdfEnviadoUrl = isEdicaoComPdf && window.LigaDB?.obterLinkDeclaracaoPdf 
         ? window.LigaDB.obterLinkDeclaracaoPdf(protoUpperBusca)
         : null;
 

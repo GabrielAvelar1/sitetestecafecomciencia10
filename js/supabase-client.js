@@ -1418,14 +1418,53 @@ const DECLARACOES_PDF_MAP = {
   "CC10-352983": "declaracoes_individuais/declaracao_CC10-352983_Istefany_Gomes_de_Almeida.pdf",
   "CC10-175382": "declaracoes_individuais/declaracao_CC10-175382_Chelsea_Lyssa_de_Souza_Lino.pdf",
   "CC10-385765": "declaracoes_individuais/declaracao_CC10-385765_Gabriele_dos_Reis_Beato.pdf",
-  "CC10-ORG-CADU": "declaracoes_individuais/declaracao_SEM-PROTOCOLO-PAG30_Carlos_Eduardo_Figueira_Mancia.pdf"
+  "CC10-ORG-CADU": "declaracoes_individuais/declaracao_SEM-PROTOCOLO-PAG30_Carlos_Eduardo_Figueira_Mancia.pdf",
+
+  // --- 11° CAFÉ COM CIÊNCIA ---
+  "CC11-702011": "declaracoes_individuais/declaracao_CC11-702011_Gabriel_Avelar_de_Oliveira.pdf",
+  "CC11-849875": "declaracoes_individuais/declaracao_CC11-849875_Pedro_Henrique_da_Silva_Cota.pdf",
+  "CC11-315485": "declaracoes_individuais/declaracao_CC11-315485_clara_becalli.pdf",
+  "CC11-610803": "declaracoes_individuais/declaracao_CC11-610803_Ghaya_Maryeva_Boaventura_Alves.pdf",
+  "CC11-205927": "declaracoes_individuais/declaracao_CC11-205927_Maria_Luisa_Ribeiro_dos_Santos.pdf",
+  "CC11-903401": "declaracoes_individuais/declaracao_CC11-903401_Pedro_Henrique_Silva_Carvalho.pdf",
+  "CC11-529387": "declaracoes_individuais/declaracao_CC11-529387_Luisa_Gomes.pdf",
+  "CC11-729133": "declaracoes_individuais/declaracao_CC11-729133_Luiz_Eduardo_Evangelista_Rafael.pdf",
+  "CC11-724478": "declaracoes_individuais/declaracao_CC11-724478_Thais_Suellen_Cesar_Rocha.pdf",
+  "CC11-200985": "declaracoes_individuais/declaracao_CC11-200985_Cely_Regina_Martins_Rocha_de_Lacerda.pdf",
+  "CC11-288737": "declaracoes_individuais/declaracao_CC11-288737_Thais_Nogueira_Reis.pdf",
+  "CC11-844365": "declaracoes_individuais/declaracao_CC11-844365_Chelsea_Lyssa_de_Souza_Lino.pdf",
+  "CC11-871729": "declaracoes_individuais/declaracao_CC11-871729_Ana_Luiza_de_Andrade_Barbosa.pdf",
+  "CC11-918953": "declaracoes_individuais/declaracao_CC11-918953_Bianca_da_Silva_Monteiro.pdf",
+  "CC11-454936": "declaracoes_individuais/declaracao_CC11-454936_Geovana_Oliveira_Ferreira.pdf",
+  "CC11-149183": "declaracoes_individuais/declaracao_CC11-149183_Gabriella_Andrade_Gontijo.pdf",
+  "CC11-272253": "declaracoes_individuais/declaracao_CC11-272253_Giovanna_Maria_Carvalho_Leao_Magno.pdf",
+  "CC11-404373": "declaracoes_individuais/declaracao_CC11-404373_Karine_Oliveira.pdf",
+  "CC11-628046": "declaracoes_individuais/declaracao_CC11-628046_Liriel_Pires_Santos.pdf",
+  "CC11-495501": "declaracoes_individuais/declaracao_CC11-495501_Ana_Clara_Goncalves_de_Oliveira.pdf",
+  "CC11-113365": "declaracoes_individuais/declaracao_CC11-113365_Luiza_Martins_Sousa.pdf",
+  "CC11-252887": "declaracoes_individuais/declaracao_CC11-252887_Larissa_Goncalves_de_Oliveira.pdf",
+  "CC11-196424": "declaracoes_individuais/declaracao_CC11-196424_Natalia_Soares_Carvalho.pdf",
+  "CC11-704199": "declaracoes_individuais/declaracao_CC11-704199_Carolina_Silva_Machado.pdf",
+  "CC11-594436": "declaracoes_individuais/declaracao_CC11-594436_Maria_Fernanda_Goncalves_Oliveira.pdf",
+  "CC11-101148": "declaracoes_individuais/declaracao_CC11-101148_Fernando_Angelo_Silva_Almeida.pdf",
+  "CC11-102932": "declaracoes_individuais/declaracao_CC11-102932_Sophia_Agnes_Borba_Oliveira_da_Cunha_Fernandes.pdf",
+  "CC11-588699": "declaracoes_individuais/declaracao_CC11-588699_Renata_Venuto.pdf",
+  "CC11-922049": "declaracoes_individuais/declaracao_CC11-922049_Giovana_caroline_dos_santos_sampaio.pdf",
+  "CC11-794371": "declaracoes_individuais/declaracao_CC11-794371_Aline_Soares_Eloy_de_Queiroz.pdf",
+  "CC11-291626": "declaracoes_individuais/declaracao_CC11-291626_Julia_Soares_Souto.pdf",
+  "CC11-822978": "declaracoes_individuais/declaracao_CC11-822978_Eduardo_Erick_Portela.pdf",
+  "CC11-421574": "declaracoes_individuais/declaracao_CC11-421574_Aylla_Francielle.pdf",
+  "CC11-273289": "declaracoes_individuais/declaracao_CC11-273289_Thales_Wilson.pdf",
+  "CC11-211015": "declaracoes_individuais/declaracao_CC11-211015_Gabriele_dos_Reis_Beato.pdf",
+  "CC11-781985": "declaracoes_individuais/declaracao_CC11-781985_AILA_FERNANDES_RAMOS_E_SILVA.pdf",
+  "CC11-121635": "declaracoes_individuais/declaracao_CC11-121635_Laura_Avila_Soares.pdf"
 };
 
 function obterLinkDeclaracaoPdf(protocolo) {
   if (!protocolo) return null;
   const protoUpper = String(protocolo).trim().toUpperCase();
-  // As declarações em PDF pertencem estritamente ao 10° Café (prefixo CC10-)
-  if (!protoUpper.startsWith('CC10-')) {
+  // As declarações em PDF pertencem ao 10° Café (CC10-) e 11° Café (CC11-)
+  if (!protoUpper.startsWith('CC10-') && !protoUpper.startsWith('CC11-')) {
     return null;
   }
   return DECLARACOES_PDF_MAP[protoUpper] || null;
