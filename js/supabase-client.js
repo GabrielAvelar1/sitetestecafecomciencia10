@@ -242,6 +242,7 @@ async function obterConfiguracoesSistema() {
           if (cfg.inscricoes_10) localStorage.setItem('cafe_inscricoes_encerradas_10', cfg.inscricoes_10 === 'encerradas' ? 'true' : 'false');
           if (cfg.inscricoes_11) localStorage.setItem('cafe_inscricoes_encerradas_11', cfg.inscricoes_11 === 'encerradas' ? 'true' : 'false');
           if (cfg.inscricoes_12) localStorage.setItem('cafe_inscricoes_encerradas_12', cfg.inscricoes_12 === 'encerradas' ? 'true' : 'false');
+          if (cfg.edicao_ativa_portaria) localStorage.setItem('cafe_edicao_ativa_portaria', String(cfg.edicao_ativa_portaria));
           if (typeof cfg.certificados_liberados === 'boolean') {
             localStorage.setItem('cafe_certificados_liberados', cfg.certificados_liberados ? 'true' : 'false');
           }
@@ -257,7 +258,120 @@ async function obterConfiguracoesSistema() {
     inscricoes_10: localStorage.getItem('cafe_inscricoes_encerradas_10') === 'true' ? 'encerradas' : 'abertas',
     inscricoes_11: localStorage.getItem('cafe_inscricoes_encerradas_11') === 'true' ? 'encerradas' : 'abertas',
     inscricoes_12: localStorage.getItem('cafe_inscricoes_encerradas_12') === 'true' ? 'encerradas' : 'abertas',
+    edicao_ativa_portaria: localStorage.getItem('cafe_edicao_ativa_portaria') ? parseInt(localStorage.getItem('cafe_edicao_ativa_portaria'), 10) : 12,
     certificados_liberados: localStorage.getItem('cafe_certificados_liberados') === 'true'
+  };
+}
+
+async function obterEdicaoAtivaPortaria() {
+  try {
+    const cfg = await obterConfiguracoesSistema();
+    if (cfg && cfg.edicao_ativa_portaria) {
+      return parseInt(cfg.edicao_ativa_portaria, 10);
+    }
+  } catch (e) {}
+
+  const salvaLocal = localStorage.getItem('cafe_edicao_ativa_portaria');
+  if (salvaLocal) {
+    return parseInt(salvaLocal, 10);
+  }
+  return 12;
+}
+
+async function definirEdicaoAtivaPortaria(edicao) {
+  const num = parseInt(edicao, 10) || 12;
+  localStorage.setItem('cafe_edicao_ativa_portaria', String(num));
+
+  const sb = getSupabase();
+  if (sb) {
+    try {
+      const cfgAtual = (await obterConfiguracoesSistema()) || {};
+      cfgAtual.edicao_ativa_portaria = num;
+
+      const { data: existente } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('id')
+        .eq('protocolo', 'SISTEMA-CONFIG')
+        .limit(1);
+
+      if (existente && existente.length > 0) {
+        await sb
+          .from(SUPABASE_CONFIG.tableName)
+          .update({
+            observacoes: JSON.stringify(cfgAtual),
+            ultimo_lembrete_em: new Date().toISOString()
+          })
+          .eq('protocolo', 'SISTEMA-CONFIG');
+      } else {
+        await sb
+          .from(SUPABASE_CONFIG.tableName)
+          .insert([{
+            protocolo: 'SISTEMA-CONFIG',
+            nome_completo: 'Configurações Globais do Sistema',
+            email: 'admin@cafecomciencia.com',
+            telefone: '31999999999',
+            observacoes: JSON.stringify(cfgAtual),
+            presenca_confirmada: false,
+            pago: true
+          }]);
+      }
+    } catch (e) {
+      console.warn('Erro ao salvar edicao_ativa_portaria no Supabase:', e);
+    }
+  }
+
+  window.dispatchEvent(new CustomEvent('portaria_edicao_changed', {
+    detail: { edicao: num }
+  }));
+
+  return num;
+}
+
+function obterInfoEdicao(edicao) {
+  const n = parseInt(edicao, 10) || 12;
+  const catalogo = {
+    10: {
+      num: 10,
+      prefixo: 'CC10',
+      titulo: '10° Café com Ciência',
+      subtitulo: 'A Importância do Pré-Natal Odontológico',
+      palestrante: 'Profa. Dra. Carolina Diniz',
+      link: 'index.html'
+    },
+    11: {
+      num: 11,
+      prefixo: 'CC11',
+      titulo: '11° Café com Ciência',
+      subtitulo: 'Disfunção Temporomandibular e Dor Orofacial',
+      palestrante: 'Prof. Dr. Henrique Pretti',
+      link: '11cafe.html'
+    },
+    12: {
+      num: 12,
+      prefixo: 'CC12',
+      titulo: '12° Café com Ciência',
+      subtitulo: 'Diagnóstico e Planejamento na Reabilitação Oral',
+      palestrante: 'Dra. Thaissa Calab',
+      link: '12cafe.html'
+    },
+    13: {
+      num: 13,
+      prefixo: 'CC13',
+      titulo: '13° Café com Ciência',
+      subtitulo: 'Próxima Edição Oficial',
+      palestrante: 'Liga Acadêmica de Odontologia',
+      link: 'portal.html'
+    }
+  };
+
+  if (catalogo[n]) return catalogo[n];
+  return {
+    num: n,
+    prefixo: `CC${n}`,
+    titulo: `${n}° Café com Ciência`,
+    subtitulo: `${n}ª Edição Oficial`,
+    palestrante: 'Liga Acadêmica de Odontologia',
+    link: 'portal.html'
   };
 }
 
@@ -842,19 +956,21 @@ async function buscarTodasInscricoes(termo) {
 }
 
 // ============================================================================
-// 7. VALIDAÇÃO DE PRESENÇA (CHECK-IN POR QR CODE NA PORTARIA)
+// 7. VALIDAÇÃO DE PRESENÇA (CHECK-IN POR QR CODE OU NFC NA PORTARIA)
 // ============================================================================
-async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficial') {
-  if (!codigo) throw new Error('Código do QR Code não fornecido.');
+async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficial', edicaoEsperada = null) {
+  if (!codigo) throw new Error('Código do QR Code ou identificação não fornecido.');
 
   let protocolo = String(codigo).trim();
 
-  // 1. Extração robusta se for uma URL completa ou link com parâmetros
+  // 1. Extração robusta se for uma URL completa ou link com parâmetros (?p=..., ?protocolo=...)
   if (protocolo.includes('?')) {
     try {
       const urlQuery = protocolo.split('?')[1];
       const urlParams = new URLSearchParams(urlQuery);
-      if (urlParams.get('protocolo')) {
+      if (urlParams.get('p')) {
+        protocolo = urlParams.get('p');
+      } else if (urlParams.get('protocolo')) {
         protocolo = urlParams.get('protocolo');
       } else if (urlParams.get('checkin')) {
         protocolo = urlParams.get('checkin');
@@ -864,34 +980,75 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
     } catch (e) {}
   }
 
-  // 2. Extração via Regex: localiza padrão oficial CC10-XXXXXX, CC11-XXXXXX ou CC12-XXXXXX
-  const matchOficial = protocolo.match(/CC\d{2}-[A-Z0-9]+/i);
+  // 2. Determina a edição esperada da portaria
+  if (!edicaoEsperada) {
+    edicaoEsperada = await obterEdicaoAtivaPortaria();
+  }
+  const numEdicaoEsperada = parseInt(edicaoEsperada, 10) || 12;
+  const prefixoEsperado = `CC${numEdicaoEsperada}-`;
+
+  // 3. Verificação de prefixo se for protocolo oficial CCxx-XXXXXX
+  const matchOficial = protocolo.match(/CC(\d{2})-[A-Z0-9]+/i);
   if (matchOficial) {
-    protocolo = matchOficial[0];
+    const edicaoDoCodigo = parseInt(matchOficial[1], 10);
+    if (edicaoDoCodigo !== numEdicaoEsperada) {
+      throw new Error(`Este código pertence ao ${edicaoDoCodigo}° Café com Ciência. A portaria está recebendo os inscritos da ${numEdicaoEsperada}ª Edição.`);
+    }
+    protocolo = matchOficial[0].toUpperCase();
   }
 
-  protocolo = protocolo.toUpperCase().trim();
-
   const sb = getSupabase();
+  let aluno = null;
 
   if (sb) {
-    const { data: inscritos, error: buscaError } = await sb
-      .from(SUPABASE_CONFIG.tableName)
-      .select('*')
-      .ilike('protocolo', protocolo)
-      .limit(1);
+    let listaCandidatos = [];
 
-    if (buscaError || !inscritos || inscritos.length === 0) {
-      throw new Error(`Inscrição não encontrada para o código: ${protocolo}`);
+    if (matchOficial) {
+      const { data, error } = await sb
+        .from(SUPABASE_CONFIG.tableName)
+        .select('*')
+        .ilike('protocolo', protocolo)
+        .limit(1);
+      if (!error && data && data.length > 0) {
+        listaCandidatos = data;
+      }
+    } else {
+      const termoLimpo = protocolo.toLowerCase().trim();
+      let q = sb.from(SUPABASE_CONFIG.tableName).select('*').neq('role', 'organizador');
+      if (termoLimpo.includes('@')) {
+        q = q.ilike('email', termoLimpo);
+      } else {
+        const digitos = termoLimpo.replace(/\D/g, '');
+        q = q.or(`protocolo.ilike.%${termoLimpo}%,email.ilike.%${termoLimpo}%,telefone.ilike.%${digitos || termoLimpo}%`);
+      }
+      const { data, error } = await q.order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        listaCandidatos = data;
+      }
     }
 
-    const aluno = inscritos[0];
+    if (listaCandidatos.length === 0) {
+      throw new Error(`Inscrição não encontrada para o código ou e-mail: ${protocolo}`);
+    }
+
+    // Filtrar especificamente para a edição esperada da portaria
+    aluno = listaCandidatos.find(item => 
+      (item.protocolo && item.protocolo.toUpperCase().startsWith(prefixoEsperado)) ||
+      parseInt(item.edicao, 10) === numEdicaoEsperada
+    );
+
+    if (!aluno) {
+      const outraEdicao = listaCandidatos[0].edicao || (listaCandidatos[0].protocolo ? listaCandidatos[0].protocolo.substring(2, 4) : '');
+      const nomeEncontrado = listaCandidatos[0].nome_completo || 'Participante';
+      throw new Error(`Olá, ${nomeEncontrado}! Identificamos seu cadastro em edição anterior (${outraEdicao}° Café), mas não localizamos inscrição ativa na ${numEdicaoEsperada}ª Edição.`);
+    }
 
     if (aluno.presenca_confirmada) {
       return {
         jaConfirmado: true,
         aluno: aluno,
-        mensagem: `Atenção: A presença de ${aluno.nome_completo} já foi registrada anteriormente!`
+        edicao: numEdicaoEsperada,
+        mensagem: `Atenção: A presença de ${aluno.nome_completo} no ${numEdicaoEsperada}° Café já foi registrada anteriormente!`
       };
     }
 
@@ -918,25 +1075,50 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
     return {
       sucesso: true,
       jaConfirmado: false,
-      aluno: updated[0],
-      mensagem: `Presença de ${aluno.nome_completo} confirmada com sucesso! Certificado liberado.`
+      aluno: updated[0] || aluno,
+      edicao: numEdicaoEsperada,
+      mensagem: `Presença de ${aluno.nome_completo} confirmada com sucesso no ${numEdicaoEsperada}° Café com Ciência! Certificado liberado.`
     };
 
   } else {
+    // Fallback Local
     const inscricoes = JSON.parse(localStorage.getItem('cafe_ciencia_inscricoes') || '[]');
-    const index = inscricoes.findIndex(i => i.protocolo && i.protocolo.toUpperCase() === protocolo);
+    let listaCandidatos = [];
 
-    if (index === -1) {
-      throw new Error(`Inscrição não encontrada para o código: ${protocolo}`);
+    if (matchOficial) {
+      listaCandidatos = inscricoes.filter(i => i.protocolo && i.protocolo.toUpperCase() === protocolo);
+    } else {
+      const termoLimpo = protocolo.toLowerCase().trim();
+      listaCandidatos = inscricoes.filter(i => 
+        i.role !== 'organizador' && (
+          (i.protocolo && i.protocolo.toLowerCase() === termoLimpo) ||
+          (i.email && i.email.toLowerCase() === termoLimpo) ||
+          (i.telefone && i.telefone.replace(/\D/g, '') === termoLimpo.replace(/\D/g, ''))
+        )
+      );
     }
 
-    const aluno = inscricoes[index];
+    if (listaCandidatos.length === 0) {
+      throw new Error(`Inscrição não encontrada para o código ou e-mail: ${protocolo}`);
+    }
+
+    aluno = listaCandidatos.find(item => 
+      (item.protocolo && item.protocolo.toUpperCase().startsWith(prefixoEsperado)) ||
+      parseInt(item.edicao, 10) === numEdicaoEsperada
+    );
+
+    if (!aluno) {
+      const outraEdicao = listaCandidatos[0].edicao || (listaCandidatos[0].protocolo ? listaCandidatos[0].protocolo.substring(2, 4) : '');
+      const nomeEncontrado = listaCandidatos[0].nome_completo || 'Participante';
+      throw new Error(`Olá, ${nomeEncontrado}! Identificamos seu cadastro em edição anterior (${outraEdicao}° Café), mas não localizamos inscrição ativa na ${numEdicaoEsperada}ª Edição.`);
+    }
 
     if (aluno.presenca_confirmada) {
       return {
         jaConfirmado: true,
         aluno: aluno,
-        mensagem: `Atenção: A presença de ${aluno.nome_completo} já foi registrada anteriormente!`
+        edicao: numEdicaoEsperada,
+        mensagem: `Atenção: A presença de ${aluno.nome_completo} no ${numEdicaoEsperada}° Café já foi registrada anteriormente!`
       };
     }
 
@@ -954,7 +1136,8 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
       sucesso: true,
       jaConfirmado: false,
       aluno: aluno,
-      mensagem: `Presença de ${aluno.nome_completo} confirmada com sucesso! Certificado liberado.`
+      edicao: numEdicaoEsperada,
+      mensagem: `Presença de ${aluno.nome_completo} confirmada com sucesso no ${numEdicaoEsperada}° Café com Ciência! Certificado liberado.`
     };
   }
 }
@@ -1282,6 +1465,9 @@ window.LigaDB = {
   estaoCertificadosLiberados,
   alternarLiberacaoCertificados,
   obterConfiguracoesSistema,
+  obterEdicaoAtivaPortaria,
+  definirEdicaoAtivaPortaria,
+  obterInfoEdicao,
   estaoInscricoesEncerradas,
   alternarInscricoesEncerradas,
   extrairInstituicaoAluno,

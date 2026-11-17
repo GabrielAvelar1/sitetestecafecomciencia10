@@ -687,6 +687,36 @@
               </div>
             </div>
 
+            <!-- Seletor de Edição Ativa da Portaria & NFC (Reaproveitamento de Etiquetas) -->
+            <div class="bg-amber-100/70 p-4 rounded-2xl border border-amber-300 space-y-2">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-black text-coffee-950 uppercase tracking-wider">
+                      🎯 Edição Ativa para Check-in NFC & Portaria:
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-300 text-amber-950">Reutilizável</span>
+                  </div>
+                  <p class="text-[11px] text-stone-600 mt-0.5">
+                    O link central das etiquetas atenderá a esta edição. Quando o 12° terminar, basta mudar para o 13° aqui sem precisar regravar nenhuma etiqueta!
+                  </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <select 
+                    id="selectEdicaoAtivaPortaria" 
+                    onchange="alterarEdicaoAtivaPortariaAdmin(this.value)"
+                    class="px-3.5 py-2.5 text-xs font-bold bg-white text-coffee-950 border-2 border-amber-400 rounded-xl shadow-xs outline-none focus:ring-2 focus:ring-amber-500 transition cursor-pointer"
+                  >
+                    <option value="12" selected>12° Café (Reabilitação Oral · Atual)</option>
+                    <option value="13">13° Café com Ciência (Próxima Edição)</option>
+                    <option value="14">14° Café com Ciência</option>
+                    <option value="11">11° Café (Encerrado)</option>
+                    <option value="10">10° Café (Encerrado)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <!-- Link Central da Tag Inteligente -->
             <div class="bg-white p-4 rounded-2xl border border-amber-200 space-y-2">
               <label class="block text-[11px] font-bold text-coffee-900 uppercase tracking-wider">

@@ -436,6 +436,13 @@ async function carregarInscricoesAdmin() {
     if (typeof filtrarInscricoesTabelaAdmin === 'function') {
       filtrarInscricoesTabelaAdmin();
     }
+    // Sincroniza seletor da edição ativa da portaria NFC
+    if (window.LigaDB?.obterEdicaoAtivaPortaria) {
+      window.LigaDB.obterEdicaoAtivaPortaria().then(edPortaria => {
+        const selPortaria = document.getElementById('selectEdicaoAtivaPortaria');
+        if (selPortaria) selPortaria.value = String(edPortaria);
+      }).catch(() => {});
+    }
   } catch (err) {
     console.error('Erro ao listar:', err);
     container.innerHTML = `
@@ -2327,6 +2334,7 @@ window.abrirEditorCertificadoParaAluno = abrirEditorCertificadoParaAluno;
 // MÓDULO NFC & PORTARIA INTELIGENTE (CHECK-IN POR APROXIMAÇÃO)
 // ============================================================================
 let nfcInscritosFiltradosCache = [];
+let nfcEdicaoAtivaModal = 12;
 
 function copiarLinkNfcGeral() {
   const input = document.getElementById('inputUrlNfcGeral');
@@ -2343,22 +2351,51 @@ function copiarLinkNfcGeral() {
   });
 }
 
-function abrirModalNfcInscritos() {
+async function alterarEdicaoAtivaPortariaAdmin(novaEdicao) {
+  const ed = parseInt(novaEdicao, 10) || 12;
+  try {
+    await window.LigaDB.definirEdicaoAtivaPortaria(ed);
+    const info = window.LigaDB?.obterInfoEdicao ? window.LigaDB.obterInfoEdicao(ed) : { num: ed, titulo: `${ed}° Café` };
+    
+    if (typeof mostrarToast === 'function') {
+      mostrarToast(`Portaria NFC agora está ativa para o ${info.titulo}!`);
+    } else {
+      alert(`A portaria e o link central das etiquetas NFC agora estão ativas para o ${info.titulo}!`);
+    }
+
+    // Se o modal estiver aberto, atualiza a lista
+    const modal = document.getElementById('modalNfcInscritos');
+    if (modal && !modal.classList.contains('hidden')) {
+      abrirModalNfcInscritos();
+    }
+  } catch (err) {
+    console.error('Erro ao alterar edição da portaria:', err);
+    alert('Erro ao atualizar edição ativa: ' + err.message);
+  }
+}
+
+async function abrirModalNfcInscritos() {
   const modal = document.getElementById('modalNfcInscritos');
   if (!modal) return;
 
-  // Filtrar apenas inscritos do 12° Café
+  if (window.LigaDB?.obterEdicaoAtivaPortaria) {
+    nfcEdicaoAtivaModal = await window.LigaDB.obterEdicaoAtivaPortaria();
+  }
+
+  const prefixo = `CC${nfcEdicaoAtivaModal}-`;
+
+  // Filtrar apenas inscritos da edição ativa da portaria
   const todos = Array.isArray(inscricoesCache) ? inscricoesCache : [];
   nfcInscritosFiltradosCache = todos.filter(aluno => {
     const p = (aluno.protocolo || '').toUpperCase();
     const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
-    return p.startsWith('CC12-') || ed === 12;
+    return p.startsWith(prefixo) || ed === nfcEdicaoAtivaModal;
   });
 
   const busca = document.getElementById('buscaModalNfc');
   if (busca) busca.value = '';
 
-  renderizarModalNfcInscritos(nfcInscritosFiltradosCache);
+  renderizarModalNfcInscritos(nfcInscritosFiltradosCache, nfcEdicaoAtivaModal);
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -2382,24 +2419,24 @@ function filtrarModalNfcInscritos() {
     return nome.includes(termo) || proto.includes(termo) || email.includes(termo);
   });
 
-  renderizarModalNfcInscritos(filtrados);
+  renderizarModalNfcInscritos(filtrados, nfcEdicaoAtivaModal);
 }
 
-function renderizarModalNfcInscritos(lista) {
+function renderizarModalNfcInscritos(lista, edicao = 12) {
   const container = document.getElementById('listaInscritosNfcContainer');
   const badge = document.getElementById('badgeTotalNfcModal');
   if (!container) return;
 
   if (badge) {
-    badge.textContent = `${lista.length} aluno(s) do 12° Café`;
+    badge.textContent = `${lista.length} aluno(s) do ${edicao}° Café`;
   }
 
   if (lista.length === 0) {
     container.innerHTML = `
       <div class="py-12 text-center text-stone-400">
         <i data-lucide="users" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-        <p class="text-xs font-semibold">Nenhum inscrito encontrado para o 12° Café.</p>
-        <p class="text-[11px] text-stone-400 mt-1">Conforme novas inscrições chegarem, elas aparecerão aqui automaticamente.</p>
+        <p class="text-xs font-semibold">Nenhum inscrito encontrado para o ${edicao}° Café com Ciência.</p>
+        <p class="text-[11px] text-stone-400 mt-1">Conforme novas inscrições chegarem nesta edição, elas aparecerão aqui automaticamente.</p>
       </div>
     `;
     if (window.lucide) window.lucide.createIcons();
@@ -2409,7 +2446,7 @@ function renderizarModalNfcInscritos(lista) {
   const baseUrl = 'https://gabrielavelar1.github.io/sitetestecafecomciencia10/checkin.html';
 
   container.innerHTML = lista.map((aluno, idx) => {
-    const proto = aluno.protocolo || 'CC12-SEM-PROTO';
+    const proto = aluno.protocolo || `CC${edicao}-SEM-PROTO`;
     const linkAluno = `${baseUrl}?p=${encodeURIComponent(proto)}`;
     const statusPresenca = aluno.presenca_confirmada 
       ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Presente</span>' 
@@ -2474,7 +2511,10 @@ function copiarLinkNfcIndividual(url, btnId) {
 
 // Exportações NFC
 window.copiarLinkNfcGeral = copiarLinkNfcGeral;
+window.alterarEdicaoAtivaPortariaAdmin = alterarEdicaoAtivaPortariaAdmin;
 window.abrirModalNfcInscritos = abrirModalNfcInscritos;
 window.fecharModalNfcInscritos = fecharModalNfcInscritos;
+window.filtrarModalNfcInscritos = filtrarModalNfcInscritos;
+window.copiarLinkNfcIndividual = copiarLinkNfcIndividual;
 window.filtrarModalNfcInscritos = filtrarModalNfcInscritos;
 window.copiarLinkNfcIndividual = copiarLinkNfcIndividual;
