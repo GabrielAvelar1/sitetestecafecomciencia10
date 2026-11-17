@@ -560,7 +560,7 @@
 
   <!-- Scripts da Aplicação -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=13"></script>
+  <script src="js/=14"></script>
   <script>
     if (window.lucide) window.lucide.createIcons();
 
@@ -677,38 +677,46 @@
                         ? window.LigaDB.obterLinkDeclaracaoPdf(itemProto)
                         : null;
 
+                      let botoes = '';
+
                       if (isItemComPdf && pdfLink) {
-                        return `
+                        botoes += `
                           <a 
                             href="${pdfLink}" 
                             target="_blank"
-                            class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                            download
+                            class="flex-1 min-w-[200px] py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                            title="Baixar sua declaração oficial de participação em PDF"
                           >
                             <i data-lucide="file-check" class="w-3.5 h-3.5"></i>
-                            <span>Ver / Baixar Declaração (PDF Oficial)</span>
+                            <span>Baixar Declaração (PDF Oficial)</span>
                           </a>
                         `;
                       }
 
-                      return `
+                      botoes += `
                         <a 
                           href="${edNum === 11 ? '11cafe.html' : (edNum === 12 ? '12cafe.html' : 'index.html')}?consultar=${item.protocolo}"
-                          class="flex-1 py-2.5 px-3 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
-                          title="Abrir credencial oficial com QR Code"
+                          class="${pdfLink ? 'px-3.5' : 'flex-1'} py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
+                          title="Abrir credencial oficial com QR Code e detalhes da inscrição"
                         >
                           <i data-lucide="qr-code" class="w-3.5 h-3.5 text-amber-300"></i>
-                          <span>Ver Credencial & QR Code</span>
+                          <span>Ver Credencial</span>
                         </a>
                       `;
-                    })()}
 
-                    <a 
-                      href="${edNum === 12 ? '12cafe.html' : (edNum === 11 ? '11cafe.html' : 'index.html')}" 
-                      class="py-2.5 px-3 bg-white border border-stone-300 hover:bg-stone-100 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1"
-                    >
-                      <span>Página da Palestra</span>
-                      <i data-lucide="external-link" class="w-3.5 h-3.5 text-stone-400"></i>
-                    </a>
+                      botoes += `
+                        <a 
+                          href="${edNum === 12 ? '12cafe.html' : (edNum === 11 ? '11cafe.html' : 'index.html')}" 
+                          class="py-2.5 px-3 bg-white border border-stone-300 hover:bg-stone-100 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1"
+                        >
+                          <span>Palestra</span>
+                          <i data-lucide="external-link" class="w-3.5 h-3.5 text-stone-400"></i>
+                        </a>
+                      `;
+
+                      return botoes;
+                    })()}
                   </div>
                 </div>
               `;

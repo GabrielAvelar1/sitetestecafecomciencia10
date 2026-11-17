@@ -787,24 +787,48 @@ function exibirCredencialSucesso(aluno) {
 
       <!-- Ações: Imprimir / Certificado / Sair -->
       <div class="space-y-2 pt-2">
-        ${aluno.presenca_confirmada ? (
-          (window.LigaDB?.estaoCertificadosLiberados && window.LigaDB.estaoCertificadosLiberados()) ? `
-            <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-              <i data-lucide="award" class="w-5 h-5"></i>
-              <span>Visualizar / Baixar Certificado Oficial (4h)</span>
-            </a>
-          ` : `
-            <div class="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1 text-left">
-              <div class="flex items-center gap-1.5 font-bold text-amber-900">
-                <i data-lucide="clock" class="w-4 h-4 text-amber-600 shrink-0"></i>
-                <span>Presença Confirmada · Certificado em Assinatura</span>
+        ${(() => {
+          const protoUpper = (aluno.protocolo || '').toUpperCase();
+          const pdfLink = window.LigaDB?.obterLinkDeclaracaoPdf ? window.LigaDB.obterLinkDeclaracaoPdf(protoUpper) : null;
+          
+          if (pdfLink) {
+            return `
+              <a href="${pdfLink}" target="_blank" download class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                <i data-lucide="file-check" class="w-5 h-5"></i>
+                <span>Visualizar / Baixar Declaração Oficial (PDF)</span>
+              </a>
+              <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-300 transition flex items-center justify-center gap-2">
+                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                <span>Abrir Página de Certificado & Autenticidade</span>
+              </a>
+            `;
+          }
+
+          if (aluno.presenca_confirmada) {
+            const liberado = (window.LigaDB?.estaoCertificadosLiberados && window.LigaDB.estaoCertificadosLiberados()) || aluno.certificado_emitido;
+            if (liberado) {
+              return `
+                <a href="certificados.html?protocolo=${aluno.protocolo}" target="_blank" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                  <i data-lucide="award" class="w-5 h-5"></i>
+                  <span>Visualizar / Baixar Certificado Oficial</span>
+                </a>
+              `;
+            }
+            return `
+              <div class="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-300 text-xs text-amber-950 space-y-1 text-left">
+                <div class="flex items-center gap-1.5 font-bold text-amber-900">
+                  <i data-lucide="clock" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                  <span>Presença Confirmada · Certificado em Assinatura</span>
+                </div>
+                <p class="text-[11px] leading-relaxed text-amber-850">
+                  Sua presença foi confirmada pela organização! Os certificados oficiais estão em fase de coleta de assinaturas da coordenação e serão liberados em breve aqui no site.
+                </p>
               </div>
-              <p class="text-[11px] leading-relaxed text-amber-850">
-                Sua presença foi confirmada pela organização! Os certificados oficiais de 4 horas estão em fase de coleta de assinaturas da coordenação e serão liberados em breve aqui no site.
-              </p>
-            </div>
-          `
-        ) : ''}
+            `;
+          }
+
+          return '';
+        })()}
 
         <button onclick="window.print()" class="w-full py-3 px-4 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-sm">
           <i data-lucide="printer" class="w-4 h-4"></i>
@@ -1441,21 +1465,42 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
             <span>Ver Comprovante & QR Code</span>
           </button>
 
-          ${certificadoLiberado ? `
-            <a 
-              href="certificados.html?protocolo=${inscricao.protocolo}" 
-              target="_blank" 
-              class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
-            >
-              <i data-lucide="award" class="w-4 h-4"></i>
-              <span>Baixar Certificado (4h)</span>
-            </a>
-          ` : `
-            <span class="py-2 px-3 bg-stone-100 text-stone-400 font-medium text-[11px] rounded-xl flex items-center justify-center gap-1 cursor-not-allowed" title="Certificado liberado após o evento e confirmação de presença">
-              <i data-lucide="award" class="w-3.5 h-3.5"></i>
-              <span>Certificado 4h (Pós-evento)</span>
-            </span>
-          `}
+          ${(() => {
+            const protoUpper = (inscricao.protocolo || '').toUpperCase();
+            const pdfUrl = window.LigaDB?.obterLinkDeclaracaoPdf ? window.LigaDB.obterLinkDeclaracaoPdf(protoUpper) : null;
+            if (pdfUrl) {
+              return `
+                <a 
+                  href="${pdfUrl}" 
+                  target="_blank" 
+                  download
+                  class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+                  title="Baixar a declaração oficial individual de participação em PDF"
+                >
+                  <i data-lucide="file-check" class="w-4 h-4"></i>
+                  <span>Baixar Declaração (PDF)</span>
+                </a>
+              `;
+            }
+            if (certificadoLiberado) {
+              return `
+                <a 
+                  href="certificados.html?protocolo=${inscricao.protocolo}" 
+                  target="_blank" 
+                  class="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5"
+                >
+                  <i data-lucide="award" class="w-4 h-4"></i>
+                  <span>Baixar Certificado</span>
+                </a>
+              `;
+            }
+            return `
+              <span class="py-2 px-3 bg-stone-100 text-stone-400 font-medium text-[11px] rounded-xl flex items-center justify-center gap-1 cursor-not-allowed" title="Certificado liberado após o evento e confirmação de presença">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i>
+                <span>Certificado (Pós-evento)</span>
+              </span>
+            `;
+          })()}
         </div>
 
       </div>

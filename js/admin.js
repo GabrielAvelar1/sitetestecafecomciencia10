@@ -338,13 +338,25 @@ function obterInscricoesFiltradasPorEdicao(lista = inscricoesCache) {
   if (edicaoFiltroAdmin === '12') {
     return lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC12-')) || i.edicao === 12);
   } else if (edicaoFiltroAdmin === '11') {
-    return lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    const list11 = lista.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    if (list11.length === 0 && window.LigaDB?.HISTORICO_INSCRICOES) {
+      return window.LigaDB.HISTORICO_INSCRICOES.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    }
+    return list11;
   } else if (edicaoFiltroAdmin === '10') {
-    return lista.filter(i => {
+    const list10 = lista.filter(i => {
       const proto = (i.protocolo || '').toUpperCase();
       const ed = parseInt(i.edicao, 10);
       return proto.startsWith('CC10-') || ed === 10 || (!proto.startsWith('CC11-') && !proto.startsWith('CC12-') && ed !== 11 && ed !== 12);
     });
+    if (list10.length === 0 && window.LigaDB?.HISTORICO_INSCRICOES) {
+      return window.LigaDB.HISTORICO_INSCRICOES.filter(i => {
+        const proto = (i.protocolo || '').toUpperCase();
+        const ed = parseInt(i.edicao, 10);
+        return proto.startsWith('CC10-') || ed === 10 || (!proto.startsWith('CC11-') && !proto.startsWith('CC12-') && ed !== 11 && ed !== 12);
+      });
+    }
+    return list10;
   }
   return lista;
 }
@@ -361,18 +373,25 @@ function atualizarMetricasPorEdicao() {
   const badgeTodas = document.getElementById('badgeContagemEdicaoTodas');
 
   if (inscricoesCache) {
-    const lista10 = inscricoesCache.filter(i => {
+    let lista10 = inscricoesCache.filter(i => {
       const proto = (i.protocolo || '').toUpperCase();
       const ed = parseInt(i.edicao, 10);
       return proto.startsWith('CC10-') || ed === 10 || (!proto.startsWith('CC11-') && !proto.startsWith('CC12-') && ed !== 11 && ed !== 12);
     });
-    const lista11 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    let lista11 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
     const lista12 = inscricoesCache.filter(i => (i.protocolo && i.protocolo.startsWith('CC12-')) || i.edicao === 12);
+
+    if (lista10.length === 0 && window.LigaDB?.HISTORICO_INSCRICOES) {
+      lista10 = window.LigaDB.HISTORICO_INSCRICOES.filter(i => (i.protocolo && i.protocolo.startsWith('CC10-')) || i.edicao === 10);
+    }
+    if (lista11.length === 0 && window.LigaDB?.HISTORICO_INSCRICOES) {
+      lista11 = window.LigaDB.HISTORICO_INSCRICOES.filter(i => (i.protocolo && i.protocolo.startsWith('CC11-')) || i.edicao === 11);
+    }
 
     if (badge10) badge10.textContent = `${lista10.length}`;
     if (badge11) badge11.textContent = `${lista11.length}`;
     if (badge12) badge12.textContent = `${lista12.length}`;
-    if (badgeTodas) badgeTodas.textContent = `${inscricoesCache.length}`;
+    if (badgeTodas) badgeTodas.textContent = `${lista12.length + lista11.length + lista10.length}`;
 
     const listaAtual = obterInscricoesFiltradasPorEdicao(inscricoesCache);
     const qtdInscritos = listaAtual.length;
