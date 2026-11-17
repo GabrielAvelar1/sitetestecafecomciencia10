@@ -482,6 +482,7 @@ function renderizarLinhasTabelaAdmin(lista) {
     const edNum = parseInt(item.edicao, 10);
     const isEdicao12 = protoUpper.startsWith('CC12-') || edNum === 12;
     const isEdicao11 = protoUpper.startsWith('CC11-') || edNum === 11;
+    const isEdicao10 = !isEdicao12 && !isEdicao11;
     const edicaoBadge = isEdicao12
       ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="12° Café com Ciência (Dra. Thaissa Calab · 18/11)">12° Café</span>`
       : (isEdicao11
