@@ -2322,3 +2322,159 @@ window.gerarPreviaCertificados = gerarPreviaCertificados;
 window.imprimirCertificadosGerados = imprimirCertificadosGerados;
 window.enviarCertificadosEmailAdmin = enviarCertificadosEmailAdmin;
 window.abrirEditorCertificadoParaAluno = abrirEditorCertificadoParaAluno;
+
+// ============================================================================
+// MÓDULO NFC & PORTARIA INTELIGENTE (CHECK-IN POR APROXIMAÇÃO)
+// ============================================================================
+let nfcInscritosFiltradosCache = [];
+
+function copiarLinkNfcGeral() {
+  const input = document.getElementById('inputUrlNfcGeral');
+  const txt = input ? input.value : 'https://gabrielavelar1.github.io/sitetestecafecomciencia10/checkin.html';
+  navigator.clipboard.writeText(txt).then(() => {
+    const btnTxt = document.getElementById('btnCopyNfcGeralTxt');
+    if (btnTxt) {
+      const orig = btnTxt.textContent;
+      btnTxt.textContent = '✓ Copiado!';
+      setTimeout(() => { btnTxt.textContent = orig; }, 2000);
+    }
+  }).catch(err => {
+    prompt('Copie o link abaixo para gravar na sua tag NFC:', txt);
+  });
+}
+
+function abrirModalNfcInscritos() {
+  const modal = document.getElementById('modalNfcInscritos');
+  if (!modal) return;
+
+  // Filtrar apenas inscritos do 12° Café
+  const todos = Array.isArray(inscricoesCache) ? inscricoesCache : [];
+  nfcInscritosFiltradosCache = todos.filter(aluno => {
+    const p = (aluno.protocolo || '').toUpperCase();
+    const ed = aluno.edicao ? parseInt(aluno.edicao, 10) : 0;
+    return p.startsWith('CC12-') || ed === 12;
+  });
+
+  const busca = document.getElementById('buscaModalNfc');
+  if (busca) busca.value = '';
+
+  renderizarModalNfcInscritos(nfcInscritosFiltradosCache);
+
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function fecharModalNfcInscritos() {
+  const modal = document.getElementById('modalNfcInscritos');
+  if (modal) modal.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function filtrarModalNfcInscritos() {
+  const input = document.getElementById('buscaModalNfc');
+  const termo = input ? input.value.trim().toLowerCase() : '';
+
+  const filtrados = nfcInscritosFiltradosCache.filter(aluno => {
+    const nome = (aluno.nome_completo || '').toLowerCase();
+    const proto = (aluno.protocolo || '').toLowerCase();
+    const email = (aluno.email || '').toLowerCase();
+    return nome.includes(termo) || proto.includes(termo) || email.includes(termo);
+  });
+
+  renderizarModalNfcInscritos(filtrados);
+}
+
+function renderizarModalNfcInscritos(lista) {
+  const container = document.getElementById('listaInscritosNfcContainer');
+  const badge = document.getElementById('badgeTotalNfcModal');
+  if (!container) return;
+
+  if (badge) {
+    badge.textContent = `${lista.length} aluno(s) do 12° Café`;
+  }
+
+  if (lista.length === 0) {
+    container.innerHTML = `
+      <div class="py-12 text-center text-stone-400">
+        <i data-lucide="users" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+        <p class="text-xs font-semibold">Nenhum inscrito encontrado para o 12° Café.</p>
+        <p class="text-[11px] text-stone-400 mt-1">Conforme novas inscrições chegarem, elas aparecerão aqui automaticamente.</p>
+      </div>
+    `;
+    if (window.lucide) window.lucide.createIcons();
+    return;
+  }
+
+  const baseUrl = 'https://gabrielavelar1.github.io/sitetestecafecomciencia10/checkin.html';
+
+  container.innerHTML = lista.map((aluno, idx) => {
+    const proto = aluno.protocolo || 'CC12-SEM-PROTO';
+    const linkAluno = `${baseUrl}?p=${encodeURIComponent(proto)}`;
+    const statusPresenca = aluno.presenca_confirmada 
+      ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">Presente</span>' 
+      : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-100 text-stone-600">Pendente</span>';
+
+    return `
+      <div class="p-3 bg-stone-50 hover:bg-stone-100/80 rounded-2xl border border-stone-200 flex items-center justify-between gap-3 transition">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <h5 class="text-xs font-bold text-coffee-950 truncate">${aluno.nome_completo || 'Sem Nome'}</h5>
+            ${statusPresenca}
+          </div>
+          <div class="flex items-center gap-2 text-[11px] text-stone-500 font-mono mt-0.5">
+            <span>${proto}</span>
+            <span>·</span>
+            <span class="truncate max-w-[200px] text-stone-400 font-sans">${aluno.email || ''}</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button 
+            id="btnCopyNfc_${idx}"
+            onclick="copiarLinkNfcIndividual('${linkAluno}', 'btnCopyNfc_${idx}')"
+            class="px-2.5 py-1.5 bg-white border border-stone-300 hover:border-amber-500 hover:bg-amber-50 text-coffee-900 font-bold text-[11px] rounded-lg shadow-2xs transition flex items-center gap-1"
+            title="Copiar link deste aluno para gravar na tag NFC"
+          >
+            <i data-lucide="copy" class="w-3 h-3 text-amber-600"></i>
+            <span>Copiar Link</span>
+          </button>
+          <a 
+            href="${linkAluno}" 
+            target="_blank" 
+            class="p-1.5 text-stone-400 hover:text-coffee-900 rounded-lg hover:bg-stone-200 transition"
+            title="Abrir e testar check-in deste aluno"
+          >
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function copiarLinkNfcIndividual(url, btnId) {
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById(btnId);
+    if (btn) {
+      const origHtml = btn.innerHTML;
+      btn.innerHTML = '<span>✓ Copiado!</span>';
+      btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+      setTimeout(() => {
+        btn.innerHTML = origHtml;
+        btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+      }, 2000);
+    }
+  }).catch(err => {
+    prompt('Copie o link abaixo para gravar na etiqueta deste participante:', url);
+  });
+}
+
+// Exportações NFC
+window.copiarLinkNfcGeral = copiarLinkNfcGeral;
+window.abrirModalNfcInscritos = abrirModalNfcInscritos;
+window.fecharModalNfcInscritos = fecharModalNfcInscritos;
+window.filtrarModalNfcInscritos = filtrarModalNfcInscritos;
+window.copiarLinkNfcIndividual = copiarLinkNfcIndividual;

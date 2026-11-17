@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Check-in NFC Portaria | Café com Ciência</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coffee: {
+              50: '#FBF8F5',
+              100: '#F6F0E8',
+              200: '#EADCC9',
+              300: '#D6C0A5',
+              400: '#C69255',
+              500: '#A46F35',
+              600: '#784C28',
+              700: '#5C3A21',
+              800: '#3D2214',
+              900: '#26160F',
+              950: '#1A0E0A',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    @keyframes pulse-subtle {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.03); opacity: 0.92; }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-[#FAF7F2] text-stone-800 antialiased min-h-screen flex flex-col justify-between selection:bg-coffee-400 selection:text-white p-4 sm:p-6">
+
+  <!-- Topo: Identificação do Evento -->
+  <header class="max-w-md w-full mx-auto text-center pt-2 pb-4">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-coffee-100 border border-coffee-200 text-coffee-900 text-xs font-bold mb-3 shadow-2xs">
+      <i data-lucide="nfc" class="w-4 h-4 text-amber-600"></i>
+      <span>Portaria Inteligente · Check-in NFC</span>
+    </div>
+    
+    <div class="flex items-center justify-center gap-2.5">
+      <div class="w-10 h-10 rounded-xl bg-white p-1 border border-coffee-200 shadow-xs shrink-0">
+        <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
+      </div>
+      <div class="text-left">
+        <h1 class="text-base font-extrabold text-coffee-950 leading-tight">Café com Ciência</h1>
+        <p class="text-xs text-stone-500 font-medium">12ª Edição · Reabilitação Oral</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Card Central de Ação -->
+  <main class="max-w-md w-full mx-auto my-auto">
+    <div id="checkinCard" class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-coffee-200 shadow-xl relative overflow-hidden text-center transition-all duration-300">
+      
+      <!-- Estado 1: Processando Automático -->
+      <div id="stateLoading" class="py-10 space-y-4">
+        <div class="w-20 h-20 rounded-full bg-coffee-50 border-2 border-coffee-200 flex items-center justify-center mx-auto text-coffee-700 animate-pulse-subtle">
+          <i data-lucide="loader-2" class="w-10 h-10 animate-spin text-coffee-600"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-coffee-950">Validando Presença...</h2>
+          <p class="text-xs text-stone-500 mt-1">Conectando ao banco de dados oficial da Liga</p>
+        </div>
+      </div>
+
+      <!-- Estado 2: Presença Confirmada com Sucesso -->
+      <div id="stateSuccess" class="hidden py-4 space-y-4">
+        <div class="w-20 h-20 rounded-full bg-emerald-100 border-4 border-emerald-300 flex items-center justify-center mx-auto text-emerald-600 shadow-md">
+          <i data-lucide="check" class="w-10 h-10 stroke-[3]"></i>
+        </div>
+
+        <div>
+          <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 inline-block mb-2">
+            ✓ Presença Confirmada!
+          </span>
+          <h2 id="successNomeAluno" class="text-2xl font-black text-coffee-950 leading-tight">
+            Nome do Participante
+          </h2>
+          <p id="successFaculdade" class="text-xs text-stone-500 font-medium mt-1">
+            Faculdade Arnaldo
+          </p>
+        </div>
+
+        <!-- Box de Detalhes -->
+        <div class="bg-stone-50 border border-stone-200 rounded-2xl p-4 text-xs text-left space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-stone-500 font-medium">Protocolo:</span>
+            <span id="successProtocolo" class="font-mono font-bold text-coffee-900 bg-coffee-100 px-2 py-0.5 rounded">CC12-000000</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-stone-500 font-medium">Horário:</span>
+            <span id="successHorario" class="font-bold text-stone-800">18/11/2026 às 15:58</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-stone-500 font-medium">Validação:</span>
+            <span class="inline-flex items-center gap-1 font-semibold text-emerald-700">
+              <i data-lucide="nfc" class="w-3.5 h-3.5"></i>
+              <span>Etiqueta NFC Portaria</span>
+            </span>
+          </div>
+          <div class="flex items-center justify-between border-t border-stone-200 pt-2 mt-2">
+            <span class="text-stone-500 font-medium">Certificado (4h):</span>
+            <span class="font-bold text-blue-700">Garantido</span>
+          </div>
+        </div>
+
+        <div class="pt-2 flex flex-col gap-2">
+          <a id="btnVerCredencial" href="portal.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+            <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+            <span>Acessar Meu Painel / Credencial</span>
+          </a>
+          <a href="12cafe.html" class="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 border border-stone-300">
+            <span>Página da Palestra (12° Café)</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-stone-400"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Estado 3: Presença Já Confirmada Anteriormente -->
+      <div id="stateAlready" class="hidden py-4 space-y-4">
+        <div class="w-20 h-20 rounded-full bg-amber-100 border-4 border-amber-300 flex items-center justify-center mx-auto text-amber-600 shadow-md">
+          <i data-lucide="info" class="w-10 h-10 stroke-[2.5]"></i>
+        </div>
+
+        <div>
+          <span class="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 inline-block mb-2">
+            Atenção: Já Registrado
+          </span>
+          <h2 id="alreadyNomeAluno" class="text-xl font-black text-coffee-950 leading-tight">
+            Nome do Participante
+          </h2>
+          <p class="text-xs text-stone-500 font-medium mt-1">
+            Sua presença neste evento já havia sido confirmada anteriormente na portaria.
+          </p>
+        </div>
+
+        <div class="p-3 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900">
+          <p id="alreadyMensagem">O check-in já consta como ativo no sistema da Liga.</p>
+        </div>
+
+        <div class="pt-2 flex flex-col gap-2">
+          <a href="12cafe.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
+            <span>Acessar Palestra (12° Café)</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Estado 4: Formulário Manual (Quando a etiqueta é genérica e o aluno não está logado) -->
+      <div id="stateManual" class="hidden py-2 space-y-4 text-left">
+        <div class="text-center">
+          <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 border border-amber-300 flex items-center justify-center mx-auto mb-2">
+            <i data-lucide="nfc" class="w-7 h-7"></i>
+          </div>
+          <h2 class="text-lg font-black text-coffee-950">Identifique sua Inscrição</h2>
+          <p class="text-xs text-stone-500 mt-0.5">Aproxime-se da portaria e confirme seus dados para liberar sua entrada:</p>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
+              Protocolo ou E-mail Cadastrado:
+            </label>
+            <input 
+              type="text" 
+              id="inputManualCheckin" 
+              placeholder="Ex: CC12-123456 ou seuemail@exemplo.com"
+              class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-600 focus:ring-2 focus:ring-coffee-200 outline-none transition"
+              onkeydown="if(event.key === 'Enter') submeterCheckinManual()"
+            />
+          </div>
+
+          <div id="manualErro" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 font-medium"></div>
+
+          <button 
+            id="btnConfirmarManual"
+            type="button" 
+            onclick="submeterCheckinManual()"
+            class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-bold text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span>Confirmar Minha Presença</span>
+          </button>
+        </div>
+
+        <p class="text-[11px] text-stone-400 text-center pt-2">
+          Dica: Seu protocolo está no e-mail de confirmação enviado pela Liga.
+        </p>
+      </div>
+
+      <!-- Estado 5: Erro Inesperado -->
+      <div id="stateError" class="hidden py-6 space-y-4 text-center">
+        <div class="w-16 h-16 rounded-full bg-red-100 border-2 border-red-300 text-red-600 flex items-center justify-center mx-auto">
+          <i data-lucide="alert-circle" class="w-8 h-8"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-red-950">Não foi possível validar</h2>
+          <p id="errorMensagem" class="text-xs text-stone-600 mt-1">Inscrição não encontrada ou link inválido.</p>
+        </div>
+        <button onclick="mostrarFormularioManual()" class="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold text-xs rounded-xl border border-stone-300 transition">
+          Tentar com Protocolo ou E-mail
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="max-w-md w-full mx-auto text-center py-4 text-xs text-stone-400">
+    <p>© 2026 Liga Acadêmica de Odontologia · UniArnaldo</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js?v=12"></script>
+
+  <script>
+    if (window.lucide) window.lucide.createIcons();
+
+    function tocarSomSucesso() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.35);
+      } catch (e) {}
+    }
+
+    function dispararConfetes() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 60,
+          spread: 60,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    function vibrarAparelho() {
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate([100, 50, 150]); } catch (e) {}
+      }
+    }
+
+    function ocultarTodosEstados() {
+      document.getElementById('stateLoading').classList.add('hidden');
+      document.getElementById('stateSuccess').classList.add('hidden');
+      document.getElementById('stateAlready').classList.add('hidden');
+      document.getElementById('stateManual').classList.add('hidden');
+      document.getElementById('stateError').classList.add('hidden');
+    }
+
+    function mostrarFormularioManual(prefill = '') {
+      ocultarTodosEstados();
+      const st = document.getElementById('stateManual');
+      const input = document.getElementById('inputManualCheckin');
+      const err = document.getElementById('manualErro');
+      if (err) err.classList.add('hidden');
+      if (input && prefill) input.value = prefill;
+      if (st) st.classList.remove('hidden');
+      if (input) setTimeout(() => input.focus(), 150);
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    async function processarCheckin(codigo) {
+      if (!codigo) {
+        mostrarFormularioManual();
+        return;
+      }
+
+      ocultarTodosEstados();
+      document.getElementById('stateLoading').classList.remove('hidden');
+      if (window.lucide) window.lucide.createIcons();
+
+      try {
+        const res = await window.LigaDB.validarPresencaPorQRCode(codigo, 'Tag NFC Portaria');
+        const aluno = res.aluno;
+
+        if (res.jaConfirmado) {
+          ocultarTodosEstados();
+          document.getElementById('alreadyNomeAluno').textContent = aluno?.nome_completo || 'Participante';
+          document.getElementById('alreadyMensagem').textContent = res.mensagem || 'Presença já validada anteriormente.';
+          document.getElementById('stateAlready').classList.remove('hidden');
+          if (window.lucide) window.lucide.createIcons();
+          return;
+        }
+
+        // Sucesso na confirmação
+        tocarSomSucesso();
+        vibrarAparelho();
+        dispararConfetes();
+
+        ocultarTodosEstados();
+        document.getElementById('successNomeAluno').textContent = aluno?.nome_completo || 'Participante';
+        document.getElementById('successProtocolo').textContent = aluno?.protocolo || codigo;
+        document.getElementById('successFaculdade').textContent = window.LigaDB?.extrairInstituicaoAluno 
+          ? window.LigaDB.extrairInstituicaoAluno(aluno) 
+          : (aluno?.instituicao || 'Faculdade Arnaldo');
+        
+        const dataH = aluno?.presenca_horario ? new Date(aluno.presenca_horario) : new Date();
+        document.getElementById('successHorario').textContent = dataH.toLocaleString('pt-BR');
+
+        const btnCred = document.getElementById('btnVerCredencial');
+        if (btnCred && aluno?.protocolo) {
+          btnCred.href = `12cafe.html?consultar=${aluno.protocolo}`;
+        }
+
+        document.getElementById('stateSuccess').classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+
+      } catch (err) {
+        console.warn('Erro no checkin NFC:', err);
+        ocultarTodosEstados();
+        document.getElementById('errorMensagem').textContent = err.message || 'Código não reconhecido.';
+        document.getElementById('stateError').classList.remove('hidden');
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+
+    async function submeterCheckinManual() {
+      const input = document.getElementById('inputManualCheckin');
+      const errDiv = document.getElementById('manualErro');
+      const btn = document.getElementById('btnConfirmarManual');
+      const termo = input ? input.value.trim() : '';
+
+      if (!termo) {
+        if (errDiv) {
+          errDiv.textContent = 'Por favor, digite seu protocolo ou e-mail.';
+          errDiv.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (errDiv) errDiv.classList.add('hidden');
+      if (btn) btn.disabled = true;
+
+      try {
+        await processarCheckin(termo);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    // Inicialização ao Carregar a Página
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      
+      // 1. Tenta obter o protocolo pela URL (ex: ?p=CC12-123456 ou ?protocolo=CC12-123456 ou ?codigo=...)
+      const paramProto = urlParams.get('p') || urlParams.get('protocolo') || urlParams.get('codigo') || urlParams.get('checkin');
+      if (paramProto) {
+        await processarCheckin(paramProto);
+        return;
+      }
+
+      // 2. Se não veio na URL, verifica se o aluno está conectado ou com sessão salva no celular
+      const usuarioLogado = window.LigaDB?.getUsuarioLogado ? window.LigaDB.getUsuarioLogado() : null;
+      if (usuarioLogado && (usuarioLogado.protocolo || usuarioLogado.email)) {
+        // Se a sessão for de organizador, abre formulário manual para validar aluno
+        if (usuarioLogado.role === 'organizador') {
+          mostrarFormularioManual();
+          return;
+        }
+
+        const proto = usuarioLogado.protocolo || usuarioLogado.email;
+        await processarCheckin(proto);
+        return;
+      }
+
+      // 3. Fallback: Se for acesso sem parâmetros e sem login, abre o formulário manual ágil
+      mostrarFormularioManual();
+    });
+  </script>
+</body>
+</html>
