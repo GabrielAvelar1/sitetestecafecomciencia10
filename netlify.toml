@@ -8,3 +8,19 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
+
+# Redirecionamentos amigáveis para Check-in NFC da Portaria
+[[redirects]]
+  from = "/checkin"
+  to = "/checkin.html"
+  status = 200
+
+[[redirects]]
+  from = "/nfc"
+  to = "/checkin.html"
+  status = 200
+
+[[redirects]]
+  from = "/portaria"
+  to = "/checkin.html"
+  status = 200

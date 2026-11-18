@@ -133,6 +133,10 @@
         </div>
 
         <div class="pt-2 flex flex-col gap-2">
+          <button onclick="mostrarFormularioManual()" class="w-full py-2.5 px-4 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-bold text-xs rounded-xl border border-emerald-300 transition flex items-center justify-center gap-1.5 shadow-2xs">
+            <i data-lucide="user-check" class="w-4 h-4 text-emerald-700"></i>
+            <span>Validar Próximo Inscrito</span>
+          </button>
           <a id="btnVerCredencial" href="portal.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
             <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
             <span>Acessar Meu Painel / Credencial</span>
@@ -167,6 +171,10 @@
         </div>
 
         <div class="pt-2 flex flex-col gap-2">
+          <button onclick="mostrarFormularioManual()" class="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-300 transition flex items-center justify-center gap-1.5">
+            <i data-lucide="user-check" class="w-4 h-4 text-stone-600"></i>
+            <span>Validar Próximo Inscrito</span>
+          </button>
           <a id="btnLinkPalestraAlready" href="12cafe.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-1.5">
             <span>Acessar Palestra (12° Café)</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
@@ -187,12 +195,12 @@
         <div class="space-y-3 pt-2">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1">
-              Protocolo ou E-mail Cadastrado:
+              Nome, E-mail ou Protocolo Cadastrado:
             </label>
             <input 
               type="text" 
               id="inputManualCheckin" 
-              placeholder="Ex: CC12-123456 ou seuemail@exemplo.com"
+              placeholder="Ex: Seu Nome, seuemail@gmail.com ou CC12-123456"
               class="w-full px-4 py-3 text-sm rounded-xl border border-stone-300 focus:border-coffee-600 focus:ring-2 focus:ring-coffee-200 outline-none transition"
               onkeydown="if(event.key === 'Enter') submeterCheckinManual()"
             />
@@ -212,7 +220,7 @@
         </div>
 
         <p class="text-[11px] text-stone-400 text-center pt-2">
-          Dica: Seu protocolo está no e-mail de confirmação enviado pela Liga.
+          Dica: Você pode digitar seu nome completo, e-mail da inscrição ou código de protocolo.
         </p>
       </div>
 
@@ -395,7 +403,7 @@
 
       if (!termo) {
         if (errDiv) {
-          errDiv.textContent = 'Por favor, digite seu protocolo ou e-mail.';
+          errDiv.textContent = 'Por favor, digite seu nome, e-mail ou protocolo.';
           errDiv.classList.remove('hidden');
         }
         return;

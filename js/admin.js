@@ -2358,7 +2358,7 @@ let nfcEdicaoAtivaModal = 12;
 
 function copiarLinkNfcGeral() {
   const input = document.getElementById('inputUrlNfcGeral');
-  const txt = input ? input.value : 'https://gabrielavelar1.github.io/sitetestecafecomciencia10/checkin.html';
+  const txt = input ? input.value : 'https://cafecomciencia.netlify.app/checkin.html';
   navigator.clipboard.writeText(txt).then(() => {
     const btnTxt = document.getElementById('btnCopyNfcGeralTxt');
     if (btnTxt) {
@@ -2463,7 +2463,9 @@ function renderizarModalNfcInscritos(lista, edicao = 12) {
     return;
   }
 
-  const baseUrl = 'https://gabrielavelar1.github.io/sitetestecafecomciencia10/checkin.html';
+  const baseUrl = (typeof window !== 'undefined' && window.location?.origin?.includes('netlify.app'))
+    ? window.location.origin + '/checkin.html'
+    : 'https://cafecomciencia.netlify.app/checkin.html';
 
   container.innerHTML = lista.map((aluno, idx) => {
     const proto = aluno.protocolo || `CC${edicao}-SEM-PROTO`;

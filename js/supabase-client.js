@@ -1113,22 +1113,49 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
   const prefixoEsperado = `CC${numEdicaoEsperada}-`;
 
   // 3. Verificação de prefixo se for protocolo oficial CCxx-XXXXXX
+  let aluno = null;
   const matchOficial = protocolo.match(/CC(\d{2})-[A-Z0-9]+/i);
   if (matchOficial) {
     const edicaoDoCodigo = parseInt(matchOficial[1], 10);
     if (edicaoDoCodigo !== numEdicaoEsperada) {
-      throw new Error(`Este código pertence ao ${edicaoDoCodigo}° Café com Ciência. A portaria está recebendo os inscritos da ${numEdicaoEsperada}ª Edição.`);
+      // Se for protocolo de outra edição, tenta achar o email desse aluno para ver se ele está inscrito na edição esperada
+      let emailAluno = null;
+      if (typeof HISTORICO_INSCRICOES !== 'undefined') {
+        const hist = HISTORICO_INSCRICOES.find(i => i.protocolo && i.protocolo.toUpperCase() === protocolo.toUpperCase());
+        if (hist && hist.email) emailAluno = hist.email.trim().toLowerCase();
+      }
+
+      const sbTemp = getSupabase();
+      if (sbTemp && emailAluno) {
+        const { data: emEsperada } = await sbTemp
+          .from(SUPABASE_CONFIG.tableName)
+          .select('*')
+          .neq('role', 'organizador')
+          .ilike('email', emailAluno)
+          .ilike('protocolo', `${prefixoEsperado}%`)
+          .limit(1);
+        if (emEsperada && emEsperada.length > 0) {
+          aluno = emEsperada[0];
+          protocolo = aluno.protocolo;
+        }
+      }
+
+      if (!aluno) {
+        throw new Error(`Este código pertence ao ${edicaoDoCodigo}° Café com Ciência. A portaria está recebendo os inscritos da ${numEdicaoEsperada}ª Edição.`);
+      }
+    } else {
+      protocolo = matchOficial[0].toUpperCase();
     }
-    protocolo = matchOficial[0].toUpperCase();
   }
 
   const sb = getSupabase();
-  let aluno = null;
 
   if (sb) {
     let listaCandidatos = [];
 
-    if (matchOficial) {
+    if (aluno) {
+      listaCandidatos = [aluno];
+    } else if (matchOficial) {
       const { data, error } = await sb
         .from(SUPABASE_CONFIG.tableName)
         .select('*')
@@ -1144,7 +1171,7 @@ async function validarPresencaPorQRCode(codigo, validadorNome = 'Portaria Oficia
         q = q.ilike('email', termoLimpo);
       } else {
         const digitos = termoLimpo.replace(/\D/g, '');
-        q = q.or(`protocolo.ilike.%${termoLimpo}%,email.ilike.%${termoLimpo}%,telefone.ilike.%${digitos || termoLimpo}%`);
+        q = q.or(`protocolo.ilike.%${termoLimpo}%,email.ilike.%${termoLimpo}%,nome_completo.ilike.%${termoLimpo}%,telefone.ilike.%${digitos || termoLimpo}%`);
       }
       const { data, error } = await q.order('created_at', { ascending: false });
       if (!error && data && data.length > 0) {
