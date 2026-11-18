@@ -873,7 +873,7 @@ const MODELOS_LEMBRETES = {
   },
   'certificado': {
     titulo: 'Aviso: Seu Certificado Oficial está disponível!',
-    texto: `Parabéns pela participação, [NOME]!\n\nSeu Certificado Oficial de 4 horas do *10° Café com Ciência* já foi autenticado e está liberado para emissão e download:\n\n🎓 Acesse e baixe seu certificado aqui:\n[LINK_CERTIFICADO]\n\nMuito obrigado por fazer parte da 10ª edição com a gente!`
+    texto: `Parabéns pela participação, [NOME]!\n\nSeu Certificado Oficial de 2 horas do *10° Café com Ciência* já foi autenticado e está liberado para emissão e download:\n\n🎓 Acesse e baixe seu certificado aqui:\n[LINK_CERTIFICADO]\n\nMuito obrigado por fazer parte da 10ª edição com a gente!`
   }
 };
 
@@ -1459,7 +1459,7 @@ async function enviarEmailIndividualAdmin(id) {
     `1: Credencial Oficial com QR Code (Confirmação de Inscrição)\n` +
     `2: Confirmação de Presença (Validação da Portaria)\n` +
     `3: Lembrete do Evento (Conforme modelo selecionado)\n` +
-    `4: Certificado Oficial de Participação (4 Horas)\n` +
+    `4: Certificado Oficial de Participação (2 Horas)\n` +
     `5: Certificado de Organizador (6 Horas - Membro da Liga)\n` +
     `6: Ambos os Certificados (Participação + Organizador - 2 Certificados)\n` +
     `7: Comunicado de Alteração de Data (18/11)\n\n` +
@@ -1694,14 +1694,16 @@ const EDICOES_CERTIFICADOS = {
     tema: '"11º CAFÉ COM CIÊNCIA : 10 anos do projeto NAM em Belo Horizonte"',
     palestrante: 'Prof. Dr. Henrique Pretti',
     data: '2026-11-13',
-    prefixo: 'CC11'
+    prefixo: 'CC11',
+    horasPart: 2
   },
   '12': {
     titulo: '12° Café com Ciência',
     tema: '"12º CAFÉ COM CIÊNCIA : Diagnóstico e Planejamento na Reabilitação Oral"',
     palestrante: 'Dra. Thaissa Calab',
     data: '2026-11-18',
-    prefixo: 'CC12'
+    prefixo: 'CC12',
+    horasPart: 2
   }
 };
 
@@ -1912,7 +1914,7 @@ function carregarMembrosLigaCertificados() {
 
   atualizarContagemNomesCertificados();
   gerarPreviaCertificados();
-  alert('⭐ Modo DUPLO ativado! Cada membro listado receberá 2 certificados: Participação (4h) e Organizador (6h).');
+  alert('⭐ Modo DUPLO ativado! Cada membro listado receberá 2 certificados: Participação (2h) e Organizador (6h).');
 }
 
 function limparNomesCertificados() {
@@ -2032,7 +2034,7 @@ function gerarPreviaCertificados() {
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 rounded-full font-bold bg-blue-100 text-blue-900 border border-blue-200 flex items-center gap-1">
               <i data-lucide="award" class="w-3.5 h-3.5 text-blue-700"></i>
-              Certificado de Participação (4 Horas)
+              Certificado de Participação (2 Horas)
             </span>
             <span class="font-bold text-stone-800">${nome}</span>
           </div>
@@ -2270,7 +2272,7 @@ async function enviarCertificadosEmailAdmin() {
 
   const tipoStr = certModalidadeAtiva === 'ambos' 
     ? 'os 2 certificados (Participação + Organizador)' 
-    : (certModalidadeAtiva === 'organizador' ? 'o Certificado de Organizador (6h)' : 'o Certificado de Participação (4h)');
+    : (certModalidadeAtiva === 'organizador' ? 'o Certificado de Organizador (6h)' : 'o Certificado de Participação (2h)');
 
   const confirma = confirm(`Deseja enviar por e-mail ${tipoStr} para ${correspondentes.length} participantes encontrados?\n\nDestinatários:\n${correspondentes.map(c => c.nome_completo + ' (' + c.email + ')').join('\n')}`);
   if (!confirma) return;

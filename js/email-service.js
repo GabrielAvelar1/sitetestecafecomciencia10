@@ -270,7 +270,7 @@
                             <strong>📅 Data:</strong> ${dados.dataHora}<br>
                             <strong>📍 Local:</strong> ${dados.local}<br>
                             <strong>👩‍⚕️ Palestrante:</strong> ${dados.palestrante}<br>
-                            <strong>☕ Incluso:</strong> Coffee Break & Certificado Oficial de 4 Horas
+                            <strong>☕ Incluso:</strong> Coffee Break & Certificado Oficial de 2 Horas
                           </div>
                         </td>
                       </tr>
@@ -359,18 +359,18 @@
       <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
         <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Check-in Confirmado</div>
         <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada · ${dados.local}</div>
-        <div style="font-size: 12px; color: #365314;">Horas Complementares: 4 horas acadêmicas garantidas.</div>
+        <div style="font-size: 12px; color: #365314;">Horas Complementares: 2 horas acadêmicas garantidas.</div>
       </div>
 
       <p>Esperamos que aproveite a palestra com a <strong>${dados.palestrante}</strong> e o nosso coffee break com networking!</p>
-      <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 4 horas</strong> estará disponível para download no link abaixo:</p>
+      <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 2 horas</strong> estará disponível para download no link abaixo:</p>
     `;
 
     return enviarEmail({
       to: aluno.email,
       subject: `✅ Presença Confirmada! ${dados.numeroOrdinal} Café com Ciência · UniArnaldo`,
       html: gerarLayoutHtmlBase({
-        preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 4 horas garantido.`,
+        preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 2 horas garantido.`,
         titulo: 'Presença Confirmada no Evento!',
         badge: `Check-in Realizado · ${dados.numeroOrdinalFem} Edição`,
         conteudoHtml,
@@ -451,7 +451,7 @@
             <div style="background-color: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 10px; padding: 8px 12px; margin: 6px auto 0 auto; max-width: 420px;">
               <p style="margin: 0; font-size: 12px; color: #1b5e20; font-weight: 600; line-height: 1.4;">
                 📲 <strong>Apresente este QR Code na portaria:</strong><br>
-                Ele será lido na entrada para validar sua presença e liberar seu Certificado de 4 Horas.
+                Ele será lido na entrada para validar sua presença e liberar seu Certificado de 2 Horas.
               </p>
             </div>
           </td>
@@ -500,7 +500,7 @@
     const codigoCert = aluno.certificado_codigo || `CERT-${aluno.protocolo}`;
 
     let subject = `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`;
-    let preheader = `Seu certificado de 4 horas do ${dados.numeroOrdinal} Café foi liberado! Código: ${codigoCert}`;
+    let preheader = `Seu certificado de 2 horas do ${dados.numeroOrdinal} Café foi liberado! Código: ${codigoCert}`;
     let titulo = 'Seu Certificado Oficial está Pronto!';
     let badge = `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`;
     let botaoTexto = 'Visualizar e Baixar Meu Certificado';
@@ -535,20 +535,20 @@
         <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
         <p>Como membro da Liga Acadêmica Café com Ciência, você tem direito a <strong>dois certificados oficiais</strong> referentes ao <strong>${dados.tituloEdicao}</strong>:</p>
         <ul style="margin: 15px 0; padding-left: 20px; color: #374151; font-size: 14px; line-height: 1.8;">
-          <li>🎓 <strong>Certificado de Participação</strong> (4 Horas Complementares como ouvinte)</li>
+          <li>🎓 <strong>Certificado de Participação</strong> (2 Horas Complementares como ouvinte)</li>
           <li>🏆 <strong>Certificado de Organizador(a)</strong> (6 Horas Complementares de comissão organizadora)</li>
         </ul>
         <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Autenticidade Oficial dos Certificados:</div>
           <div style="font-size: 18px; font-weight: 800; font-family: monospace; color: #166534; margin: 4px 0;">CERT-${aluno.protocolo} &bull; CERT-ORG-${aluno.protocolo}</div>
-          <div style="font-size: 12px; color: #365314;">Totalizando 10 horas complementares de atividades acadêmicas.</div>
+          <div style="font-size: 12px; color: #365314;">Totalizando 8 horas complementares de atividades acadêmicas.</div>
         </div>
         <p>Você pode visualizar ambos na tela, alternar entre eles e imprimir os dois juntos em PDF clicando no botão abaixo:</p>
       `;
     } else {
       conteudoHtml = `
         <p>Parabéns, <strong>${aluno.nome_completo}</strong>!</p>
-        <p>Seu <strong>Certificado Oficial de Participação de 4 Horas Complementares</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
+        <p>Seu <strong>Certificado Oficial de Participação de 2 Horas Complementares</strong> do <strong>${dados.tituloEdicao} (${dados.subtituloEdicao})</strong> foi assinado, autenticado e já está liberado para emissão e download!</p>
         
         <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Código de Autenticidade Oficial:</div>
@@ -607,7 +607,7 @@
         <div style="font-size: 11px; color: #a8a29e;">Apresente sua credencial digital na portaria para check-in rápido</div>
       </div>
 
-      <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 4 Horas</strong> complementares.</p>
+      <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 2 Horas</strong> complementares.</p>
       <p>Agradecemos imensamente a sua compreensão e estamos à disposição para qualquer dúvida. Nos vemos no dia <strong>${dados.dataCurta}</strong>!</p>
     `;
 
@@ -688,16 +688,16 @@
         <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #15803d; text-transform: uppercase; font-weight: 700;">Check-in Confirmado</div>
           <div style="font-size: 15px; font-weight: 700; color: #166534; margin: 4px 0;">Presença Validada · ${dados.local}</div>
-          <div style="font-size: 12px; color: #365314;">Horas Complementares: 4 horas acadêmicas garantidas.</div>
+          <div style="font-size: 12px; color: #365314;">Horas Complementares: 2 horas acadêmicas garantidas.</div>
         </div>
 
         <p>Esperamos que aproveite a palestra com a <strong>${dados.palestrante}</strong> e o nosso coffee break com networking!</p>
-        <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 4 horas</strong> estará disponível para download no link abaixo:</p>
+        <p>Assim que a comissão organizadora concluir a assinatura das declarações, seu <strong>Certificado Oficial de 2 horas</strong> estará disponível para download no link abaixo:</p>
       `;
       return {
         subject: `✅ Presença Confirmada! ${dados.numeroOrdinal} Café com Ciência · UniArnaldo`,
         html: gerarLayoutHtmlBase({
-          preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 4 horas garantido.`,
+          preheader: `Sua presença no ${dados.numeroOrdinal} Café foi validada! Certificado de 2 horas garantido.`,
           titulo: 'Presença Confirmada no Evento!',
           badge: `Check-in Realizado · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,
@@ -738,7 +738,7 @@
           <div style="font-size: 12px; color: #6b5c4f;">Tenha sua Credencial aberta no celular para ler o QR Code na entrada.</div>
         </div>
 
-        <p>Apresente o QR Code na entrada para credenciamento rápido e garantir seu certificado oficial de 4 horas.</p>
+        <p>Apresente o QR Code na entrada para credenciamento rápido e garantir seu certificado oficial de 2 horas.</p>
       `;
 
       return {
@@ -774,7 +774,7 @@
           <div style="font-size: 11px; color: #a8a29e;">Apresente sua credencial digital na portaria para check-in rápido</div>
         </div>
 
-        <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 4 Horas</strong> complementares.</p>
+        <p>Aproveitaremos este encontro para proporcionar uma experiência clínica ainda mais completa, com coffee break especial, networking e emissão de <strong>Certificado Oficial de 2 Horas</strong> complementares.</p>
         <p>Agradecemos imensamente a sua compreensão e estamos à disposição para qualquer dúvida. Nos vemos no dia <strong>${dados.dataCurta}</strong>!</p>
       `;
 
@@ -798,11 +798,11 @@
       const conteudoHtml = `
         <p>Olá, <strong>${aluno.nome_completo}</strong>!</p>
         <p>Agradecemos muito sua participação no <strong>${dados.tituloEdicao}: ${dados.subtituloEdicao}</strong>!</p>
-        <p>Temos o prazer de informar que o seu <strong>Certificado Oficial de Participação (4 Horas)</strong> com a <strong>${dados.palestrante}</strong> já está assinado e liberado para emissão.</p>
+        <p>Temos o prazer de informar que o seu <strong>Certificado Oficial de Participação (2 Horas)</strong> com a <strong>${dados.palestrante}</strong> já está assinado e liberado para emissão.</p>
 
         <div style="background-color: #fff9f3; border-left: 4px solid #a65824; padding: 14px 18px; margin: 20px 0; border-radius: 0 10px 10px 0;">
           <div style="font-size: 12px; color: #733c1a; text-transform: uppercase; font-weight: 700;">Certificado Homologado:</div>
-          <div style="font-size: 16px; font-weight: 800; color: #2b1810; margin: 4px 0;">Carga Horária: 4 Horas Complementares</div>
+          <div style="font-size: 16px; font-weight: 800; color: #2b1810; margin: 4px 0;">Carga Horária: 2 Horas Complementares</div>
           <div style="font-size: 12px; color: #6b5c4f;">Código de Autenticidade: CERT-${aluno.protocolo}</div>
         </div>
 
@@ -812,7 +812,7 @@
       return {
         subject: `🎓 Seu Certificado Oficial está Disponível! ${dados.numeroOrdinal} Café com Ciência`,
         html: gerarLayoutHtmlBase({
-          preheader: `Seu certificado de 4 horas complementares do ${dados.numeroOrdinal} Café foi liberado! Código: CERT-${aluno.protocolo}`,
+          preheader: `Seu certificado de 2 horas complementares do ${dados.numeroOrdinal} Café foi liberado! Código: CERT-${aluno.protocolo}`,
           titulo: 'Seu Certificado Oficial está Pronto!',
           badge: `Certificado Disponível · ${dados.numeroOrdinalFem} Edição`,
           conteudoHtml,

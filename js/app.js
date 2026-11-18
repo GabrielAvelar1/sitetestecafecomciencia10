@@ -1508,50 +1508,55 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
   }).join('');
 
   // Sugestões de próximas edições ainda não inscritas
+  const cfgSistema = window.LigaDB?.obterConfiguracoesSistema ? window.LigaDB.obterConfiguracoesSistema() : {};
+  const enc10 = cfgSistema.inscricoes_10 === 'encerradas';
+  const enc11 = cfgSistema.inscricoes_11 === 'encerradas';
+  const enc12 = cfgSistema.inscricoes_12 === 'encerradas';
+
   let bannersSugeridos = [];
-  if (!temEdicao10) {
-    bannersSugeridos.push(`
-      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-stone-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">10ª Edição · Inscrições Abertas</span>
-          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
-        </div>
-        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">10° Café: Os Direitos dos Pacientes na Odontologia</h5>
-        <p class="text-[11px] text-stone-600">Com a <strong>Profa. Carolina Diniz</strong> em 30 de Outubro às 15h. Certificado de 4 horas!</p>
-        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
-          <span>Garantir Vaga no 10° Café</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </a>
-      </div>
-    `);
-  }
-  if (!temEdicao11) {
-    bannersSugeridos.push(`
-      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
-        <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">11ª Edição · Inscrições Abertas</span>
-          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
-        </div>
-        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">11° Café: 10 anos do projeto NAM em Belo Horizonte</h5>
-        <p class="text-[11px] text-stone-600">Com o <strong>Prof. Dr. Henrique Pretti</strong> em 13 de Novembro às 15h. Certificado de 4 horas!</p>
-        <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
-          <span>Garantir Vaga no 11° Café</span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-        </a>
-      </div>
-    `);
-  }
-  if (!temEdicao12) {
+  if (!temEdicao12 && !enc12) {
     bannersSugeridos.push(`
       <div class="p-3.5 bg-gradient-to-r from-stone-50 to-amber-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">12ª Edição · Inscrições Abertas</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300">12ª Edição · Inscrições Abertas</span>
           <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
         </div>
         <h5 class="text-xs sm:text-sm font-bold text-coffee-950">12° Café: Diagnóstico e Planejamento na Reabilitação Oral</h5>
-        <p class="text-[11px] text-stone-600">Com a <strong>Dra. Thaissa Calab</strong> em 18 de Novembro às 16h. Certificado de 4 horas!</p>
+        <p class="text-[11px] text-stone-600">Com a <strong>Dra. Thaissa Calab</strong> em 18 de Novembro às 16h. Certificado de 2 horas!</p>
         <a href="12cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
           <span>Garantir Vaga no 12° Café</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `);
+  }
+  if (!temEdicao11 && !enc11) {
+    bannersSugeridos.push(`
+      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">11ª Edição</span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">11° Café: 10 anos do projeto NAM em Belo Horizonte</h5>
+        <p class="text-[11px] text-stone-600">Com o <strong>Prof. Dr. Henrique Pretti</strong> em 13 de Novembro às 15h. Certificado de 2 horas!</p>
+        <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+          <span>Ver 11° Café</span>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+        </a>
+      </div>
+    `);
+  }
+  if (!temEdicao10 && !enc10) {
+    bannersSugeridos.push(`
+      <div class="p-3.5 bg-gradient-to-r from-amber-50 to-stone-50 rounded-2xl border-2 border-amber-300 text-left space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-200 text-amber-900">10ª Edição</span>
+          <span class="text-xs font-bold text-amber-900 font-mono">R$ 10,00</span>
+        </div>
+        <h5 class="text-xs sm:text-sm font-bold text-coffee-950">10° Café: Os Direitos dos Pacientes na Odontologia</h5>
+        <p class="text-[11px] text-stone-600">Com a <strong>Profa. Carolina Diniz</strong> em 30 de Outubro às 15h. Certificado de 2 horas!</p>
+        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+          <span>Ver 10° Café</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </a>
       </div>
@@ -1569,7 +1574,7 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
         </div>
         <div>
           <p class="font-bold text-emerald-900">Ciclo Completo de Palestras!</p>
-          <p class="text-[11px] text-emerald-800">Você garantiu sua participação na 10ª, 11ª e 12ª edição. Seus comprovantes e certificados de 12 horas no total ficam arquivados permanentemente aqui.</p>
+          <p class="text-[11px] text-emerald-800">Você garantiu sua participação nas edições do Café com Ciência. Seus comprovantes e certificados de 2 horas por edição ficam arquivados permanentemente aqui.</p>
         </div>
       </div>
     `;
@@ -1653,27 +1658,28 @@ function renderizarAreaAlunoSemInscricao(content, usuario) {
       </div>
 
       <div class="space-y-3 pt-1 text-left">
-        <!-- Card 10° Café -->
-        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-stone-200 hover:border-coffee-500 hover:bg-stone-50 transition flex items-center justify-between gap-3 group">
+        <!-- Card 12° Café (Aberto) -->
+        <a href="12cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/50 hover:bg-emerald-50 transition flex items-center justify-between gap-3 group shadow-xs">
           <div>
-            <span class="text-[10px] uppercase font-bold text-coffee-700 bg-coffee-50 px-2 py-0.5 rounded border border-coffee-200">10ª Edição · 30/Out</span>
-            <h5 class="text-xs font-bold text-stone-900 mt-1">Atendimento Odontológico de Pacientes Hospitalizados</h5>
-            <p class="text-[11px] text-stone-500">Profa. Carolina Diniz · 15:00h</p>
+            <span class="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">12ª Edição · Inscrições Abertas</span>
+            <h5 class="text-xs font-bold text-stone-900 mt-1">Diagnóstico e Planejamento na Reabilitação Oral</h5>
+            <p class="text-[11px] text-stone-600">Dra. Thaissa Calab · 18 de Novembro às 16h · Certificado de 2 horas</p>
           </div>
-          <span class="px-3 py-1.5 bg-coffee-800 group-hover:bg-coffee-900 text-white rounded-xl text-xs font-bold shrink-0">
+          <span class="px-3 py-1.5 bg-coffee-900 group-hover:bg-black text-white rounded-xl text-xs font-bold shrink-0 shadow">
             Inscrever (R$ 10)
           </span>
         </a>
 
-        <!-- Card 11° Café -->
-        <a href="11cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-amber-200 hover:border-amber-500 hover:bg-amber-50/50 transition flex items-center justify-between gap-3 group">
+        <!-- Card Portal Histórico -->
+        <a href="portal.html" onclick="fecharAreaDoAluno()" class="p-3 rounded-2xl border border-stone-200 hover:border-coffee-300 hover:bg-stone-50 transition flex items-center justify-between gap-3 text-stone-600">
           <div>
-            <span class="text-[10px] uppercase font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300">11ª Edição · 06/Nov</span>
-            <h5 class="text-xs font-bold text-stone-900 mt-1">Diagnóstico e Planejamento na Reabilitação Oral</h5>
-            <p class="text-[11px] text-stone-500">Dra. Thaissa Calab · 16:00h</p>
+            <span class="text-[10px] uppercase font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded">Edições Anteriores</span>
+            <h5 class="text-xs font-bold text-stone-800 mt-1">10° e 11° Café com Ciência</h5>
+            <p class="text-[11px] text-stone-500">Inscrições encerradas · Ver histórico e certificados no Portal</p>
           </div>
-          <span class="px-3 py-1.5 bg-amber-700 group-hover:bg-amber-800 text-white rounded-xl text-xs font-bold shrink-0">
-            Inscrever (R$ 10)
+          <span class="text-xs font-bold text-coffee-700 flex items-center gap-1">
+            <span>Ver Portal</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </span>
         </a>
       </div>

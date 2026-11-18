@@ -164,7 +164,7 @@
         palestranteNome = 'Dra. Thaissa Calab';
         dataDefault = '2026-11-18';
         prefixoCert = 'CC12';
-        horasParticipacao = 4;
+        horasParticipacao = 2; // Todos os cafés possuem certificado de 2 horas (ouvinte)
         nomeCoordenador = 'Jhonathan Lopes Silva';
         cargoCoordenador = 'Coordenador do Curso de Odontologia';
       } else if (is11) {
@@ -173,7 +173,7 @@
         palestranteNome = 'Prof. Dr. Henrique Pretti';
         dataDefault = '2026-11-13';
         prefixoCert = 'CC11';
-        horasParticipacao = 4;
+        horasParticipacao = 2; // Todos os cafés possuem certificado de 2 horas (ouvinte)
         nomeCoordenador = 'Jhonathan Lopes Silva';
         cargoCoordenador = 'Coordenador do Curso de Odontologia';
       }
@@ -278,7 +278,7 @@
             </div>
             <h2 class="text-xl font-bold text-stone-900 mb-2">Certificados em Processo de Emissão</h2>
             <p class="text-sm text-stone-600 leading-relaxed mb-6">
-              Os certificados oficiais do <strong>${nomeEvento}</strong> estão em fase de coleta e autenticação de assinaturas pela coordenação acadêmica do UniArnaldo. Assim que a comissão organizadora liberar a emissão no sistema, o download da sua declaração oficial de 4 horas estará disponível nesta página.
+              Os certificados oficiais do <strong>${nomeEvento}</strong> estão em fase de coleta e autenticação de assinaturas pela coordenação acadêmica do UniArnaldo. Assim que a comissão organizadora liberar a emissão no sistema, o download da sua declaração oficial de 2 horas estará disponível nesta página.
             </p>
             <div class="p-4 bg-stone-50 rounded-2xl text-xs text-stone-600 mb-6 text-left space-y-1.5 border border-stone-200">
               <p><strong>Participante:</strong> ${nomeFinal}</p>
@@ -355,7 +355,7 @@
             <!-- Barra de Seleção de Certificado para Membros da Liga -->
             <div class="no-print mb-6 p-2 bg-stone-900/90 backdrop-blur-md rounded-2xl flex flex-wrap items-center justify-center gap-2 shadow-lg border border-stone-700">
               <button id="btnTabPart" onclick="mostrarCertificadoPublico('participacao')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-white text-stone-900 shadow">
-                🎓 Certificado de Participação (4h)
+                🎓 Certificado de Participação (2h)
               </button>
               <button id="btnTabOrg" onclick="mostrarCertificadoPublico('organizador')" class="px-4 py-2 rounded-xl text-xs font-bold transition text-stone-300 hover:text-white">
                 🏆 Certificado de Organizador (6h)
