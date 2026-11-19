@@ -85,7 +85,7 @@ function fecharPainelAdmin() {
 // Trocar Abas no Painel Admin
 function trocarAbaAdmin(aba) {
   abaAtivaAtual = aba;
-  const abas = ['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados'];
+  const abas = ['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados', 'qrcode'];
   
   abas.forEach(nome => {
     const btn = document.getElementById(`tabBtn_${nome}`);
@@ -121,6 +121,8 @@ function trocarAbaAdmin(aba) {
     carregarHistoricoEmailsResend();
   } else if (aba === 'certificados') {
     inicializarEstudioCertificados();
+  } else if (aba === 'qrcode') {
+    inicializarGeradorQrCodeAdmin();
   }
 
   if (window.lucide) window.lucide.createIcons();
@@ -2540,5 +2542,427 @@ window.abrirModalNfcInscritos = abrirModalNfcInscritos;
 window.fecharModalNfcInscritos = fecharModalNfcInscritos;
 window.filtrarModalNfcInscritos = filtrarModalNfcInscritos;
 window.copiarLinkNfcIndividual = copiarLinkNfcIndividual;
-window.filtrarModalNfcInscritos = filtrarModalNfcInscritos;
-window.copiarLinkNfcIndividual = copiarLinkNfcIndividual;
+
+// ============================================================================
+// GERADOR DINÂMICO DE QR CODE (ADMIN)
+// ============================================================================
+
+const QR_DESTINOS_ADMIN = {
+  portal: {
+    nome: 'Portal Geral da Liga (Início)',
+    titulo: 'Portal Café com Ciência',
+    legenda: 'Acesse o Portal do Café com Ciência',
+    url: 'https://cafecomciencia.netlify.app/',
+    descricao: 'Página inicial com visão geral de todas as palestras, novidades e certificados da Liga.',
+    badge: 'Página Inicial'
+  },
+  '12cafe': {
+    nome: '12° Café com Ciência — Reabilitação Oral',
+    titulo: '12° Café com Ciência',
+    legenda: 'Dra. Thaissa Calab · 18 de Novembro',
+    url: 'https://cafecomciencia.netlify.app/12cafe.html',
+    descricao: 'Página oficial da 12ª edição (Dra. Thaissa Calab - Reabilitação Oral e Odontologia).',
+    badge: '12° Café (Encerrada)'
+  },
+  '11cafe': {
+    nome: '11° Café com Ciência — Projeto NAM',
+    titulo: '11° Café com Ciência',
+    legenda: 'Dra. Daniela Drumond · Projeto NAM',
+    url: 'https://cafecomciencia.netlify.app/11cafe.html',
+    descricao: 'Página oficial da 11ª edição (Dra. Daniela Drumond - Fissuras Labiopalatinas).',
+    badge: '11° Café (Encerrada)'
+  },
+  '10cafe': {
+    nome: '10° Café com Ciência — Direitos dos Pacientes',
+    titulo: '10° Café com Ciência',
+    legenda: 'Dr. Roberto Mendes · Direitos dos Pacientes',
+    url: 'https://cafecomciencia.netlify.app/10cafe.html',
+    descricao: 'Página oficial da 10ª edição (Dr. Roberto Mendes - Direitos dos Pacientes).',
+    badge: '10° Café (Encerrada)'
+  },
+  '13cafe': {
+    nome: '13° Café com Ciência — Próxima Palestra',
+    titulo: '13° Café com Ciência',
+    legenda: 'Próxima Edição · Semestre 2027.1',
+    url: 'https://cafecomciencia.netlify.app/13cafe.html',
+    descricao: 'Página reservada para a 13ª edição do projeto no início de 2027.',
+    badge: 'Próximo Semestre'
+  },
+  portaria: {
+    nome: 'Portaria & Check-in Inteligente',
+    titulo: 'Check-in Café com Ciência',
+    legenda: 'Aproxime o celular ou leia o QR Code para confirmar presença',
+    url: 'https://cafecomciencia.netlify.app/checkin.html',
+    descricao: 'Link único para gravação de etiquetas NFC e cartazes de portaria. Redireciona sempre para o café ativo.',
+    badge: 'Link Fixo Portaria / NFC'
+  },
+  certificados: {
+    nome: 'Portal de Certificados & Validação',
+    titulo: 'Certificados & Declarações',
+    legenda: 'Consulte sua inscrição e baixe seu certificado oficial',
+    url: 'https://cafecomciencia.netlify.app/certificados.html',
+    descricao: 'Página de busca de inscrições, emissão de certificados com autenticador e declarações.',
+    badge: 'Certificados'
+  },
+  custom: {
+    nome: 'Link Personalizado',
+    titulo: 'Café com Ciência',
+    legenda: 'Acesse o conteúdo exclusivo',
+    url: '',
+    descricao: 'Digite abaixo qualquer endereço web desejado.',
+    badge: 'Personalizado'
+  }
+};
+
+let qrCodeAdminDebounceTimer = null;
+let qrCodeAdminInicializado = false;
+
+function inicializarGeradorQrCodeAdmin() {
+  if (!qrCodeAdminInicializado) {
+    qrCodeAdminInicializado = true;
+    aoMudarDestinoQrCode();
+  } else {
+    atualizarPreviewQrCodeAdmin();
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function aoMudarDestinoQrCode() {
+  const sel = document.getElementById('qrCodeSelectDestino');
+  if (!sel) return;
+  const val = sel.value;
+  const config = QR_DESTINOS_ADMIN[val] || QR_DESTINOS_ADMIN.portal;
+
+  const inputUrl = document.getElementById('qrInputUrlFinal');
+  const inputLegenda = document.getElementById('qrInputLegenda');
+  const descEl = document.getElementById('qrDescricaoDestino');
+  const badgeEl = document.getElementById('qrBadgeTipoLink');
+
+  if (val === 'custom') {
+    if (badgeEl) badgeEl.textContent = 'Personalizado';
+    if (descEl) descEl.textContent = 'Digite acima qualquer URL ou link desejado para gerar o QR Code.';
+    if (inputUrl) {
+      if (!inputUrl.value.trim() || Object.values(QR_DESTINOS_ADMIN).some(c => c.url && c.url === inputUrl.value.trim())) {
+        inputUrl.value = 'https://';
+      }
+      inputUrl.focus();
+    }
+    if (inputLegenda && !inputLegenda.value.trim()) {
+      inputLegenda.value = 'Café com Ciência';
+    }
+  } else {
+    if (inputUrl) {
+      inputUrl.value = config.url;
+    }
+    if (inputLegenda) {
+      inputLegenda.value = config.legenda;
+    }
+    if (descEl) descEl.textContent = config.descricao;
+    if (badgeEl) badgeEl.textContent = config.badge || 'Oficial';
+  }
+
+  atualizarPreviewQrCodeAdmin();
+}
+
+function aoDigitarUrlQrCode() {
+  const sel = document.getElementById('qrCodeSelectDestino');
+  const inputUrl = document.getElementById('qrInputUrlFinal');
+  const badgeEl = document.getElementById('qrBadgeTipoLink');
+  
+  if (sel && inputUrl) {
+    const urlDigitada = inputUrl.value.trim();
+    const chaveEncontrada = Object.keys(QR_DESTINOS_ADMIN).find(k => k !== 'custom' && QR_DESTINOS_ADMIN[k].url === urlDigitada);
+    if (chaveEncontrada) {
+      sel.value = chaveEncontrada;
+      if (badgeEl) badgeEl.textContent = QR_DESTINOS_ADMIN[chaveEncontrada].badge;
+    } else {
+      sel.value = 'custom';
+      if (badgeEl) badgeEl.textContent = 'Personalizado';
+    }
+  }
+
+  clearTimeout(qrCodeAdminDebounceTimer);
+  qrCodeAdminDebounceTimer = setTimeout(() => {
+    atualizarPreviewQrCodeAdmin();
+  }, 250);
+}
+
+function aoDigitarLegendaQrCode() {
+  const inputLegenda = document.getElementById('qrInputLegenda');
+  const legendaCard = document.getElementById('qrCardLegendaPreview');
+  if (inputLegenda && legendaCard) {
+    legendaCard.textContent = inputLegenda.value || 'Acesse o Portal do Café com Ciência';
+  }
+}
+
+function aoMudarConfigQrCode() {
+  atualizarPreviewQrCodeAdmin();
+}
+
+function atualizarPreviewQrCodeAdmin() {
+  const inputUrl = document.getElementById('qrInputUrlFinal');
+  const url = (inputUrl?.value.trim()) || 'https://cafecomciencia.netlify.app/';
+  const cor = document.getElementById('qrSelectCor')?.value || '2F180E';
+  const margem = document.getElementById('qrSelectMargem')?.value || '2';
+  const res = document.getElementById('qrSelectResolucao')?.value || '800';
+  const selDestino = document.getElementById('qrCodeSelectDestino')?.value || 'portal';
+  const config = QR_DESTINOS_ADMIN[selDestino] || QR_DESTINOS_ADMIN.portal;
+
+  const tituloEl = document.getElementById('qrCardTituloPreview');
+  const legendaEl = document.getElementById('qrCardLegendaPreview');
+  const inputLegenda = document.getElementById('qrInputLegenda');
+  const urlEl = document.getElementById('qrCardUrlPreview');
+  const resBadge = document.getElementById('qrPreviewTamanhoBadge');
+  const spinner = document.getElementById('qrLoadingSpinner');
+  const img = document.getElementById('qrImgPreview');
+
+  if (tituloEl) {
+    tituloEl.textContent = (selDestino === 'custom') ? 'Café com Ciência' : config.titulo;
+  }
+  if (legendaEl) {
+    legendaEl.textContent = (inputLegenda?.value) || config.legenda;
+  }
+  if (urlEl) {
+    urlEl.textContent = url;
+  }
+  if (resBadge) {
+    resBadge.textContent = `${res}x${res} px`;
+  }
+
+  if (img) {
+    if (spinner) spinner.classList.remove('hidden');
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=${encodeURIComponent(url)}&color=${cor}&bgcolor=FFFFFF&margin=${margem}&format=png`;
+    img.src = qrUrl;
+  }
+}
+
+function aoCarregarImagemQrCode(sucesso) {
+  const spinner = document.getElementById('qrLoadingSpinner');
+  if (spinner) spinner.classList.add('hidden');
+}
+
+async function baixarQrCodeAdmin() {
+  const inputUrl = document.getElementById('qrInputUrlFinal');
+  const url = (inputUrl?.value.trim()) || 'https://cafecomciencia.netlify.app/';
+  const res = document.getElementById('qrSelectResolucao')?.value || '800';
+  const cor = document.getElementById('qrSelectCor')?.value || '2F180E';
+  const margem = document.getElementById('qrSelectMargem')?.value || '2';
+  const selDestino = document.getElementById('qrCodeSelectDestino')?.value || 'portal';
+
+  const btn = document.getElementById('btnBaixarQrCode');
+  let origHtml = '';
+  if (btn) {
+    origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-amber-300"></i><span>Gerando arquivo ${res}x${res} px...</span>`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${res}x${res}&data=${encodeURIComponent(url)}&color=${cor}&bgcolor=FFFFFF&margin=${margem}&format=png`;
+  const filename = `qrcode-${selDestino}-${res}x${res}.png`;
+
+  try {
+    const resp = await fetch(qrUrl);
+    if (!resp.ok) throw new Error('Resposta de erro da API de QR Code');
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+  } catch (err) {
+    console.warn('Fallback para download direto do QR Code:', err);
+    const a = document.createElement('a');
+    a.href = qrUrl;
+    a.target = '_blank';
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+}
+
+function copiarLinkQrCodeAdmin() {
+  const input = document.getElementById('qrInputUrlFinal');
+  const url = input?.value.trim() || 'https://cafecomciencia.netlify.app/';
+  const txtBtn = document.getElementById('txtBtnCopiarLinkQr');
+  const btn = document.getElementById('btnCopiarLinkQrCode');
+
+  navigator.clipboard.writeText(url).then(() => {
+    if (txtBtn) txtBtn.textContent = '✓ Copiado!';
+    if (btn) {
+      btn.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+    }
+    setTimeout(() => {
+      if (txtBtn) txtBtn.textContent = 'Copiar Link';
+      if (btn) {
+        btn.classList.remove('bg-emerald-50', 'text-emerald-700', 'border-emerald-300');
+      }
+    }, 2000);
+  }).catch(() => {
+    prompt('Copie o link abaixo:', url);
+  });
+}
+
+function testarLinkQrCodeNoNavegador() {
+  const input = document.getElementById('qrInputUrlFinal');
+  const url = input?.value.trim() || 'https://cafecomciencia.netlify.app/';
+  window.open(url, '_blank');
+}
+
+function imprimirCartazQrCodeAdmin() {
+  const inputUrl = document.getElementById('qrInputUrlFinal');
+  const url = inputUrl?.value.trim() || 'https://cafecomciencia.netlify.app/';
+  const selDestino = document.getElementById('qrCodeSelectDestino')?.value || 'portal';
+  const config = QR_DESTINOS_ADMIN[selDestino] || QR_DESTINOS_ADMIN.portal;
+  const titulo = (selDestino === 'custom') ? 'Café com Ciência' : config.titulo;
+  const inputLegenda = document.getElementById('qrInputLegenda');
+  const legenda = inputLegenda?.value.trim() || config.legenda;
+  const cor = document.getElementById('qrSelectCor')?.value || '2F180E';
+  const margem = document.getElementById('qrSelectMargem')?.value || '2';
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(url)}&color=${cor}&bgcolor=FFFFFF&margin=${margem}&format=png`;
+
+  const escapeHtml = str => String(str).replace(/[&<>"']/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[m]);
+
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Permita pop-ups no seu navegador para abrir a página de impressão do cartaz.');
+    return;
+  }
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="UTF-8">
+      <title>Cartaz QR Code - ${escapeHtml(titulo)}</title>
+      <style>
+        @page { size: A4 portrait; margin: 15mm; }
+        * { box-sizing: border-box; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 90vh;
+          text-align: center;
+          margin: 0;
+          padding: 30px;
+          color: #2F180E;
+          background: #ffffff;
+        }
+        .badge {
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: #874C27;
+          background: #F7F2E9;
+          padding: 8px 20px;
+          border-radius: 9999px;
+          border: 1px solid #DCBE9B;
+          margin-bottom: 24px;
+          display: inline-block;
+        }
+        h1 {
+          font-size: 36px;
+          font-weight: 900;
+          margin: 0 0 12px 0;
+          color: #2F180E;
+        }
+        p.sub {
+          font-size: 20px;
+          color: #552F1E;
+          margin: 0 0 36px 0;
+          max-width: 600px;
+          font-weight: 500;
+        }
+        .qr-frame {
+          padding: 24px;
+          background: #ffffff;
+          border: 3px solid #EBDDC9;
+          border-radius: 28px;
+          display: inline-block;
+          box-shadow: 0 10px 30px rgba(47, 24, 14, 0.08);
+        }
+        img.qr {
+          width: 320px;
+          height: 320px;
+          display: block;
+        }
+        .callout {
+          margin-top: 36px;
+          font-size: 22px;
+          font-weight: 800;
+          color: #2F180E;
+        }
+        .url {
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 15px;
+          font-weight: 600;
+          color: #874C27;
+          margin-top: 10px;
+          word-break: break-all;
+        }
+        .footer {
+          margin-top: 45px;
+          font-size: 13px;
+          color: #A46331;
+          border-top: 1px solid #EBDDC9;
+          padding-top: 18px;
+          width: 85%;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="badge">Liga Acadêmica Café com Ciência</div>
+      <h1>${escapeHtml(titulo)}</h1>
+      <p class="sub">${escapeHtml(legenda)}</p>
+      <div class="qr-frame">
+        <img class="qr" src="${qrUrl}" alt="QR Code" />
+      </div>
+      <div class="callout">📲 Aponte a câmera do seu celular para acessar</div>
+      <div class="url">${escapeHtml(url)}</div>
+      <div class="footer">UniArnaldo · Campus Anchieta · Belo Horizonte/MG</div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 400);
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  win.document.close();
+}
+
+// Exportações para o escopo global (window)
+window.inicializarGeradorQrCodeAdmin = inicializarGeradorQrCodeAdmin;
+window.aoMudarDestinoQrCode = aoMudarDestinoQrCode;
+window.aoDigitarUrlQrCode = aoDigitarUrlQrCode;
+window.aoDigitarLegendaQrCode = aoDigitarLegendaQrCode;
+window.aoMudarConfigQrCode = aoMudarConfigQrCode;
+window.atualizarPreviewQrCodeAdmin = atualizarPreviewQrCodeAdmin;
+window.aoCarregarImagemQrCode = aoCarregarImagemQrCode;
+window.baixarQrCodeAdmin = baixarQrCodeAdmin;
+window.copiarLinkQrCodeAdmin = copiarLinkQrCodeAdmin;
+window.testarLinkQrCodeNoNavegador = testarLinkQrCodeNoNavegador;
+window.imprimirCartazQrCodeAdmin = imprimirCartazQrCodeAdmin;

@@ -330,6 +330,15 @@
               <span>Gerador de Certificados</span>
             </button>
 
+            <button 
+              id="tabBtn_qrcode" 
+              onclick="trocarAbaAdmin('qrcode')" 
+              class="px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap text-stone-300 hover:text-white hover:bg-white/10"
+            >
+              <i data-lucide="qr-code" class="w-4 h-4 text-purple-400"></i>
+              <span>Gerador de QR Code</span>
+            </button>
+
             <button id="tabBtn_resend_teste" 
               onclick="trocarAbaAdmin('resend_teste')" 
               class="px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap text-stone-300 hover:text-white hover:bg-white/10"
@@ -1531,6 +1540,292 @@
 
       </section>
 
+      <!-- ================= ABA 6: GERADOR DE QR CODE ================= -->
+      <section id="tabView_qrcode" class="hidden space-y-6">
+
+        <!-- Banner Explicativo -->
+        <div class="bg-gradient-to-r from-stone-900 via-coffee-950 to-stone-900 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden border border-amber-900/40 shadow-xl">
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-bold tracking-wider uppercase">
+                <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                <span>Gerador de QR Code Oficial</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-serif font-black tracking-tight">Divulgação, Portaria e Eventos</h2>
+              <p class="text-stone-300 text-sm max-w-2xl leading-relaxed">
+                Gere códigos QR de alta precisão para impressão em panfletos, cartazes de divulgação, crachás físicos, telões de apresentação ou envio no WhatsApp. Selecione o Portal principal ou qualquer edição do Café com Ciência.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2 self-start md:self-auto">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur text-xs font-mono text-amber-200 border border-white/10">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Pronto para Impressão</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          <!-- Coluna Esquerda: Controles -->
+          <div class="lg:col-span-6 xl:col-span-7 space-y-6">
+
+            <!-- Card: Seleção de Destino -->
+            <div class="bg-white rounded-3xl p-6 border border-stone-200 shadow-xs space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-coffee-950 flex items-center gap-2">
+                  <i data-lucide="compass" class="w-5 h-5 text-amber-600"></i>
+                  <span>1. Selecionar Destino do QR Code</span>
+                </h3>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900">Etapa 1</span>
+              </div>
+
+              <!-- Seletor Rápido de Edições e Páginas -->
+              <div class="space-y-2">
+                <label for="qrCodeSelectDestino" class="block text-xs font-bold uppercase tracking-wider text-stone-600">
+                  Página ou Edição do Café com Ciência:
+                </label>
+                <select 
+                  id="qrCodeSelectDestino" 
+                  onchange="aoMudarDestinoQrCode()"
+                  class="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-sm font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 transition cursor-pointer"
+                >
+                  <optgroup label="🌐 Páginas Principais">
+                    <option value="portal" selected>🌐 Portal Geral da Liga (Página Inicial)</option>
+                    <option value="portaria">📲 Portaria & Check-in Inteligente (Link Único NFC)</option>
+                    <option value="certificados">📜 Portal de Certificados & Declarações</option>
+                  </optgroup>
+                  <optgroup label="☕ Edições do Café com Ciência">
+                    <option value="12cafe">☕ 12° Café — Reabilitação Oral (Dra. Thaissa Calab)</option>
+                    <option value="11cafe">☕ 11° Café — Projeto NAM (Dra. Daniela Drumond)</option>
+                    <option value="10cafe">☕ 10° Café — Direitos dos Pacientes (Dr. Roberto Mendes)</option>
+                    <option value="13cafe">☕ 13° Café — Próxima Palestra (Semestre 2027.1)</option>
+                  </optgroup>
+                  <optgroup label="🔗 Personalizado">
+                    <option value="custom">✏️ Outro Link Personalizado...</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <!-- Campo de URL Final Gerada -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label for="qrInputUrlFinal" class="block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    Link de Destino Completo (URL):
+                  </label>
+                  <span id="qrBadgeTipoLink" class="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/60">
+                    Página Inicial
+                  </span>
+                </div>
+                <div class="relative">
+                  <input 
+                    type="url" 
+                    id="qrInputUrlFinal" 
+                    value="https://cafecomciencia.netlify.app/"
+                    oninput="aoDigitarUrlQrCode()" 
+                    placeholder="https://cafecomciencia.netlify.app/..."
+                    class="w-full pl-4 pr-32 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs sm:text-sm font-mono text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 transition"
+                  />
+                  <button 
+                    type="button" 
+                    onclick="testarLinkQrCodeNoNavegador()" 
+                    class="absolute right-2 top-2 px-3 py-1.5 rounded-xl bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold flex items-center gap-1 transition cursor-pointer"
+                    title="Testar link em nova aba"
+                  >
+                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Testar Link</span>
+                  </button>
+                </div>
+                <p id="qrDescricaoDestino" class="text-xs text-stone-500 italic">
+                  Página inicial com visão geral de todas as palestras, novidades e certificados da Liga.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Card: Customização Visual e Tamanho -->
+            <div class="bg-white rounded-3xl p-6 border border-stone-200 shadow-xs space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-coffee-950 flex items-center gap-2">
+                  <i data-lucide="sliders" class="w-5 h-5 text-amber-600"></i>
+                  <span>2. Resolução e Formato para Impressão</span>
+                </h3>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-700">Etapa 2</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Resolução de Exportação -->
+                <div class="space-y-1.5">
+                  <label for="qrSelectResolucao" class="block text-xs font-bold uppercase tracking-wider text-stone-600">Resolução do Arquivo PNG:</label>
+                  <select 
+                    id="qrSelectResolucao" 
+                    onchange="aoMudarConfigQrCode()"
+                    class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 cursor-pointer"
+                  >
+                    <option value="400">400 x 400 px (WhatsApp & Telas)</option>
+                    <option value="800" selected>800 x 800 px (Panfletos & Crachás - Ideal)</option>
+                    <option value="1200">1200 x 1200 px (Alta Definição para Cartazes A4/A3)</option>
+                    <option value="2000">2000 x 2000 px (Ultra HD para Banners e Telões)</option>
+                  </select>
+                </div>
+
+                <!-- Cor do QR Code -->
+                <div class="space-y-1.5">
+                  <label for="qrSelectCor" class="block text-xs font-bold uppercase tracking-wider text-stone-600">Paleta de Cores:</label>
+                  <select 
+                    id="qrSelectCor" 
+                    onchange="aoMudarConfigQrCode()"
+                    class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 cursor-pointer"
+                  >
+                    <option value="2F180E" selected>☕ Café Nobre (#2F180E - Identidade da Liga)</option>
+                    <option value="000000">⚫ Preto Clássico (#000000 - Contraste Máximo)</option>
+                    <option value="874C27">🌰 Terracota / Âmbar (#874C27)</option>
+                    <option value="1E3A8A">🔵 Azul Marinho (#1E3A8A)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <!-- Margem / Borda Branca -->
+                <div class="space-y-1.5">
+                  <label for="qrSelectMargem" class="block text-xs font-bold uppercase tracking-wider text-stone-600">Margem Branca (Quiet Zone):</label>
+                  <select 
+                    id="qrSelectMargem" 
+                    onchange="aoMudarConfigQrCode()"
+                    class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600 cursor-pointer"
+                  >
+                    <option value="2" selected>Média (2 blocos - Recomendado)</option>
+                    <option value="1">Compacta (1 bloco)</option>
+                    <option value="4">Ampla (4 blocos - Impressão com borda)</option>
+                  </select>
+                </div>
+
+                <!-- Legenda do Cartaz -->
+                <div class="space-y-1.5">
+                  <label for="qrInputLegenda" class="block text-xs font-bold uppercase tracking-wider text-stone-600">Texto / Subtítulo no Cartaz:</label>
+                  <input 
+                    type="text" 
+                    id="qrInputLegenda" 
+                    value="Acesse o Portal do Café com Ciência"
+                    oninput="aoDigitarLegendaQrCode()"
+                    class="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-600"
+                  />
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Coluna Direita: Pré-visualização e Ações -->
+          <div class="lg:col-span-6 xl:col-span-5 space-y-6">
+
+            <!-- Card de Prévia Ao Vivo -->
+            <div class="bg-white rounded-3xl p-6 border border-stone-200 shadow-sm space-y-5">
+              <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+                <h3 class="text-base font-bold text-coffee-950 flex items-center gap-2">
+                  <i data-lucide="eye" class="w-5 h-5 text-emerald-600"></i>
+                  <span>3. Prévia do QR Code</span>
+                </h3>
+                <span class="text-xs font-mono font-bold text-stone-500" id="qrPreviewTamanhoBadge">800x800 px</span>
+              </div>
+
+              <!-- Mockup de Cartaz Impresso / Display -->
+              <div id="qrPrintCardPreview" class="bg-gradient-to-b from-stone-50 to-stone-100/80 p-6 rounded-2xl border border-stone-200 flex flex-col items-center justify-center text-center space-y-4 shadow-inner">
+                
+                <div class="space-y-1">
+                  <span class="inline-block text-[10px] font-black tracking-widest uppercase text-amber-900 bg-amber-100 px-3 py-0.5 rounded-full border border-amber-300/50">
+                    Liga Acadêmica Café com Ciência
+                  </span>
+                  <h4 id="qrCardTituloPreview" class="text-lg font-black text-coffee-950 font-serif leading-tight">
+                    Portal Café com Ciência
+                  </h4>
+                </div>
+
+                <!-- Contêiner do QR Code (Moldura Branca) -->
+                <div class="relative bg-white p-4 rounded-2xl border-2 border-stone-200/90 shadow-md flex items-center justify-center min-w-[220px] min-h-[220px]">
+                  <img 
+                    id="qrImgPreview" 
+                    src="https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=https%3A%2F%2Fcafecomciencia.netlify.app%2F&color=2F180E&margin=2" 
+                    alt="QR Code Café com Ciência"
+                    class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg transition-transform duration-300"
+                    onload="aoCarregarImagemQrCode(true)"
+                    onerror="aoCarregarImagemQrCode(false)"
+                  />
+                  <div id="qrLoadingSpinner" class="absolute inset-0 bg-white/90 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center gap-2 hidden">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-amber-600 animate-spin"></i>
+                    <span class="text-xs font-bold text-stone-600">Gerando QR Code...</span>
+                  </div>
+                </div>
+
+                <!-- Legenda e URL -->
+                <div class="space-y-1 max-w-xs">
+                  <p id="qrCardLegendaPreview" class="text-xs font-bold text-stone-700">
+                    Acesse o Portal do Café com Ciência
+                  </p>
+                  <p id="qrCardUrlPreview" class="text-[11px] font-mono text-amber-900 break-all select-all font-semibold">
+                    https://cafecomciencia.netlify.app/
+                  </p>
+                </div>
+              </div>
+
+              <!-- Botões de Ação -->
+              <div class="space-y-2.5 pt-2">
+                <button 
+                  type="button" 
+                  id="btnBaixarQrCode"
+                  onclick="baixarQrCodeAdmin()"
+                  class="w-full py-3.5 px-4 bg-coffee-950 hover:bg-stone-900 text-amber-300 font-bold text-sm rounded-2xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <i data-lucide="download" class="w-4 h-4 text-amber-400"></i>
+                  <span>Baixar Imagem em Alta Resolução (PNG)</span>
+                </button>
+
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button 
+                    type="button" 
+                    id="btnCopiarLinkQrCode"
+                    onclick="copiarLinkQrCodeAdmin()"
+                    class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <i data-lucide="copy" class="w-3.5 h-3.5 text-amber-700"></i>
+                    <span id="txtBtnCopiarLinkQr">Copiar Link</span>
+                  </button>
+
+                  <button 
+                    type="button" 
+                    id="btnImprimirCartazQr"
+                    onclick="imprimirCartazQrCodeAdmin()"
+                    class="py-2.5 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl border border-stone-200 transition flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <i data-lucide="printer" class="w-3.5 h-3.5 text-blue-600"></i>
+                    <span>Imprimir Cartaz</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Dica Rápida para Portaria / NFC -->
+            <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 flex items-start gap-3 text-xs text-amber-950">
+              <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+              <div class="space-y-1">
+                <span class="font-bold">Dica para Portaria Física & Tags NFC:</span>
+                <p class="text-amber-900 leading-relaxed">
+                  Para cartazes impressos fixados na porta do auditório ou etiquetas físicas NFC, escolha a opção <strong>"Portaria & Check-in Inteligente (Link Único NFC)"</strong>. O link <code class="bg-amber-100 px-1 py-0.5 rounded text-[11px] font-mono">/checkin.html</code> é fixo e redirecionará automaticamente os alunos para o café ativo definido no painel!
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
     </main>
 
     <!-- Rodapé do Dashboard -->
@@ -1748,10 +2043,10 @@
   </div>
 
   <!-- Scripts do Painel Administrativo -->
-  <script src="js/supabase-client.js?v=14"></script>
-  <script src="js/email-service.js?v=14"></script>
-  <script src="js/qr-scanner.js?v=14"></script>
-  <script src="js/admin.js?v=14"></script>
+  <script src="js/supabase-client.js?v=15"></script>
+  <script src="js/email-service.js?v=15"></script>
+  <script src="js/qr-scanner.js?v=15"></script>
+  <script src="js/admin.js?v=15"></script>
 
   <script>
     // Inicialização da Página Dedicada de Admin
@@ -1762,7 +2057,7 @@
 
       // Suporte a hash de aba (#portaria, #lembretes, #resend_teste)
       const hash = window.location.hash.replace('#', '');
-      if (['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados'].includes(hash)) {
+      if (['inscricoes', 'portaria', 'lembretes', 'resend_teste', 'certificados', 'qrcode'].includes(hash)) {
         trocarAbaAdmin(hash);
       }
     });
