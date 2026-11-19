@@ -1650,34 +1650,36 @@ function renderizarAreaAlunoSemInscricao(content, usuario) {
       <div class="p-4 bg-amber-50/90 rounded-2xl border border-amber-200 text-xs text-amber-900 text-left space-y-2">
         <p class="font-bold flex items-center gap-1.5 text-amber-950">
           <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0"></i>
-          Você ainda não se inscreveu nas palestras:
+          Ciclo de Palestras do Semestre Encerrado
         </p>
         <p class="leading-relaxed">
-          Sua conta está conectada, mas você ainda não concluiu o pagamento do Pix (R$ 10,00) para gerar sua credencial oficial com QR Code. Escolha a palestra abaixo para se inscrever:
+          Todas as edições deste semestre letivo (10°, 11° e 12° Café com Ciência) foram realizadas com sucesso. Novas palestras acontecerão no próximo semestre! Se você participou, consulte seus dados e declarações no Portal.
         </p>
       </div>
 
       <div class="space-y-3 pt-1 text-left">
-        <!-- Card 12° Café (Aberto) -->
-        <a href="12cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border-2 border-emerald-400 bg-emerald-50/50 hover:bg-emerald-50 transition flex items-center justify-between gap-3 group shadow-xs">
-          <div>
-            <span class="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">12ª Edição · Inscrições Abertas</span>
-            <h5 class="text-xs font-bold text-stone-900 mt-1">Diagnóstico e Planejamento na Reabilitação Oral</h5>
-            <p class="text-[11px] text-stone-600">Dra. Thaissa Calab · 18 de Novembro às 16h · Certificado de 2 horas</p>
+        <!-- Card Informativo: Ciclo do Semestre Encerrado -->
+        <div class="p-4 rounded-2xl border border-amber-300 bg-amber-50/70 flex items-start gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
+            <i data-lucide="sparkles" class="w-5 h-5 text-amber-700"></i>
           </div>
-          <span class="px-3 py-1.5 bg-coffee-900 group-hover:bg-black text-white rounded-xl text-xs font-bold shrink-0 shadow">
-            Inscrever (R$ 10)
-          </span>
-        </a>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded border border-amber-300">Ciclo Concluído</span>
+            <h5 class="text-xs sm:text-sm font-bold text-stone-900 mt-1">Novas Palestras no Próximo Semestre!</h5>
+            <p class="text-[11px] text-stone-600 mt-0.5 leading-relaxed">
+              As inscrições online deste semestre estão encerradas. Em breve anunciaremos os novos temas e palestrantes do próximo semestre.
+            </p>
+          </div>
+        </div>
 
         <!-- Card Portal Histórico -->
-        <a href="portal.html" onclick="fecharAreaDoAluno()" class="p-3 rounded-2xl border border-stone-200 hover:border-coffee-300 hover:bg-stone-50 transition flex items-center justify-between gap-3 text-stone-600">
+        <a href="portal.html" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-stone-200 hover:border-coffee-300 hover:bg-stone-50 transition flex items-center justify-between gap-3 text-stone-600">
           <div>
-            <span class="text-[10px] uppercase font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded">Edições Anteriores</span>
-            <h5 class="text-xs font-bold text-stone-800 mt-1">10° e 11° Café com Ciência</h5>
-            <p class="text-[11px] text-stone-500">Inscrições encerradas · Ver histórico e certificados no Portal</p>
+            <span class="text-[10px] uppercase font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded">Edições Realizadas</span>
+            <h5 class="text-xs font-bold text-stone-800 mt-1">10°, 11° e 12° Café com Ciência</h5>
+            <p class="text-[11px] text-stone-500">Inscrições encerradas · Ver histórico e declarações no Portal</p>
           </div>
-          <span class="text-xs font-bold text-coffee-700 flex items-center gap-1">
+          <span class="text-xs font-bold text-coffee-700 flex items-center gap-1 shrink-0">
             <span>Ver Portal</span>
             <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
           </span>

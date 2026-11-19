@@ -255,11 +255,11 @@ async function obterConfiguracoesSistema() {
   }
 
   return {
-    inscricoes_10: localStorage.getItem('cafe_inscricoes_encerradas_10') === 'true' ? 'encerradas' : 'abertas',
-    inscricoes_11: localStorage.getItem('cafe_inscricoes_encerradas_11') === 'true' ? 'encerradas' : 'abertas',
-    inscricoes_12: localStorage.getItem('cafe_inscricoes_encerradas_12') === 'true' ? 'encerradas' : 'abertas',
+    inscricoes_10: localStorage.getItem('cafe_inscricoes_encerradas_10') === 'false' ? 'abertas' : 'encerradas',
+    inscricoes_11: localStorage.getItem('cafe_inscricoes_encerradas_11') === 'false' ? 'abertas' : 'encerradas',
+    inscricoes_12: localStorage.getItem('cafe_inscricoes_encerradas_12') === 'false' ? 'abertas' : 'encerradas',
     edicao_ativa_portaria: localStorage.getItem('cafe_edicao_ativa_portaria') ? parseInt(localStorage.getItem('cafe_edicao_ativa_portaria'), 10) : 12,
-    certificados_liberados: localStorage.getItem('cafe_certificados_liberados') === 'true'
+    certificados_liberados: localStorage.getItem('cafe_certificados_liberados') !== 'false'
   };
 }
 
@@ -378,7 +378,12 @@ function obterInfoEdicao(edicao) {
 function estaoInscricoesEncerradas(edicao = 10) {
   const n = parseInt(edicao, 10);
   const ed = (n === 12 || n === 11) ? n : 10;
-  return localStorage.getItem(`cafe_inscricoes_encerradas_${ed}`) === 'true';
+  if (configSistemaCache && configSistemaCache[`inscricoes_${ed}`]) {
+    return configSistemaCache[`inscricoes_${ed}`] === 'encerradas';
+  }
+  const item = localStorage.getItem(`cafe_inscricoes_encerradas_${ed}`);
+  if (item !== null) return item === 'true';
+  return true; // Por padrão seguro, todas as edições passadas (10, 11 e 12) estão encerradas
 }
 
 async function alternarInscricoesEncerradas(edicao = 10, novoStatusEncerradas = true) {

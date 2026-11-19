@@ -74,7 +74,7 @@
             <span class="hidden sm:inline-flex px-1.5 py-0.5 text-[9px] uppercase font-bold tracking-wider rounded-md bg-coffee-100 text-coffee-800 border border-coffee-300 leading-none shrink-0">12ª Edição</span>
           </div>
           <span class="text-[10px] sm:text-[11px] text-stone-500 font-medium leading-none mt-0.5 truncate">
-            Liga de Odontologia <span class="sm:hidden text-coffee-700 font-bold">· 11ª Ed.</span>
+            Liga de Odontologia <span class="sm:hidden text-coffee-700 font-bold">· 12ª Ed.</span>
           </span>
         </div>
       </a>
@@ -87,7 +87,7 @@
         </a>
         <a href="#palestrante" class="hover:text-coffee-700 transition">A Palestrante</a>
         <a href="#local" class="hover:text-coffee-700 transition">Data & Local</a>
-        <a href="#inscricao" class="hover:text-coffee-700 transition text-coffee-900 font-bold">Inscrição</a>
+        <a href="#inscricao" class="hover:text-coffee-700 transition text-coffee-900 font-bold">Inscrição & Declaração</a>
         <a href="https://www.instagram.com/cafecomciencia.arnaldobh/" target="_blank" rel="noopener noreferrer" class="p-1.5 text-stone-400 hover:text-pink-600 rounded-lg hover:bg-pink-50 transition" title="Instagram Oficial (@cafecomciencia.arnaldobh)">
           <svg class="w-4 h-4 text-pink-500 fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
         </a>
@@ -104,18 +104,18 @@
           <span>Painel da Liga</span>
         </a>
 
-        <!-- CTA Inscrição -->
-        <a href="#inscricao" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white gradient-cta shadow-md hover:shadow-lg transition transform active:scale-95 shrink-0 whitespace-nowrap">
-          <span>Garantir Vaga</span>
-          <i data-lucide="arrow-right" class="w-4 h-4"></i>
-        </a>
+        <!-- CTA Inscrição / Consulta -->
+        <button onclick="abrirModalConsulta()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-coffee-800 hover:bg-coffee-900 shadow-md hover:shadow-lg transition transform active:scale-95 shrink-0 whitespace-nowrap">
+          <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
+          <span>Consultar Declaração</span>
+        </button>
       </div>
 
       <!-- Controles Mobile (Compactos e que cabem 100% na tela) -->
       <div class="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
-        <a href="#inscricao" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-white gradient-cta shadow-sm whitespace-nowrap active:scale-95 transition">
-          Inscrever
-        </a>
+        <button onclick="abrirModalConsulta()" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-white bg-coffee-800 shadow-sm whitespace-nowrap active:scale-95 transition">
+          Consultar
+        </button>
         <button 
           id="btnMenuMobile" 
           onclick="toggleMenuMobile()" 
@@ -183,12 +183,20 @@
         <div class="lg:col-span-6 space-y-6">
           
           <div class="flex flex-wrap items-center gap-2.5">
-            <!-- Badge 12° Café com Ciência sem emote de estrelinha -->
+            <!-- Badge 12° Café com Ciência -->
             <span class="inline-flex items-center px-3.5 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
               <span>12° Café com Ciência</span>
             </span>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-white/10 text-stone-300 border border-white/15">
-              <span>18 de Novembro · 16:00</span>
+              <span>Realizado em 18 de Novembro</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-500/25 text-red-300 border border-red-500/40 shadow-xs">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+              <span>Inscrições Encerradas</span>
+            </span>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-xs">
+              <i data-lucide="award" class="w-3.5 h-3.5"></i>
+              <span>Declarações Liberadas</span>
             </span>
           </div>
 
@@ -222,22 +230,22 @@
               <div class="flex items-center gap-2 text-amber-300 text-xs font-semibold mb-1">
                 <i data-lucide="award" class="w-4 h-4"></i> Certificado
               </div>
-              <div class="text-white font-bold text-sm">Incluso</div>
-              <div class="text-stone-400 text-xs">Horas Complementares</div>
+              <div class="text-white font-bold text-sm">2 Horas</div>
+              <div class="text-stone-400 text-xs">Liberado para Alunos</div>
             </div>
           </div>
 
           <!-- CTAs e Avisos -->
           <div class="pt-4 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <a href="#inscricao" class="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-white gradient-cta shadow-xl hover:shadow-2xl transition transform active:scale-95">
-              <span>Garantir Minha Vaga (R$ 10,00)</span>
-              <i data-lucide="arrow-right" class="w-5 h-5"></i>
-            </a>
-
-            <button onclick="abrirAreaDoAluno()" class="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-xs sm:text-sm font-semibold text-stone-200 bg-white/10 hover:bg-white/15 border border-white/20 transition backdrop-blur-md">
-              <i data-lucide="user-check" class="w-4 h-4 text-amber-300"></i>
-              <span>Já me inscrevi (Ver Credencial)</span>
+            <button onclick="abrirModalConsulta()" class="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl text-base font-bold text-white bg-coffee-800 hover:bg-coffee-900 shadow-xl hover:shadow-2xl transition transform active:scale-95">
+              <i data-lucide="award" class="w-5 h-5 text-amber-300"></i>
+              <span>Consultar Inscrição / Declaração</span>
             </button>
+
+            <a href="portal.html" class="inline-flex items-center justify-center gap-2 px-5 py-4 rounded-xl text-xs sm:text-sm font-semibold text-stone-200 bg-white/10 hover:bg-white/15 border border-white/20 transition backdrop-blur-md">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-amber-300"></i>
+              <span>Ver Portal de Palestras</span>
+            </a>
           </div>
 
           <div class="flex items-center gap-2 text-stone-300 text-xs pt-1">
@@ -453,15 +461,15 @@
       
       <!-- Cabeçalho da Seção -->
       <div class="text-center max-w-3xl mx-auto mb-14">
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-pix text-xs font-bold mb-3">
-          Inscrição Imediata via PIX
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-100 text-red-900 border border-red-300 text-xs font-bold mb-3">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-red-700"></i>
+          <span>Inscrições Encerradas</span>
         </div>
         <h2 class="text-3xl font-extrabold text-coffee-900 sm:text-4xl font-serif">
-          Garanta seu lugar no 12° Café com Ciência
+          12° Café com Ciência Concluído
         </h2>
         <p class="text-stone-600 text-sm sm:text-base mt-2">
-          Para mantermos a qualidade do evento e o coffee break, solicitamos a contribuição de apenas <strong>R$ 10,00</strong>.
-          Faça o Pix, anexe o comprovante abaixo e sua vaga estará assegurada!
+          Esta edição foi realizada com sucesso em <strong>18 de Novembro de 2026</strong>. As inscrições online deste semestre estão encerradas e novas palestras acontecerão no próximo semestre. Se você participou, consulte seus dados e declaração oficial de horas complementares abaixo!
         </p>
       </div>
 
