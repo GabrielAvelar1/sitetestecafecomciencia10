@@ -186,9 +186,9 @@
       const codigoAutenticidade = aluno ? (aluno.certificado_codigo || `CERT-${aluno.protocolo}`) : `CERT-${prefixoCert}-${Math.floor(100000 + Math.random() * 900000)}`;
       const dataFormatada = formatarDataPorExtenso(aluno?.presenca_horario || dataDefault);
 
-      // 1. SE EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL (10° ou 11° CAFÉ), EXIBE O PDF DIRETO COM PRIORIDADE MÁXIMA
+      // 1. SE EXISTIR O PDF OFICIAL ENVIADO POR E-MAIL (10°, 11° ou 12° CAFÉ), EXIBE O PDF DIRETO COM PRIORIDADE MÁXIMA
       const protoUpperBusca = (aluno?.protocolo || protocolo || '').toUpperCase();
-      const isEdicaoComPdf = protoUpperBusca.startsWith('CC10-') || protoUpperBusca.startsWith('CC11-');
+      const isEdicaoComPdf = protoUpperBusca.startsWith('CC10-') || protoUpperBusca.startsWith('CC11-') || protoUpperBusca.startsWith('CC12-');
       const pdfEnviadoUrl = isEdicaoComPdf && window.LigaDB?.obterLinkDeclaracaoPdf 
         ? window.LigaDB.obterLinkDeclaracaoPdf(protoUpperBusca)
         : null;
@@ -227,7 +227,7 @@
                     <span>Abrir em Tela Cheia</span>
                   </a>
                   <a 
-                    href="${is11 ? '11cafe.html' : 'index.html'}?consultar=${aluno?.protocolo || protocolo}"
+                    href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : 'index.html')}?consultar=${aluno?.protocolo || protocolo}"
                     class="px-4 py-3 bg-amber-50 hover:bg-amber-100 text-coffee-950 font-bold text-xs sm:text-sm rounded-xl border border-amber-300 transition flex items-center gap-2"
                     title="Ver sua credencial oficial de inscrição com QR Code"
                   >

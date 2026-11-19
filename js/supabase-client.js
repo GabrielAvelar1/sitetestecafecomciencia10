@@ -1609,14 +1609,53 @@ const DECLARACOES_PDF_MAP = {
   "CC11-273289": "declaracoes_individuais/declaracao_CC11-273289_Thales_Wilson.pdf",
   "CC11-211015": "declaracoes_individuais/declaracao_CC11-211015_Gabriele_dos_Reis_Beato.pdf",
   "CC11-781985": "declaracoes_individuais/declaracao_CC11-781985_AILA_FERNANDES_RAMOS_E_SILVA.pdf",
-  "CC11-121635": "declaracoes_individuais/declaracao_CC11-121635_Laura_Avila_Soares.pdf"
+  "CC11-121635": "declaracoes_individuais/declaracao_CC11-121635_Laura_Avila_Soares.pdf",
+
+  // --- 12° CAFÉ COM CIÊNCIA ---
+  "CC12-510886": "declaracoes_individuais/declaracao_CC12-510886_Emanuelle_Vitoria.pdf",
+  "CC12-375547": "declaracoes_individuais/declaracao_CC12-375547_Deborah_Alves.pdf",
+  "CC12-795251": "declaracoes_individuais/declaracao_CC12-795251_Felipe_Henrique_Guedes_de_Souza.pdf",
+  "CC12-296411": "declaracoes_individuais/declaracao_CC12-296411_Carlos_Eduardo_Figueira_Mancia.pdf",
+  "CC12-213268": "declaracoes_individuais/declaracao_CC12-213268_Maria_Julia_Silva_dias_Paes.pdf",
+  "CC12-272750": "declaracoes_individuais/declaracao_CC12-272750_Rafaela_Alves_da_Mata.pdf",
+  "CC12-673831": "declaracoes_individuais/declaracao_CC12-673831_Kelly_Gabrielle_Couto_Aquino_de_Oliveira.pdf",
+  "CC12-959863": "declaracoes_individuais/declaracao_CC12-959863_Tatiellen_bruna_dos_Santos.pdf",
+  "CC12-431741": "declaracoes_individuais/declaracao_CC12-431741_Pedro_Henrique_da_Silva_Cota.pdf",
+  "CC12-162910": "declaracoes_individuais/declaracao_CC12-162910_Maira_Pinheiro_Neves.pdf",
+  "CC12-225562": "declaracoes_individuais/declaracao_CC12-225562_Raquel_pimenta.pdf",
+  "CC12-581583": "declaracoes_individuais/declaracao_CC12-581583_Chrystine_Pereira_Soares.pdf",
+  "CC12-464001": "declaracoes_individuais/declaracao_CC12-464001_Isabella_de_Cassia_Barboza_Castro.pdf",
+  "CC12-995950": "declaracoes_individuais/declaracao_CC12-995950_Otavio_Santiago_da_Silva.pdf",
+  "CC12-975084": "declaracoes_individuais/declaracao_CC12-975084_Michelle_Stole_Vieira_Cassavari.pdf",
+  "CC12-577249": "declaracoes_individuais/declaracao_CC12-577249_Isadora_Queiroz_Horta.pdf",
+  "CC12-875201": "declaracoes_individuais/declaracao_CC12-875201_Pedro_Paulo_Costa_e_Silva_de_Morais.pdf",
+  "CC12-436379": "declaracoes_individuais/declaracao_CC12-436379_Yasmim_Pereira_dos_Santos_Morais.pdf",
+  "CC12-165232": "declaracoes_individuais/declaracao_CC12-165232_Igor_Landolfi.pdf",
+  "CC12-900299": "declaracoes_individuais/declaracao_CC12-900299_Juliana_Dutra_de_Farias.pdf",
+  "CC12-297073": "declaracoes_individuais/declaracao_CC12-297073_Wendy_Shirll_da_Silva.pdf",
+  "CC12-809944": "declaracoes_individuais/declaracao_CC12-809944_Deborah_Ketlyn_Alves_Lage.pdf",
+  "CC12-243287": "declaracoes_individuais/declaracao_CC12-243287_Ana_Luiza_Martins_Hilario.pdf",
+  "CC12-848812": "declaracoes_individuais/declaracao_CC12-848812_ELIANE_CARMEM_COSTA_CABRAL.pdf",
+  "CC12-479054": "declaracoes_individuais/declaracao_CC12-479054_Sarah_Victoria_dos_Santos_Costa.pdf",
+  "CC12-880141": "declaracoes_individuais/declaracao_CC12-880141_Shara_Soares_Braganca.pdf",
+  "CC12-270986": "declaracoes_individuais/declaracao_CC12-270986_Iasmim_Nunes_Alves.pdf",
+  "CC12-674850": "declaracoes_individuais/declaracao_CC12-674850_Luiz_Eduardo_Evangelista_Rafael.pdf",
+  "CC12-261880": "declaracoes_individuais/declaracao_CC12-261880_Felipe_Tacchi.pdf",
+  "CC12-754767": "declaracoes_individuais/declaracao_CC12-754767_Chelsea_Lyssa_de_Souza_Lino.pdf",
+  "CC12-988472": "declaracoes_individuais/declaracao_CC12-988472_Maria_Luisa_Ribeiro_dos_Santos.pdf",
+  "CC12-967927": "declaracoes_individuais/declaracao_CC12-967927_Gabriele_dos_Reis_Beato.pdf",
+  "CC12-470260": "declaracoes_individuais/declaracao_CC12-470260_Cely_Regina_Martins_Rocha_de_Lacerda.pdf",
+  "CC12-317833": "declaracoes_individuais/declaracao_CC12-317833_Julia_Soares_Souto.pdf",
+  "CC12-612610": "declaracoes_individuais/declaracao_CC12-612610_Geovana_Oliveira_Ferreira.pdf",
+  "CC12-466452": "declaracoes_individuais/declaracao_CC12-466452_Amanda_Laysa_Almeida_Santos.pdf",
+  "CC12-960259": "declaracoes_individuais/declaracao_CC12-960259_Fabio_Fonseca_Queiroz.pdf",
 };
 
 function obterLinkDeclaracaoPdf(protocolo) {
   if (!protocolo) return null;
   const protoUpper = String(protocolo).trim().toUpperCase();
   // As declarações em PDF pertencem ao 10° Café (CC10-) e 11° Café (CC11-)
-  if (!protoUpper.startsWith('CC10-') && !protoUpper.startsWith('CC11-')) {
+  if (!protoUpper.startsWith('CC10-') && !protoUpper.startsWith('CC11-') && !protoUpper.startsWith('CC12-')) {
     return null;
   }
   return DECLARACOES_PDF_MAP[protoUpper] || null;

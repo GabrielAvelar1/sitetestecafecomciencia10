@@ -672,7 +672,7 @@
                   <div class="pt-2 border-t border-stone-200/60 flex flex-wrap gap-2">
                     ${(() => {
                       const itemProto = (item.protocolo || '').toUpperCase();
-                      const isItemComPdf = itemProto.startsWith('CC10-') || itemProto.startsWith('CC11-') || edNum === 10 || edNum === 11;
+                      const isItemComPdf = itemProto.startsWith('CC10-') || itemProto.startsWith('CC11-') || itemProto.startsWith('CC12-') || edNum === 10 || edNum === 11 || edNum === 12;
                       const pdfLink = isItemComPdf && window.LigaDB?.obterLinkDeclaracaoPdf 
                         ? window.LigaDB.obterLinkDeclaracaoPdf(itemProto)
                         : null;
