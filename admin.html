@@ -236,12 +236,12 @@
           </div>
         </div>
 
-        <!-- Ações do Cabeçalho -->
+        <!-- Ações do Cabeçalho Desktop + Botão Hamburguer Mobile -->
         <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           <a 
             href="index.html" 
             target="_blank" 
-            class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold border border-white/10 transition whitespace-nowrap"
+            class="hidden md:inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold border border-white/10 transition whitespace-nowrap"
             title="Visualizar o Portal Oficial com todas as palestras"
           >
             <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-amber-300 shrink-0"></i>
@@ -251,7 +251,7 @@
           <a 
             href="12cafe.html" 
             target="_blank" 
-            class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 text-xs font-bold border border-purple-400/30 transition shadow-xs whitespace-nowrap"
+            class="hidden lg:inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 text-xs font-bold border border-purple-400/30 transition shadow-xs whitespace-nowrap"
             title="Visualizar a página da 12ª Edição"
           >
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-300 shrink-0"></i>
@@ -261,7 +261,7 @@
           <a 
             href="11cafe.html" 
             target="_blank" 
-            class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-bold border border-amber-400/30 transition shadow-xs whitespace-nowrap"
+            class="hidden lg:inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-bold border border-amber-400/30 transition shadow-xs whitespace-nowrap"
             title="Visualizar a página da 11ª Edição"
           >
             <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300 shrink-0"></i>
@@ -271,7 +271,7 @@
           <a 
             href="10cafe.html" 
             target="_blank" 
-            class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold border border-white/10 transition whitespace-nowrap"
+            class="hidden xl:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold border border-white/10 transition whitespace-nowrap"
             title="Visualizar o site da 10ª Edição"
           >
             <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
@@ -280,20 +280,32 @@
 
           <button 
             onclick="desconectarOrganizadorAdmin()" 
-            class="inline-flex items-center gap-1 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-semibold border border-red-500/30 transition whitespace-nowrap"
+            class="hidden sm:inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-semibold border border-red-500/30 transition whitespace-nowrap cursor-pointer"
             title="Sair da conta de organizador"
           >
             <i data-lucide="log-out" class="w-3.5 h-3.5 shrink-0"></i>
-            <span class="hidden sm:inline">Sair</span>
+            <span>Sair</span>
+          </button>
+
+          <!-- Botão Hamburguer Mobile Oficial -->
+          <button 
+            type="button"
+            id="btnMenuMobileAdmin" 
+            onclick="toggleMenuMobileAdmin()" 
+            class="sm:hidden p-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-white border border-white/15 transition flex items-center justify-center cursor-pointer shadow-xs"
+            aria-label="Abrir Menu de Navegação"
+            title="Menu do Painel"
+          >
+            <i data-lucide="menu" id="iconMenuMobileAdmin" class="w-5 h-5 text-amber-300"></i>
           </button>
         </div>
 
       </div>
 
-      <!-- Barra de Navegação de Abas -->
-      <div class="bg-coffee-900 border-t border-coffee-800/80">
-        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
-          <nav class="flex space-x-1.5 sm:space-x-4 overflow-x-auto no-scrollbar py-2 text-xs sm:text-sm font-semibold">
+      <!-- Barra de Navegação de Abas Desktop (Horizontal) -->
+      <div class="hidden sm:block bg-coffee-900 border-t border-coffee-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex space-x-2 overflow-x-auto no-scrollbar py-2 text-xs sm:text-sm font-semibold">
             <button 
               id="tabBtn_inscricoes" 
               onclick="trocarAbaAdmin('inscricoes')" 
@@ -349,6 +361,187 @@
           </nav>
         </div>
       </div>
+    </header>
+
+    <!-- ================= MENU GAVETA MOBILE (HAMBÚRGUER) ================= -->
+    <div id="drawerMenuMobileAdmin" class="fixed inset-0 z-50 hidden sm:hidden">
+      <!-- Backdrop Escuro -->
+      <div 
+        id="backdropMenuMobileAdmin" 
+        onclick="fecharMenuMobileAdmin()" 
+        class="fixed inset-0 bg-black/70 backdrop-blur-xs transition-opacity duration-300"
+      ></div>
+      
+      <!-- Painel Gaveta Lateral -->
+      <div class="fixed top-0 bottom-0 left-0 w-80 max-w-[85vw] bg-coffee-950 text-white shadow-2xl flex flex-col z-10 border-r border-coffee-800 animate-in slide-in-from-left duration-200">
+        
+        <!-- Topo da Gaveta -->
+        <div class="p-4 border-b border-coffee-800/80 flex items-center justify-between bg-coffee-900/60">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white p-1 overflow-hidden shadow shrink-0 border border-coffee-400">
+              <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
+            </div>
+            <div>
+              <h3 class="font-serif font-black text-sm text-white leading-tight">Café com Ciência</h3>
+              <span class="text-[11px] text-amber-300 font-semibold">Painel Administrativo</span>
+            </div>
+          </div>
+          <button 
+            type="button"
+            onclick="fecharMenuMobileAdmin()" 
+            class="p-2 text-stone-400 hover:text-white rounded-xl hover:bg-white/10 transition cursor-pointer"
+            title="Fechar Menu"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Indicador de Status do Supabase no Mobile -->
+        <div class="px-4 py-2.5 bg-black/20 border-b border-coffee-800/40 flex items-center justify-between text-xs">
+          <span class="text-stone-300 font-medium">Banco de Dados:</span>
+          <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Online</span>
+          </span>
+        </div>
+
+        <!-- Lista de Abas do Painel -->
+        <div class="flex-1 overflow-y-auto p-3 space-y-1.5">
+          <div class="text-[10px] uppercase font-black tracking-wider text-amber-400/80 px-2 py-1">
+            Seções do Painel
+          </div>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_inscricoes" 
+            onclick="selecionarAbaMobile('inscricoes')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition bg-white/20 text-amber-300 font-black border border-amber-400/40 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+              <i data-lucide="users" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Inscrições & Alunos</div>
+              <div class="text-[11px] text-stone-300 truncate">Aprovar Pix, presença e contatos</div>
+            </div>
+          </button>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_portaria" 
+            onclick="selecionarAbaMobile('portaria')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition text-stone-300 hover:bg-white/10 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center shrink-0">
+              <i data-lucide="scan-line" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Portaria & Scanner QR</div>
+              <div class="text-[11px] text-stone-400 truncate">Validação de check-in e crachás</div>
+            </div>
+          </button>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_lembretes" 
+            onclick="selecionarAbaMobile('lembretes')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition text-stone-300 hover:bg-white/10 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+              <i data-lucide="bell" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Disparador de Lembretes</div>
+              <div class="text-[11px] text-stone-400 truncate">Mensagens em massa via WhatsApp</div>
+            </div>
+          </button>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_certificados" 
+            onclick="selecionarAbaMobile('certificados')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition text-stone-300 hover:bg-white/10 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
+              <i data-lucide="award" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Gerador de Certificados</div>
+              <div class="text-[11px] text-stone-400 truncate">Emissão individual ou em lote</div>
+            </div>
+          </button>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_qrcode" 
+            onclick="selecionarAbaMobile('qrcode')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition text-stone-300 hover:bg-white/10 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0">
+              <i data-lucide="qr-code" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Gerador de QR Code</div>
+              <div class="text-[11px] text-stone-400 truncate">Portal, portaria e edições</div>
+            </div>
+          </button>
+
+          <button 
+            type="button"
+            id="mobileTabBtn_resend_teste" 
+            onclick="selecionarAbaMobile('resend_teste')" 
+            class="w-full text-left px-3.5 py-3 rounded-2xl flex items-center gap-3 font-semibold text-xs transition text-stone-300 hover:bg-white/10 cursor-pointer"
+          >
+            <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-300 flex items-center justify-center shrink-0">
+              <i data-lucide="mail-check" class="w-4 h-4"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-white text-sm">Testes de E-mail (Resend)</div>
+              <div class="text-[11px] text-stone-400 truncate">Disparos de teste e logs</div>
+            </div>
+          </button>
+
+          <!-- Atalhos para o Site Público -->
+          <div class="pt-3 pb-1 border-t border-coffee-800/80">
+            <div class="text-[10px] uppercase font-black tracking-wider text-amber-400/80 px-2 py-1">
+              Ver Páginas Públicas
+            </div>
+            <div class="grid grid-cols-2 gap-2 mt-1.5">
+              <a href="index.html" target="_blank" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-amber-300"></i>
+                <span>Portal</span>
+              </a>
+              <a href="12cafe.html" target="_blank" class="px-3 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 text-xs font-bold flex items-center gap-1.5 transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-300"></i>
+                <span>12° Café</span>
+              </a>
+              <a href="11cafe.html" target="_blank" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-bold flex items-center gap-1.5 transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+                <span>11° Café</span>
+              </a>
+              <a href="10cafe.html" target="_blank" class="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition">
+                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                <span>10° Café</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Rodapé da Gaveta -->
+        <div class="p-4 border-t border-coffee-800/80 bg-coffee-950">
+          <button 
+            type="button"
+            onclick="desconectarOrganizadorAdmin()" 
+            class="w-full py-3 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer shadow-md"
+          >
+            <i data-lucide="log-out" class="w-4 h-4"></i>
+            <span>Sair da Área Administrativa</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
     </header>
 
     <!-- Conteúdo Principal -->
@@ -510,29 +703,141 @@
           </button>
         </div>
 
-        <!-- Card Principal da Tabela de Inscrições -->
-        <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+        <!-- Card Principal da Gestão de Inscrições (Visão Tabela & Cards) -->
+        <div class="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
           
-          <!-- Barra de Ferramentas / Filtros / Ações -->
-          <div class="p-4 sm:p-5 border-b border-stone-100 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-stone-50/60">
+          <!-- Barra de Ferramentas / Filtros / Modos de Visão -->
+          <div class="p-4 sm:p-5 border-b border-stone-100 flex flex-col gap-3.5 bg-stone-50/70">
             
-            <!-- Campo de Busca e Filtros Rápidos -->
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 max-w-2xl">
-              <div class="relative flex-1">
+            <!-- Linha 1: Busca, Filtro de Status, Alternador Tabela/Cards e Ações Globais -->
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+              
+              <!-- Campo de Busca -->
+              <div class="relative flex-1 max-w-xl">
                 <i data-lucide="search" class="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
                 <input 
                   type="text" 
                   id="inputBuscaInscritosAdmin" 
                   oninput="filtrarInscricoesTabelaAdmin()" 
-                  placeholder="Buscar por nome, email ou protocolo (CC10-...)" 
+                  placeholder="Buscar por nome, e-mail, telefone ou protocolo..." 
                   class="w-full pl-10 pr-4 py-2.5 text-xs sm:text-sm rounded-xl border border-stone-300 bg-white focus:border-coffee-600 focus:ring-2 focus:ring-coffee-200 outline-none transition"
                 />
               </div>
 
+              <!-- Controles à Direita: Modo Tabela/Cards + Ações Globais -->
+              <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
+                
+                <!-- Alternador de Modo de Visualização (Tabela vs Cards) -->
+                <div class="flex items-center bg-stone-200/80 p-1 rounded-xl shadow-2xs">
+                  <button 
+                    type="button"
+                    id="btnModoTabela" 
+                    onclick="alternarModoVisualizacao('tabela')" 
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-coffee-950 shadow-xs cursor-pointer"
+                    title="Modo Tabela Compacta (ideal para PC)"
+                  >
+                    <i data-lucide="table" class="w-3.5 h-3.5 text-amber-700"></i>
+                    <span class="hidden sm:inline">Tabela</span>
+                  </button>
+
+                  <button 
+                    type="button"
+                    id="btnModoCards" 
+                    onclick="alternarModoVisualizacao('cards')" 
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition flex items-center gap-1.5 cursor-pointer"
+                    title="Modo Cards Responsivos (ideal para Celular & Tablet)"
+                  >
+                    <i data-lucide="layout-grid" class="w-3.5 h-3.5 text-amber-700"></i>
+                    <span class="hidden sm:inline">Cards</span>
+                  </button>
+                </div>
+
+                <div class="h-6 w-px bg-stone-200 hidden sm:block"></div>
+
+                <!-- Botões de Ação do Banco -->
+                <button 
+                  type="button"
+                  onclick="carregarInscricoesAdmin()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-700 font-semibold text-xs hover:bg-stone-100 transition shadow-2xs cursor-pointer"
+                  title="Recarregar lista do Supabase"
+                >
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Atualizar</span>
+                </button>
+                
+                <button 
+                  type="button"
+                  onclick="exportarParaCSV()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition shadow-2xs cursor-pointer"
+                  title="Baixar lista completa em planilha Excel / CSV"
+                >
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Exportar</span>
+                </button>
+
+                <button 
+                  type="button"
+                  onclick="abrirModalResetarBanco()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition shadow-2xs cursor-pointer"
+                  title="Apagar dados e comprovantes para limpeza oficial (exige senha cafe2026)"
+                >
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span class="hidden sm:inline">Zerar Banco</span>
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Linha 2: Chips de Filtro Rápido com Contadores (Aprovação sem arrastar!) -->
+            <div class="flex items-center justify-between gap-2 flex-wrap pt-1 border-t border-stone-200/60">
+              <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 text-xs">
+                <button 
+                  type="button"
+                  onclick="filtrarRapidoStatus('todos')" 
+                  id="chipFiltro_todos"
+                  class="px-3 py-1 rounded-full font-bold transition whitespace-nowrap bg-coffee-950 text-white shadow-2xs cursor-pointer"
+                >
+                  Todos os Inscritos
+                </button>
+
+                <button 
+                  type="button"
+                  onclick="filtrarRapidoStatus('pendentes')" 
+                  id="chipFiltro_pendentes"
+                  class="px-3 py-1 rounded-full font-bold transition whitespace-nowrap bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 flex items-center gap-1.5 cursor-pointer"
+                  title="Ver apenas alunos com Pix pendente de aprovação"
+                >
+                  <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  <span>⏳ Pix Pendentes</span>
+                  <span id="chipContagemPendentes" class="px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-black text-[10px]">0</span>
+                </button>
+
+                <button 
+                  type="button"
+                  onclick="filtrarRapidoStatus('aprovados')" 
+                  id="chipFiltro_aprovados"
+                  class="px-3 py-1 rounded-full font-semibold transition whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>✓ Aprovados</span>
+                  <span id="chipContagemAprovados" class="px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-700 font-bold text-[10px]">0</span>
+                </button>
+
+                <button 
+                  type="button"
+                  onclick="filtrarRapidoStatus('presentes')" 
+                  id="chipFiltro_presentes"
+                  class="px-3 py-1 rounded-full font-semibold transition whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>🎟️ Presentes</span>
+                  <span id="chipContagemPresentes" class="px-1.5 py-0.2 rounded-full bg-stone-200 text-stone-700 font-bold text-[10px]">0</span>
+                </button>
+              </div>
+
+              <!-- Seletor Select tradicional (mantido para compatibilidade total) -->
               <select 
                 id="selectFiltroStatusAdmin" 
                 onchange="filtrarInscricoesTabelaAdmin()"
-                class="px-3.5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-stone-300 bg-white text-stone-700 outline-none"
+                class="hidden"
               >
                 <option value="todos">Todos os Inscritos</option>
                 <option value="aprovados">Pix Aprovado</option>
@@ -541,52 +846,18 @@
               </select>
             </div>
 
-            <!-- Botões de Ação Global -->
-            <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
-              <button 
-                onclick="carregarInscricoesAdmin()" 
-                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-700 font-semibold text-xs hover:bg-stone-100 transition shadow-2xs"
-                title="Recarregar lista do Supabase"
-              >
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                <span>Atualizar</span>
-              </button>
-              
-              <button 
-                onclick="exportarParaCSV()" 
-                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700 transition shadow-2xs"
-                title="Baixar lista completa em planilha Excel / CSV"
-              >
-                <i data-lucide="download" class="w-3.5 h-3.5"></i>
-                <span>Exportar (CSV)</span>
-              </button>
-
-              <button 
-                onclick="abrirModalResetarBanco()" 
-                class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition shadow-2xs"
-                title="Apagar dados e comprovantes para limpeza oficial (exige senha cafe2026)"
-              >
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span>Zerar Banco</span>
-              </button>
-            </div>
-
           </div>
 
-          <!-- Tabela Responsiva de Inscritos -->
-          <div class="overflow-x-auto custom-scroll">
-            <table class="min-w-full text-left text-xs sm:text-sm border-collapse admin-table">
+          <!-- ================= VISTA 1: TABELA COMPACTA (DESKTOP) ================= -->
+          <div id="containerVisualizacaoTabela" class="overflow-x-auto custom-scroll">
+            <table class="w-full text-left text-xs sm:text-sm border-collapse admin-table">
               <thead>
-                <tr class="bg-stone-100/80 text-stone-700 font-bold border-b border-stone-200">
-                  <th class="px-4 py-3.5">Participante / Protocolo</th>
-                  <th class="px-4 py-3.5">Faculdade</th>
-                  <th class="px-4 py-3.5">E-mail</th>
-                  <th class="px-4 py-3.5">WhatsApp</th>
-                  <th class="px-4 py-3.5 text-center">Pix (R$ 10)</th>
-                  <th class="px-4 py-3.5 text-center">Presença</th>
-                  <th class="px-4 py-3.5 text-center">Comprovante</th>
-                  <th class="px-4 py-3.5 text-center">Certificado</th>
-                  <th class="px-4 py-3.5 text-right">Ações</th>
+                <tr class="bg-stone-100/90 text-stone-700 font-bold border-b border-stone-200 text-[11px] uppercase tracking-wider">
+                  <th class="px-4 py-3.5 min-w-[240px]">Participante & Contato</th>
+                  <th class="px-4 py-3.5 min-w-[210px]">Pagamento Pix & Comprovante</th>
+                  <th class="px-4 py-3.5 text-center min-w-[110px]">Portaria / Presença</th>
+                  <th class="px-4 py-3.5 text-center min-w-[110px]">Certificado</th>
+                  <th class="px-4 py-3.5 text-right min-w-[120px]">Ações Rápidas</th>
                 </tr>
               </thead>
               <tbody id="adminInscricoesList" class="divide-y divide-stone-100">
@@ -595,10 +866,20 @@
             </table>
           </div>
 
+          <!-- ================= VISTA 2: CARDS RESPONSIVOS (MOBILE & TABLET) ================= -->
+          <div id="containerVisualizacaoCards" class="hidden p-4 sm:p-5 bg-stone-50/50 border-t border-stone-100">
+            <div id="adminInscricoesCardsList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
+              <!-- Cards são injetados dinamicamente por js/admin.js -->
+            </div>
+          </div>
+
           <!-- Rodapé da Tabela -->
-          <div class="p-3.5 bg-stone-50 border-t border-stone-200 text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <span>Mostrando lista oficial de inscritos do Supabase</span>
-            <span class="font-mono text-stone-600">Local do Evento: UniArnaldo · Sala 306</span>
+          <div class="p-4 bg-stone-50 border-t border-stone-200 text-xs text-stone-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Lista oficial sincronizada com o banco de dados</span>
+            </span>
+            <span class="font-mono text-stone-600">Local: UniArnaldo · Sala 306</span>
           </div>
 
         </div>
@@ -1937,18 +2218,46 @@
   <!-- ========================================================================
        MODAL: VISUALIZADOR DE COMPROVANTE PIX
        ======================================================================== -->
-  <div id="comprovanteViewerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-stone-200">
-      <div class="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
-        <h4 id="comprovanteViewerTitle" class="font-bold text-stone-900 text-sm">Visualizar Comprovante Pix</h4>
-        <button onclick="fecharVisualizadorComprovante()" class="text-stone-400 hover:text-stone-800 p-1">
+  <!-- Modal de Visualização e Aprovação de Comprovante Pix -->
+  <div id="comprovanteViewerModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-sm transition-all duration-200">
+    <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden animate-in fade-in zoom-in duration-150">
+      
+      <!-- Cabeçalho do Modal -->
+      <div class="px-5 sm:px-6 py-4 border-b border-stone-100 flex items-center justify-between gap-3 bg-stone-50/80">
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h4 id="comprovanteViewerTitle" class="font-black text-stone-900 text-sm sm:text-base font-serif truncate">
+              Visualizar Comprovante Pix
+            </h4>
+            <span id="comprovanteViewerStatusBadge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+              Pendente
+            </span>
+          </div>
+          <p id="comprovanteViewerSubtitle" class="text-xs text-stone-500 font-mono mt-0.5 truncate">
+            Protocolo: - · Faculdade
+          </p>
+        </div>
+
+        <button 
+          type="button"
+          onclick="fecharVisualizadorComprovante()" 
+          class="text-stone-400 hover:text-stone-800 p-2 rounded-xl hover:bg-stone-200 transition cursor-pointer"
+          title="Fechar"
+        >
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
       
-      <div id="comprovanteViewerContent">
+      <!-- Conteúdo do Comprovante (Imagem / PDF) -->
+      <div id="comprovanteViewerContent" class="flex-1 overflow-y-auto p-4 sm:p-6 bg-stone-100/50">
         <!-- Injetado dinamicamente -->
       </div>
+
+      <!-- Rodapé com Ações de Aprovação Direta -->
+      <div id="comprovanteViewerFooterActions" class="px-5 sm:px-6 py-3.5 sm:py-4 border-t border-stone-100 bg-white flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <!-- Injetado dinamicamente por visualizarComprovante -->
+      </div>
+
     </div>
   </div>
 
@@ -2134,5 +2443,8 @@
   </script>
   <!-- Área de Impressão de Certificados (@media print) -->
   <div id="areaImpressaoCertificados" style="display: none;"></div>
+
+  <!-- Contêiner de Notificações Toast do Painel -->
+  <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full px-4"></div>
 </body>
 </html>

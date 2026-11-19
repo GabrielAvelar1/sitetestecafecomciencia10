@@ -89,9 +89,12 @@ function trocarAbaAdmin(aba) {
   
   abas.forEach(nome => {
     const btn = document.getElementById(`tabBtn_${nome}`);
+    const btnMob = document.getElementById(`mobileTabBtn_${nome}`);
     const view = document.getElementById(`tabView_${nome}`);
+    const isAtiva = nome === aba;
+
     if (btn) {
-      if (nome === aba) {
+      if (isAtiva) {
         btn.classList.add('bg-white', 'text-coffee-950', 'shadow-sm', 'font-bold');
         btn.classList.remove('text-stone-300', 'text-stone-400', 'hover:text-white', 'hover:bg-white/10');
       } else {
@@ -99,14 +102,28 @@ function trocarAbaAdmin(aba) {
         btn.classList.add('text-stone-300', 'hover:text-white');
       }
     }
+
+    if (btnMob) {
+      if (isAtiva) {
+        btnMob.classList.add('bg-white/20', 'text-amber-300', 'font-black', 'border', 'border-amber-400/40');
+        btnMob.classList.remove('text-stone-300', 'hover:bg-white/10');
+      } else {
+        btnMob.classList.remove('bg-white/20', 'text-amber-300', 'font-black', 'border', 'border-amber-400/40');
+        btnMob.classList.add('text-stone-300', 'hover:bg-white/10');
+      }
+    }
+
     if (view) {
-      if (nome === aba) {
+      if (isAtiva) {
         view.classList.remove('hidden');
       } else {
         view.classList.add('hidden');
       }
     }
   });
+
+  // Fecha gaveta mobile se estiver aberta
+  fecharMenuMobileAdmin();
 
   // Inicializações específicas de aba
   if (aba === 'portaria') {
@@ -374,6 +391,10 @@ function atualizarMetricasPorEdicao() {
   const badge12 = document.getElementById('badgeContagemEdicao12');
   const badgeTodas = document.getElementById('badgeContagemEdicaoTodas');
 
+  const chipPendentes = document.getElementById('chipContagemPendentes');
+  const chipAprovados = document.getElementById('chipContagemAprovados');
+  const chipPresentes = document.getElementById('chipContagemPresentes');
+
   if (inscricoesCache) {
     let lista10 = inscricoesCache.filter(i => {
       const proto = (i.protocolo || '').toUpperCase();
@@ -399,36 +420,129 @@ function atualizarMetricasPorEdicao() {
     const qtdInscritos = listaAtual.length;
     const qtdPresentes = listaAtual.filter(i => i.presenca_confirmada).length;
     const qtdPendentes = listaAtual.filter(i => i.status_pagamento === 'pendente' || !i.status_pagamento).length;
+    const qtdAprovados = listaAtual.filter(i => i.status_pagamento === 'aprovado').length;
     const totalValor = listaAtual.filter(i => i.status_pagamento === 'aprovado').reduce((acc, curr) => acc + (parseFloat(curr.valor) || 10), 0);
 
     if (countBadge) countBadge.textContent = `${qtdInscritos} inscritos`;
     if (totalPresencas) totalPresencas.textContent = `${qtdPresentes} presenças`;
     if (totalPendentes) totalPendentes.textContent = `${qtdPendentes} pendentes`;
     if (totalArrecadado) totalArrecadado.textContent = `R$ ${totalValor.toFixed(2).replace('.', ',')}`;
+
+    if (chipPendentes) chipPendentes.textContent = `${qtdPendentes}`;
+    if (chipAprovados) chipAprovados.textContent = `${qtdAprovados}`;
+    if (chipPresentes) chipPresentes.textContent = `${qtdPresentes}`;
   }
 }
 
+// Alternar Modo de Visualização (Tabela vs Cards)
+let modoVisualizacaoAtual = null;
+
+function alternarModoVisualizacao(modo) {
+  modoVisualizacaoAtual = modo;
+  try {
+    localStorage.setItem('admin_view_mode', modo);
+  } catch (e) {}
+  aplicarModoVisualizacao();
+}
+
+function aplicarModoVisualizacao() {
+  const btnTabela = document.getElementById('btnModoTabela');
+  const btnCards = document.getElementById('btnModoCards');
+  const containerTabela = document.getElementById('containerVisualizacaoTabela');
+  const containerCards = document.getElementById('containerVisualizacaoCards');
+
+  let modo = modoVisualizacaoAtual;
+  if (!modo) {
+    try {
+      modo = localStorage.getItem('admin_view_mode');
+    } catch (e) {}
+  }
+  // Se ainda não definido, no mobile inicia como 'cards', no desktop como 'tabela'
+  if (!modo) {
+    modo = (window.innerWidth < 768) ? 'cards' : 'tabela';
+    modoVisualizacaoAtual = modo;
+  }
+
+  if (modo === 'cards') {
+    if (containerTabela) containerTabela.classList.add('hidden');
+    if (containerCards) containerCards.classList.remove('hidden');
+    if (btnCards) {
+      btnCards.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-coffee-950 shadow-xs cursor-pointer';
+    }
+    if (btnTabela) {
+      btnTabela.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition flex items-center gap-1.5 cursor-pointer';
+    }
+  } else {
+    if (containerTabela) containerTabela.classList.remove('hidden');
+    if (containerCards) containerCards.classList.add('hidden');
+    if (btnTabela) {
+      btnTabela.className = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-coffee-950 shadow-xs cursor-pointer';
+    }
+    if (btnCards) {
+      btnCards.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold text-stone-600 hover:text-stone-900 transition flex items-center gap-1.5 cursor-pointer';
+    }
+  }
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+// Filtro Rápido por Chips
+function filtrarRapidoStatus(status) {
+  const selectStatus = document.getElementById('selectFiltroStatusAdmin');
+  if (selectStatus) {
+    selectStatus.value = status;
+  }
+
+  ['todos', 'pendentes', 'aprovados', 'presentes'].forEach(s => {
+    const chip = document.getElementById(`chipFiltro_${s}`);
+    if (chip) {
+      if (s === status) {
+        chip.className = 'px-3 py-1 rounded-full font-bold transition whitespace-nowrap bg-coffee-950 text-white shadow-2xs cursor-pointer';
+      } else if (s === 'pendentes') {
+        chip.className = 'px-3 py-1 rounded-full font-semibold transition whitespace-nowrap bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300 flex items-center gap-1.5 cursor-pointer';
+      } else {
+        chip.className = 'px-3 py-1 rounded-full font-semibold transition whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 flex items-center gap-1 cursor-pointer';
+      }
+    }
+  });
+
+  filtrarInscricoesTabelaAdmin(false);
+}
+
 // Carregar Inscrições
-async function carregarInscricoesAdmin() {
+async function carregarInscricoesAdmin(mostrarLoader = true) {
   atualizarVisualStatusCertificados();
   carregarConfiguracoesResendAdmin();
 
   const container = document.getElementById('adminInscricoesList');
+  const cardsContainer = document.getElementById('adminInscricoesCardsList');
   const statusAvisos = document.getElementById('adminStatusDb');
 
   if (!container) return;
 
-  container.innerHTML = `
-    <tr>
-      <td colspan="9" class="px-6 py-8 text-center text-stone-500">
-        <div class="flex justify-center items-center gap-2">
-          <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-700"></i>
-          <span>Carregando inscrições do banco...</span>
+  const scrollYSalvo = window.scrollY;
+
+  if (mostrarLoader) {
+    container.innerHTML = `
+      <tr>
+        <td colspan="5" class="px-6 py-10 text-center text-stone-500">
+          <div class="flex justify-center items-center gap-2">
+            <i data-lucide="loader-2" class="w-5 h-5 animate-spin text-amber-700"></i>
+            <span>Carregando inscrições do banco...</span>
+          </div>
+        </td>
+      </tr>
+    `;
+    if (cardsContainer) {
+      cardsContainer.innerHTML = `
+        <div class="col-span-full py-12 text-center text-stone-500 flex flex-col items-center justify-center gap-2">
+          <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-amber-700"></i>
+          <span class="text-xs font-semibold">Carregando inscrições...</span>
         </div>
-      </td>
-    </tr>
-  `;
-  if (window.lucide) window.lucide.createIcons();
+      `;
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
 
   // Status de Conexão
   const isSupabase = window.LigaDB.isSupabaseConfigured();
@@ -455,7 +569,10 @@ async function carregarInscricoesAdmin() {
 
     atualizarMetricasPorEdicao();
     if (typeof filtrarInscricoesTabelaAdmin === 'function') {
-      filtrarInscricoesTabelaAdmin();
+      filtrarInscricoesTabelaAdmin(false);
+    }
+    if (!mostrarLoader) {
+      window.scrollTo({ top: scrollYSalvo, behavior: 'instant' });
     }
     // Sincroniza seletor da edição ativa da portaria NFC
     if (window.LigaDB?.obterEdicaoAtivaPortaria) {
@@ -468,8 +585,8 @@ async function carregarInscricoesAdmin() {
     console.error('Erro ao listar:', err);
     container.innerHTML = `
       <tr>
-        <td colspan="9" class="px-6 py-6 text-center text-red-600 text-sm">
-          Erro ao carregar inscrições. Verifique o console ou a conexão com o Supabase.
+        <td colspan="5" class="px-6 py-6 text-center text-red-600 text-sm">
+          Erro ao carregar inscrições. Verifique a conexão com o Supabase.
         </td>
       </tr>
     `;
@@ -478,23 +595,36 @@ async function carregarInscricoesAdmin() {
 
 function renderizarLinhasTabelaAdmin(lista) {
   const container = document.getElementById('adminInscricoesList');
-  if (!container) return;
+  const cardsContainer = document.getElementById('adminInscricoesCardsList');
 
+  // Estado vazio
   if (!lista || lista.length === 0) {
-    container.innerHTML = `
-      <tr>
-        <td colspan="9" class="px-6 py-12 text-center text-stone-400">
+    if (container) {
+      container.innerHTML = `
+        <tr>
+          <td colspan="5" class="px-6 py-12 text-center text-stone-400">
+            <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-stone-300"></i>
+            <p class="font-medium text-stone-600">Nenhuma inscrição encontrada.</p>
+            <p class="text-xs text-stone-400 mt-1">Ajuste os filtros de busca ou aguarde novos participantes.</p>
+          </td>
+        </tr>
+      `;
+    }
+    if (cardsContainer) {
+      cardsContainer.innerHTML = `
+        <div class="p-8 text-center bg-white rounded-2xl border border-stone-200 text-stone-400">
           <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2 text-stone-300"></i>
           <p class="font-medium text-stone-600">Nenhuma inscrição encontrada.</p>
-          <p class="text-xs text-stone-400 mt-1">Verifique os filtros de pesquisa ou aguarde novos participantes.</p>
-        </td>
-      </tr>
-    `;
+          <p class="text-xs text-stone-400 mt-1">Ajuste os filtros de busca ou aguarde novos participantes.</p>
+        </div>
+      `;
+    }
     if (window.lucide) window.lucide.createIcons();
     return;
   }
 
-  container.innerHTML = lista.map(item => {
+  // Helpers de renderização comuns
+  const prepararItem = (item) => {
     const whatsappClean = (item.telefone || '').replace(/\D/g, '');
     const instituicaoNome = window.LigaDB?.extrairInstituicaoAluno ? window.LigaDB.extrairInstituicaoAluno(item) : (item.instituicao || 'Faculdade Arnaldo');
     const isArnaldo = instituicaoNome.toLowerCase().includes('arnaldo');
@@ -504,44 +634,48 @@ function renderizarLinhasTabelaAdmin(lista) {
     const isEdicao12 = protoUpper.startsWith('CC12-') || edNum === 12;
     const isEdicao11 = protoUpper.startsWith('CC11-') || edNum === 11;
     const isEdicao10 = !isEdicao12 && !isEdicao11;
+
     const edicaoBadge = isEdicao12
-      ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="12° Café com Ciência (Dra. Thaissa Calab · 18/11)">12° Café</span>`
+      ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-purple-100 text-purple-900 border border-purple-300" title="12° Café (Dra. Thaissa Calab · 18/11)">12° Café</span>`
       : (isEdicao11
-        ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300" title="11° Café com Ciência (Prof. Dr. Henrique Pretti · 13/11)">11° Café</span>`
-        : `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="10° Café com Ciência (Profa. Carolina Diniz · 30/10)">10° Café</span>`);
+        ? `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-900 border border-emerald-300" title="11° Café (Prof. Dr. Henrique Pretti · 13/11)">11° Café</span>`
+        : `<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300" title="10° Café (Profa. Carolina Diniz · 30/10)">10° Café</span>`);
 
     const instituicaoBadge = isArnaldo
-      ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-200" title="Aluno(a) Faculdade Arnaldo">
-           <i data-lucide="graduation-cap" class="w-3.5 h-3.5 text-amber-700"></i>
-           UniArnaldo
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-900 border border-amber-200" title="Aluno(a) Faculdade Arnaldo">
+           <i data-lucide="graduation-cap" class="w-3 h-3 text-amber-700"></i> UniArnaldo
          </span>`
-      : `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-900 border border-blue-200" title="Instituição: ${instituicaoNome}">
-           <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-700"></i>
-           ${instituicaoNome}
+      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-900 border border-blue-200" title="Instituição: ${instituicaoNome}">
+           <i data-lucide="building-2" class="w-3 h-3 text-blue-700"></i> ${instituicaoNome}
          </span>`;
-    
-    // Status Pagamento
-    const statusPagamentoBadge = item.status_pagamento === 'aprovado'
-      ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-300">Aprovado</span>`
-      : item.status_pagamento === 'recusado'
-      ? `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300">Recusado</span>`
-      : `<span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300">Pendente</span>`;
 
-    // Status Presença
+    const statusPix = item.status_pagamento || 'pendente';
+    const statusPagamentoBadge = statusPix === 'aprovado'
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+           <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i> Aprovado
+         </span>`
+      : statusPix === 'recusado'
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300">
+           <i data-lucide="x-circle" class="w-3 h-3 text-red-600"></i> Recusado
+         </span>`
+      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+           <i data-lucide="clock" class="w-3 h-3 text-amber-600"></i> Pendente
+         </span>`;
+
     const presencaBadge = item.presenca_confirmada
-      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-400" title="Check-in realizado em: ${new Date(item.presenca_horario).toLocaleTimeString('pt-BR')}">
+      ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-300" title="Presente">
            <i data-lucide="check-check" class="w-3 h-3 text-emerald-600"></i> Presente
          </span>`
-      : `<span class="px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-500 border border-stone-200">Não chegou</span>`;
+      : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-stone-100 text-stone-500 border border-stone-200">
+           Não chegou
+         </span>`;
 
-    // Botão Comprovante
     const comprovanteBtn = item.comprovante_url
-      ? `<button onclick="visualizarComprovante('${item.id}')" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-stone-100 hover:bg-stone-200 text-stone-800 transition">
+      ? `<button onclick="visualizarComprovante('${item.id}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition shadow-2xs" title="Ver Comprovante Anexado">
            <i data-lucide="file-check" class="w-3.5 h-3.5 text-amber-700"></i> Ver Pix
          </button>`
-      : `<span class="text-xs text-stone-400">Sem anexo</span>`;
+      : `<span class="text-[11px] text-stone-400">Sem comprovante</span>`;
 
-    // Declarações emitidas e enviadas para 10ª e 11ª edições
     const isEdicaoComPdf = (isEdicao10 || isEdicao11) && (protoUpper.startsWith('CC10-') || protoUpper.startsWith('CC11-'));
     const pdfEnviado = isEdicaoComPdf && window.LigaDB?.obterLinkDeclaracaoPdf 
       ? window.LigaDB.obterLinkDeclaracaoPdf(item.protocolo) 
@@ -549,84 +683,242 @@ function renderizarLinhasTabelaAdmin(lista) {
 
     const certificadoBtn = pdfEnviado
       ? `<div class="inline-flex items-center gap-1">
-           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir diretamente o PDF oficial enviado por e-mail (${isEdicao11 ? '11° Café' : '10° Café'})">
-             <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-700"></i>
-             <span>PDF Enviado</span>
+           <a href="${pdfEnviado}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 hover:bg-emerald-200 transition shadow-2xs" title="Abrir PDF oficial enviado por e-mail">
+             <i data-lucide="file-check" class="w-3.5 h-3.5 text-emerald-700"></i> PDF
            </a>
            <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="p-1 rounded-lg text-stone-600 hover:bg-stone-200 transition" title="Ver no site">
              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
            </a>
          </div>`
       : ((isEdicao10 || isEdicao11) && item.presenca_confirmada
-          ? `<div class="inline-flex items-center gap-1">
-               <a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs">
-                 <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i>
-                 <span>Declaração</span>
-               </a>
-             </div>`
-          : `<span class="text-xs text-stone-400 font-medium">${(isEdicao10 || isEdicao11) ? 'Aguardando pres.' : 'Aguardando palestra'}</span>`);
+          ? `<a href="certificados.html?protocolo=${item.protocolo}" target="_blank" class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition shadow-2xs">
+               <i data-lucide="award" class="w-3.5 h-3.5 text-blue-600"></i> Declaração
+             </a>`
+          : `<span class="text-xs text-stone-400 font-medium">${(isEdicao10 || isEdicao11) ? 'Aguard. presença' : 'Sem certificado'}</span>`);
 
-    return `
-      <tr class="border-b border-stone-100 hover:bg-stone-50 transition-colors">
-        <td class="px-4 py-3">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-stone-900">${item.nome_completo}</span>
-            ${edicaoBadge}
+    return {
+      item,
+      whatsappClean,
+      instituicaoBadge,
+      edicaoBadge,
+      statusPix,
+      statusPagamentoBadge,
+      presencaBadge,
+      comprovanteBtn,
+      certificadoBtn
+    };
+  };
+
+  // 1. RENDERIZAR TABELA DESKTOP (5 COLUNAS OTIMIZADAS - SEM ROLAGEM HORIZONTAL)
+  if (container) {
+    container.innerHTML = lista.map(raw => {
+      const {
+        item,
+        whatsappClean,
+        instituicaoBadge,
+        edicaoBadge,
+        statusPix,
+        statusPagamentoBadge,
+        presencaBadge,
+        comprovanteBtn,
+        certificadoBtn
+      } = prepararItem(raw);
+
+      // Botões de Ação Pix DIRETO na Coluna 2 (Acesso Imediato)
+      const acoesPixColuna2 = statusPix === 'aprovado'
+        ? `<button onclick="alterarStatusPix('${item.id}', 'pendente')" class="text-[11px] text-stone-500 hover:text-stone-800 underline transition" title="Reverter aprovação">Reverter</button>`
+        : statusPix === 'recusado'
+        ? `<button onclick="alterarStatusPix('${item.id}', 'aprovado')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition">
+             <i data-lucide="check" class="w-3.5 h-3.5"></i> Reaprovar
+           </button>`
+        : `<!-- BOTÃO PRINCIPAL DE APROVAÇÃO RÁPIDA (SEM ARRASTE) -->
+           <button onclick="alterarStatusPix('${item.id}', 'aprovado')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white shadow-xs transition" title="Aprovar Pix de R$ 10 agora">
+             <i data-lucide="check" class="w-3.5 h-3.5"></i> Aprovar Pix
+           </button>
+           <button onclick="alterarStatusPix('${item.id}', 'recusado', true)" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 border border-stone-200 transition" title="Recusar Pix">
+             <i data-lucide="x" class="w-3.5 h-3.5"></i>
+           </button>`;
+
+      return `
+        <tr class="border-b border-stone-100 hover:bg-stone-50/80 transition-colors">
+          <!-- Coluna 1: Participante -->
+          <td class="px-4 py-3.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-stone-900">${item.nome_completo}</span>
+              ${edicaoBadge}
+            </div>
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-[11px] font-mono text-coffee-700 bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200">${item.protocolo || '-'}</span>
+              ${instituicaoBadge}
+            </div>
+          </td>
+
+          <!-- Coluna 2: Pagamento Pix & Comprovante (NO ARRASTE!) -->
+          <td class="px-4 py-3.5">
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2 flex-wrap">
+                ${statusPagamentoBadge}
+                ${comprovanteBtn}
+              </div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                ${acoesPixColuna2}
+              </div>
+            </div>
+          </td>
+
+          <!-- Coluna 3: Presença -->
+          <td class="px-4 py-3.5 text-center">
+            ${presencaBadge}
+          </td>
+
+          <!-- Coluna 4: Contato -->
+          <td class="px-4 py-3.5">
+            <div class="space-y-1">
+              ${whatsappClean ? `
+                <a href="https://wa.me/55${whatsappClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 hover:text-emerald-700 text-xs font-semibold text-stone-700 transition" title="Abrir conversa no WhatsApp">
+                  <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i>
+                  ${item.telefone}
+                </a>
+              ` : `<span class="text-xs text-stone-400">Sem telefone</span>`}
+              <div class="text-[11px] text-stone-500 font-mono truncate max-w-[200px]" title="${item.email}">${item.email}</div>
+            </div>
+          </td>
+
+          <!-- Coluna 5: Ações Extras -->
+          <td class="px-4 py-3.5 text-right whitespace-nowrap">
+            <div class="flex items-center justify-end gap-1">
+              <!-- Ver Credencial / QR Code -->
+              <button onclick="abrirCredencialPorProtocolo('${item.protocolo}')" title="Ver Credencial com QR Code" class="p-2 rounded-lg text-coffee-700 hover:bg-coffee-50 transition">
+                <i data-lucide="qr-code" class="w-4 h-4"></i>
+              </button>
+              
+              <!-- Enviar Lembrete no WhatsApp -->
+              <button onclick="enviarLembreteIndividual('${item.id}')" title="Mandar lembrete via WhatsApp" class="p-2 rounded-lg text-emerald-700 hover:bg-emerald-50 transition">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+              </button>
+
+              <!-- Enviar E-mail via Resend -->
+              <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="Enviar E-mail via Resend" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+              </button>
+
+              <!-- Certificado se houver -->
+              <div class="pl-1">
+                ${certificadoBtn}
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // 2. RENDERIZAR CARDS RESPONSIVOS PARA MOBILE (SEM NENHUM ARRASTE)
+  if (cardsContainer) {
+    cardsContainer.innerHTML = lista.map(raw => {
+      const {
+        item,
+        whatsappClean,
+        instituicaoBadge,
+        edicaoBadge,
+        statusPix,
+        statusPagamentoBadge,
+        presencaBadge,
+        comprovanteBtn,
+        certificadoBtn
+      } = prepararItem(raw);
+
+      return `
+        <div class="bg-white rounded-2xl p-4 border border-stone-200/90 shadow-xs hover:border-amber-300 transition-all space-y-3">
+          <!-- Topo do Card -->
+          <div class="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-stone-100">
+            <div class="flex items-center gap-1.5">
+              ${edicaoBadge}
+              <span class="font-mono text-xs font-bold text-coffee-800 bg-stone-100 px-2 py-0.5 rounded-md border border-stone-200">${item.protocolo || '-'}</span>
+            </div>
+            <div>
+              ${statusPagamentoBadge}
+            </div>
           </div>
-          <div class="text-[11px] font-mono text-coffee-700">${item.protocolo || '-'}</div>
-        </td>
-        <td class="px-4 py-3 whitespace-nowrap">${instituicaoBadge}</td>
-        <td class="px-4 py-3 text-stone-600 text-xs">${item.email}</td>
-        <td class="px-4 py-3 text-stone-700 text-xs whitespace-nowrap">
-          <a href="https://wa.me/55${whatsappClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 hover:text-emerald-700 font-medium" title="Abrir conversa no WhatsApp">
-            <i data-lucide="phone" class="w-3 h-3 text-emerald-600"></i>
-            ${item.telefone}
-          </a>
-        </td>
-        <td class="px-4 py-3 text-center">${statusPagamentoBadge}</td>
-        <td class="px-4 py-3 text-center">${presencaBadge}</td>
-        <td class="px-4 py-3 text-center">${comprovanteBtn}</td>
-        <td class="px-4 py-3 text-center">${certificadoBtn}</td>
-        <td class="px-4 py-3 text-right whitespace-nowrap">
-          <div class="flex items-center justify-end gap-1">
-            <!-- Botão Ver Credencial / QR Code -->
-            <button onclick="abrirCredencialPorProtocolo('${item.protocolo}')" title="Ver Credencial com QR Code" class="p-1.5 rounded-lg text-coffee-700 hover:bg-coffee-50 transition">
-              <i data-lucide="qr-code" class="w-4 h-4"></i>
-            </button>
-            
-            <!-- Aprovar Pix -->
-            <button onclick="alterarStatusPix('${item.id}', 'aprovado')" title="Aprovar pagamento Pix" class="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition">
-              <i data-lucide="check-circle" class="w-4 h-4"></i>
-            </button>
 
-            <!-- Recusar Pix -->
-            <button onclick="alterarStatusPix('${item.id}', 'recusado')" title="Recusar pagamento Pix" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition">
-              <i data-lucide="x-circle" class="w-4 h-4"></i>
-            </button>
-
-            <!-- Enviar Lembrete no WhatsApp -->
-            <button onclick="enviarLembreteIndividual('${item.id}')" title="Mandar lembrete via WhatsApp" class="p-1.5 rounded-lg text-emerald-700 hover:bg-emerald-50 transition">
-              <i data-lucide="message-circle" class="w-4 h-4"></i>
-            </button>
-
-            <!-- Enviar E-mail via Resend -->
-            <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="Enviar E-mail via Resend (Credencial, Lembrete ou Certificado)" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition">
-              <i data-lucide="mail" class="w-4 h-4"></i>
-            </button>
+          <!-- Aluno & Instituição -->
+          <div>
+            <h4 class="text-base font-black text-coffee-950 leading-snug">${item.nome_completo}</h4>
+            <div class="mt-1.5 flex items-center gap-2 flex-wrap">
+              ${instituicaoBadge}
+              ${presencaBadge}
+            </div>
           </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
+
+          <!-- Contato Rápido -->
+          <div class="flex items-center justify-between gap-2 text-xs pt-1">
+            ${whatsappClean ? `
+              <a href="https://wa.me/55${whatsappClean}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition">
+                <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-600"></i> ${item.telefone}
+              </a>
+            ` : `<span class="text-stone-400">Sem telefone</span>`}
+            <span class="text-stone-500 font-mono text-[11px] truncate flex-1 text-right" title="${item.email}">${item.email}</span>
+          </div>
+
+          <!-- ÁREA DE AÇÃO PRINCIPAL: APROVAÇÃO PIX & COMPROVANTE (SEM NENHUM ARRASTE) -->
+          <div class="pt-2 border-t border-stone-100">
+            <div class="flex items-center gap-2">
+              ${statusPix === 'aprovado'
+                ? `<div class="flex-1 flex items-center justify-between gap-2">
+                     <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700">
+                       <i data-lucide="check-circle" class="w-4 h-4"></i> Pix Aprovado ✓
+                     </span>
+                     <button onclick="alterarStatusPix('${item.id}', 'pendente')" class="text-xs text-stone-500 hover:text-stone-800 underline">Reverter</button>
+                   </div>`
+                : statusPix === 'recusado'
+                ? `<button onclick="alterarStatusPix('${item.id}', 'aprovado')" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition">
+                     <i data-lucide="check" class="w-4 h-4"></i> Reaprovar Pix
+                   </button>`
+                : `<button onclick="alterarStatusPix('${item.id}', 'aprovado')" class="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black text-xs shadow-xs transition">
+                     <i data-lucide="check" class="w-4 h-4"></i> Aprovar Pix (R$ 10)
+                   </button>
+                   <button onclick="alterarStatusPix('${item.id}', 'recusado', true)" class="p-2.5 rounded-xl text-red-500 hover:bg-red-50 border border-stone-200 transition" title="Recusar">
+                     <i data-lucide="x" class="w-4 h-4"></i>
+                   </button>`
+              }
+              ${item.comprovante_url
+                ? `<button onclick="visualizarComprovante('${item.id}')" class="inline-flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs transition">
+                     <i data-lucide="file-check" class="w-4 h-4 text-amber-700"></i> Ver Pix
+                   </button>`
+                : ''
+              }
+            </div>
+          </div>
+
+          <!-- AÇÕES SECUNDÁRIAS -->
+          <div class="pt-2 flex items-center justify-between gap-2 text-stone-600 border-t border-stone-100">
+            <div class="flex items-center gap-1">
+              <button onclick="abrirCredencialPorProtocolo('${item.protocolo}')" title="Credencial com QR Code" class="p-2 rounded-lg hover:bg-stone-100 text-coffee-800 transition">
+                <i data-lucide="qr-code" class="w-4 h-4"></i>
+              </button>
+              <button onclick="enviarLembreteIndividual('${item.id}')" title="Lembrete no WhatsApp" class="p-2 rounded-lg hover:bg-emerald-50 text-emerald-700 transition">
+                <i data-lucide="message-circle" class="w-4 h-4"></i>
+              </button>
+              <button onclick="enviarEmailIndividualAdmin('${item.id}')" title="E-mail via Resend" class="p-2 rounded-lg hover:bg-blue-50 text-blue-600 transition">
+                <i data-lucide="mail" class="w-4 h-4"></i>
+              </button>
+            </div>
+            <div>
+              ${certificadoBtn}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 
   if (window.lucide) window.lucide.createIcons();
 }
 
-function filtrarInscricoesTabelaAdmin() {
+function filtrarInscricoesTabelaAdmin(resetarLoader = false) {
   const inputBusca = document.getElementById('inputBuscaInscritosAdmin');
-  const selectStatus = document.getElementById('selectFiltroStatusAdmin');
   const termo = (inputBusca?.value || '').toLowerCase().trim();
-  const status = selectStatus?.value || 'todos';
+  const status = estadoAdmin.filtroStatusRapido || 'todos';
 
   if (!inscricoesCache) return;
 
@@ -657,52 +949,238 @@ function filtrarInscricoesTabelaAdmin() {
   renderizarLinhasTabelaAdmin(filtrados);
 }
 
-// Alterar Status Pix
-async function alterarStatusPix(id, novoStatus) {
+// Alterar Status Pix com PRESERVAÇÃO TOTAL DO SCROLL e ATUALIZAÇÃO OTIMISTA (Zero pulos!)
+async function alterarStatusPix(id, novoStatus, confirmacaoNecessaria = false) {
+  if (confirmacaoNecessaria && novoStatus === 'recusado') {
+    if (!confirm('Deseja realmente marcar este pagamento Pix como recusado?')) return;
+  }
+
+  // 1. Guardar a posição EXATA do scroll na janela
+  const scrollYSalvo = window.scrollY;
+
+  // 2. Atualização otimista na memória local para feedback imediato
+  const item = (inscricoesCache || []).find(i => String(i.id) === String(id));
+  const statusAnterior = item ? item.status_pagamento : null;
+  if (item) {
+    item.status_pagamento = novoStatus;
+  }
+
+  // 3. Re-renderizar tabela e cards com a lista filtrada atual SEM colapsar altura
+  filtrarInscricoesTabelaAdmin(false);
+
+  // 4. Restaurar imediatamente a posição do scroll para não haver qualquer salto para o topo
+  window.scrollTo({ top: scrollYSalvo, behavior: 'instant' });
+
+  // 5. Se o modal de comprovante estiver aberto com esse item, atualizar os botões dele
+  if (item) {
+    atualizarModalComprovanteAcoes(item);
+  }
+
+  // 6. Atualizar chips de contagem e métricas
+  atualizarMetricasPorEdicao();
+
+  // 7. Feedback visual através de Toast
+  if (novoStatus === 'aprovado') {
+    mostrarToastAdmin(`Pix de ${item?.nome_completo || 'participante'} aprovado com sucesso!`, 'sucesso');
+  } else if (novoStatus === 'recusado') {
+    mostrarToastAdmin(`Pix de ${item?.nome_completo || 'participante'} marcado como recusado.`, 'aviso');
+  } else {
+    mostrarToastAdmin(`Status Pix revertido para pendente.`, 'info');
+  }
+
+  // 8. Sincronização em segundo plano com o Supabase
   try {
-    await window.LigaDB.atualizarStatusPagamento(id, novoStatus);
-    carregarInscricoesAdmin();
+    if (window.LigaDB?.atualizarStatusPagamento) {
+      await window.LigaDB.atualizarStatusPagamento(id, novoStatus);
+    }
   } catch (err) {
-    alert('Erro ao atualizar status: ' + err.message);
+    console.error('Erro ao atualizar status Pix no Supabase:', err);
+    // Em caso de falha, reverte otimismo
+    if (item && statusAnterior) {
+      item.status_pagamento = statusAnterior;
+      filtrarInscricoesTabelaAdmin(false);
+      window.scrollTo({ top: scrollYSalvo, behavior: 'instant' });
+      atualizarMetricasPorEdicao();
+    }
+    mostrarToastAdmin('Erro ao salvar no Supabase: ' + (err.message || 'Tente novamente'), 'erro');
   }
 }
 
-// Visualizar Comprovante
+// Visualizar Comprovante com APROVAÇÃO DIRETA NO MODAL
 function visualizarComprovante(id) {
-  const item = inscricoesCache.find(i => i.id === id);
+  const item = (inscricoesCache || []).find(i => String(i.id) === String(id));
   if (!item || !item.comprovante_url) {
-    alert('Comprovante não disponível.');
+    mostrarToastAdmin('Comprovante não disponível para esta inscrição.', 'aviso');
     return;
   }
 
   const viewerModal = document.getElementById('comprovanteViewerModal');
   const viewerContent = document.getElementById('comprovanteViewerContent');
   const viewerTitle = document.getElementById('comprovanteViewerTitle');
+  const viewerSub = document.getElementById('comprovanteViewerSubtitle') || document.getElementById('comprovanteViewerSub');
 
-  if (viewerTitle) viewerTitle.textContent = `Comprovante: ${item.nome_completo}`;
+  if (viewerTitle) viewerTitle.textContent = item.nome_completo;
+  if (viewerSub) viewerSub.textContent = `Protocolo: ${item.protocolo || '-'} • Telefone: ${item.telefone || '-'} • E-mail: ${item.email || '-'}`;
 
-  if (item.comprovante_url.startsWith('data:application/pdf')) {
+  if (item.comprovante_url.startsWith('data:application/pdf') || item.comprovante_url.toLowerCase().endsWith('.pdf')) {
     viewerContent.innerHTML = `
-      <iframe src="${item.comprovante_url}" class="w-full h-[70vh] rounded-lg border"></iframe>
+      <iframe src="${item.comprovante_url}" class="w-full h-[65vh] rounded-xl border border-stone-700 bg-white shadow-lg"></iframe>
     `;
   } else {
     viewerContent.innerHTML = `
-      <div class="flex flex-col items-center justify-center p-2">
-        <img src="${item.comprovante_url}" alt="Comprovante Pix" class="max-h-[75vh] max-w-full rounded-lg shadow-md object-contain" />
-        <a href="${item.comprovante_url}" download="${item.comprovante_nome || 'comprovante.jpg'}" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-stone-800 text-white text-xs font-semibold rounded-lg hover:bg-stone-700 transition">
-          <i data-lucide="download" class="w-4 h-4"></i> Baixar Arquivo Original
-        </a>
+      <div class="flex flex-col items-center justify-center max-h-[68vh] w-full">
+        <img src="${item.comprovante_url}" alt="Comprovante Pix" class="max-h-[65vh] max-w-full rounded-xl shadow-2xl object-contain border border-stone-700/60" />
       </div>
     `;
   }
+
+  atualizarModalComprovanteAcoes(item);
 
   if (window.lucide) window.lucide.createIcons();
   if (viewerModal) viewerModal.classList.remove('hidden');
 }
 
+// Atualizar Ações no Rodapé do Modal do Comprovante (Permite Aprovar na Visualização!)
+function atualizarModalComprovanteAcoes(item) {
+  if (!item) return;
+  const statusBadge = document.getElementById('comprovanteViewerStatusBadge');
+  const footerActions = document.getElementById('comprovanteViewerFooterActions');
+
+  if (statusBadge) {
+    if (item.status_pagamento === 'aprovado') {
+      statusBadge.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300"><i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i> Aprovado</span>`;
+    } else if (item.status_pagamento === 'recusado') {
+      statusBadge.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800 border border-red-300"><i data-lucide="x-circle" class="w-3.5 h-3.5 text-red-600"></i> Recusado</span>`;
+    } else {
+      statusBadge.innerHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-600"></i> Pendente</span>`;
+    }
+  }
+
+  if (footerActions) {
+    const isAprovado = item.status_pagamento === 'aprovado';
+    footerActions.innerHTML = `
+      <div class="flex items-center gap-2 flex-wrap">
+        ${isAprovado ? `
+          <button onclick="reverterPixPeloModal('${item.id}')" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-300 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-stone-600"></i> Reverter para Pendente
+          </button>
+        ` : `
+          <button onclick="aprovarPixPeloModal('${item.id}')" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-md shadow-emerald-600/20 transition">
+            <i data-lucide="check-circle" class="w-4 h-4"></i> Aprovar Pagamento Pix (R$ 10)
+          </button>
+          <button onclick="recusarPixPeloModal('${item.id}')" class="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 transition">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i> Recusar
+          </button>
+        `}
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="${item.comprovante_url}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 transition">
+          <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Nova Aba
+        </a>
+        <a href="${item.comprovante_url}" download="${item.comprovante_nome || 'comprovante.jpg'}" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-stone-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition">
+          <i data-lucide="download" class="w-3.5 h-3.5 text-amber-800"></i> Baixar Arquivo
+        </a>
+      </div>
+    `;
+  }
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function aprovarPixPeloModal(id) {
+  alterarStatusPix(id, 'aprovado', false);
+}
+
+function recusarPixPeloModal(id) {
+  alterarStatusPix(id, 'recusado', true);
+}
+
+function reverterPixPeloModal(id) {
+  alterarStatusPix(id, 'pendente', false);
+}
+
 function fecharVisualizadorComprovante() {
   const viewerModal = document.getElementById('comprovanteViewerModal');
   if (viewerModal) viewerModal.classList.add('hidden');
+}
+
+// ============================================================================
+// MENU MOBILE HAMBURGUER (DRAWER OFF-CANVAS)
+// ============================================================================
+function toggleMenuMobileAdmin() {
+  const drawer = document.getElementById('drawerMenuMobileAdmin');
+  if (!drawer) return;
+  if (drawer.classList.contains('hidden')) {
+    abrirMenuMobileAdmin();
+  } else {
+    fecharMenuMobileAdmin();
+  }
+}
+
+function abrirMenuMobileAdmin() {
+  const drawer = document.getElementById('drawerMenuMobileAdmin');
+  if (!drawer) return;
+  drawer.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function fecharMenuMobileAdmin() {
+  const drawer = document.getElementById('drawerMenuMobileAdmin');
+  if (!drawer) return;
+  drawer.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function selecionarAbaMobile(aba) {
+  fecharMenuMobileAdmin();
+  trocarAbaAdmin(aba);
+}
+
+// ============================================================================
+// SISTEMA DE NOTIFICAÇÕES TOAST ELEGANTE
+// ============================================================================
+function mostrarToastAdmin(mensagem, tipo = 'sucesso') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  const corClasses = tipo === 'sucesso'
+    ? 'bg-emerald-900/95 text-emerald-100 border-emerald-700 shadow-emerald-950/20'
+    : (tipo === 'erro'
+      ? 'bg-red-900/95 text-red-100 border-red-700 shadow-red-950/20'
+      : (tipo === 'aviso'
+        ? 'bg-amber-900/95 text-amber-100 border-amber-700 shadow-amber-950/20'
+        : 'bg-stone-900/95 text-stone-100 border-stone-700 shadow-stone-950/20'));
+
+  const iconeNome = tipo === 'sucesso' ? 'check-circle' : (tipo === 'erro' ? 'alert-triangle' : (tipo === 'aviso' ? 'alert-circle' : 'info'));
+
+  toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg text-xs font-semibold transition-all transform duration-300 translate-y-2 opacity-0 ${corClasses}`;
+  toast.innerHTML = `
+    <i data-lucide="${iconeNome}" class="w-4 h-4 shrink-0"></i>
+    <span class="flex-1">${mensagem}</span>
+    <button onclick="this.parentElement.remove()" class="p-0.5 text-stone-300 hover:text-white transition">
+      <i data-lucide="x" class="w-3.5 h-3.5"></i>
+    </button>
+  `;
+
+  container.appendChild(toast);
+  if (window.lucide) window.lucide.createIcons();
+
+  // Animação de entrada suave
+  requestAnimationFrame(() => {
+    toast.classList.remove('translate-y-2', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+  });
+
+  // Remoção suave automática após 3.5s
+  setTimeout(() => {
+    toast.classList.remove('translate-y-0', 'opacity-100');
+    toast.classList.add('translate-y-2', 'opacity-0');
+    setTimeout(() => {
+      if (toast.parentElement) toast.remove();
+    }, 300);
+  }, 3500);
 }
 
 // ============================================================================
@@ -2966,3 +3444,19 @@ window.baixarQrCodeAdmin = baixarQrCodeAdmin;
 window.copiarLinkQrCodeAdmin = copiarLinkQrCodeAdmin;
 window.testarLinkQrCodeNoNavegador = testarLinkQrCodeNoNavegador;
 window.imprimirCartazQrCodeAdmin = imprimirCartazQrCodeAdmin;
+
+// Exportações da interface moderna do Painel Admin
+window.alternarModoVisualizacao = alternarModoVisualizacao;
+window.aplicarModoVisualizacao = aplicarModoVisualizacao;
+window.filtrarRapidoStatus = filtrarRapidoStatus;
+window.alterarStatusPix = alterarStatusPix;
+window.visualizarComprovante = visualizarComprovante;
+window.fecharVisualizadorComprovante = fecharVisualizadorComprovante;
+window.aprovarPixPeloModal = aprovarPixPeloModal;
+window.recusarPixPeloModal = recusarPixPeloModal;
+window.reverterPixPeloModal = reverterPixPeloModal;
+window.toggleMenuMobileAdmin = toggleMenuMobileAdmin;
+window.abrirMenuMobileAdmin = abrirMenuMobileAdmin;
+window.fecharMenuMobileAdmin = fecharMenuMobileAdmin;
+window.selecionarAbaMobile = selecionarAbaMobile;
+window.mostrarToastAdmin = mostrarToastAdmin;
