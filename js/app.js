@@ -647,7 +647,7 @@ function obterMetadadosEdicaoAluno(aluno) {
     dataCurta: '30/10 às 15h',
     palestrante: 'Profa. Carolina Diniz',
     local: 'UniArnaldo - Campus Anchieta (Sala 306)',
-    url: 'index.html',
+    url: '10cafe.html',
     dataObj: new Date(2026, 9, 30, 20, 0)
   };
 }
@@ -1555,7 +1555,7 @@ function renderizarAreaAlunoComInscricoes(content, usuario, inscricoes) {
         </div>
         <h5 class="text-xs sm:text-sm font-bold text-coffee-950">10° Café: Os Direitos dos Pacientes na Odontologia</h5>
         <p class="text-[11px] text-stone-600">Com a <strong>Profa. Carolina Diniz</strong> em 30 de Outubro às 15h. Certificado de 2 horas!</p>
-        <a href="index.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
+        <a href="10cafe.html#inscricao" onclick="fecharAreaDoAluno()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-coffee-900 hover:bg-black text-white text-xs font-bold rounded-xl transition shadow">
           <span>Ver 10° Café</span>
           <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
         </a>
@@ -1673,7 +1673,7 @@ function renderizarAreaAlunoSemInscricao(content, usuario) {
         </div>
 
         <!-- Card Portal Histórico -->
-        <a href="portal.html" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-stone-200 hover:border-coffee-300 hover:bg-stone-50 transition flex items-center justify-between gap-3 text-stone-600">
+        <a href="index.html" onclick="fecharAreaDoAluno()" class="p-3.5 rounded-2xl border border-stone-200 hover:border-coffee-300 hover:bg-stone-50 transition flex items-center justify-between gap-3 text-stone-600">
           <div>
             <span class="text-[10px] uppercase font-bold text-stone-500 bg-stone-100 px-2 py-0.5 rounded">Edições Realizadas</span>
             <h5 class="text-xs font-bold text-stone-800 mt-1">10°, 11° e 12° Café com Ciência</h5>
@@ -1913,7 +1913,7 @@ function atualizarStatusInscricoesUI() {
                 <span>Consultar Inscrição / Declaração</span>
               </button>
               <span class="text-red-400">•</span>
-              <a href="portal.html" class="inline-flex items-center gap-1 font-bold text-coffee-800 hover:underline">
+              <a href="index.html" class="inline-flex items-center gap-1 font-bold text-coffee-800 hover:underline">
                 <span>Ver Próximas Palestras no Portal</span>
                 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
               </a>

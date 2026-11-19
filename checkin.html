@@ -137,7 +137,7 @@
             <i data-lucide="user-check" class="w-4 h-4 text-emerald-700"></i>
             <span>Validar Próximo Inscrito</span>
           </button>
-          <a id="btnVerCredencial" href="portal.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+          <a id="btnVerCredencial" href="index.html" class="w-full py-3 px-4 bg-coffee-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
             <i data-lucide="award" class="w-4 h-4 text-amber-300"></i>
             <span>Acessar Meu Painel / Credencial</span>
           </a>
@@ -318,7 +318,7 @@
 
       infoEdicaoAtiva = window.LigaDB?.obterInfoEdicao 
         ? window.LigaDB.obterInfoEdicao(edicaoAtivaPortaria)
-        : { num: edicaoAtivaPortaria, titulo: `${edicaoAtivaPortaria}° Café com Ciência`, subtitulo: `${edicaoAtivaPortaria}ª Edição`, link: 'portal.html' };
+        : { num: edicaoAtivaPortaria, titulo: `${edicaoAtivaPortaria}° Café com Ciência`, subtitulo: `${edicaoAtivaPortaria}ª Edição`, link: 'index.html' };
 
       document.title = `Check-in NFC Portaria | ${infoEdicaoAtiva.titulo}`;
 
@@ -327,13 +327,13 @@
 
       const btnPalestra = document.getElementById('btnLinkPalestra');
       if (btnPalestra) {
-        btnPalestra.href = infoEdicaoAtiva.link || 'portal.html';
+        btnPalestra.href = infoEdicaoAtiva.link || 'index.html';
         btnPalestra.innerHTML = `<span>Página da Palestra (${infoEdicaoAtiva.num}° Café)</span><i data-lucide="arrow-right" class="w-3.5 h-3.5 text-stone-400"></i>`;
       }
 
       const btnPalestraAlready = document.getElementById('btnLinkPalestraAlready');
       if (btnPalestraAlready) {
-        btnPalestraAlready.href = infoEdicaoAtiva.link || 'portal.html';
+        btnPalestraAlready.href = infoEdicaoAtiva.link || 'index.html';
         btnPalestraAlready.innerHTML = `<span>Acessar Palestra (${infoEdicaoAtiva.num}° Café)</span><i data-lucide="arrow-right" class="w-4 h-4"></i>`;
       }
 
@@ -380,7 +380,7 @@
 
         const btnCred = document.getElementById('btnVerCredencial');
         if (btnCred && aluno?.protocolo) {
-          btnCred.href = `${infoEdicaoAtiva?.link || 'portal.html'}?consultar=${aluno.protocolo}`;
+          btnCred.href = `${infoEdicaoAtiva?.link || 'index.html'}?consultar=${aluno.protocolo}`;
         }
 
         document.getElementById('stateSuccess').classList.remove('hidden');

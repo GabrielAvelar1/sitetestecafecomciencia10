@@ -24,3 +24,13 @@
   from = "/portaria"
   to = "/checkin.html"
   status = 200
+
+[[redirects]]
+  from = "/portal"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/portal.html"
+  to = "/index.html"
+  status = 200

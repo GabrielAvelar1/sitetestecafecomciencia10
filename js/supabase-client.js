@@ -336,7 +336,7 @@ function obterInfoEdicao(edicao) {
       titulo: '10° Café com Ciência',
       subtitulo: 'A Importância do Pré-Natal Odontológico',
       palestrante: 'Profa. Dra. Carolina Diniz',
-      link: 'index.html'
+      link: '10cafe.html'
     },
     11: {
       num: 11,
@@ -360,7 +360,7 @@ function obterInfoEdicao(edicao) {
       titulo: '13° Café com Ciência',
       subtitulo: 'Próxima Edição Oficial',
       palestrante: 'Liga Acadêmica de Odontologia',
-      link: 'portal.html'
+      link: 'index.html'
     }
   };
 
@@ -371,7 +371,7 @@ function obterInfoEdicao(edicao) {
     titulo: `${n}° Café com Ciência`,
     subtitulo: `${n}ª Edição Oficial`,
     palestrante: 'Liga Acadêmica de Odontologia',
-    link: 'portal.html'
+    link: 'index.html'
   };
 }
 

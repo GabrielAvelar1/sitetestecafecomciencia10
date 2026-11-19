@@ -227,7 +227,7 @@
                     <span>Abrir em Tela Cheia</span>
                   </a>
                   <a 
-                    href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : 'index.html')}?consultar=${aluno?.protocolo || protocolo}"
+                    href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : '10cafe.html')}?consultar=${aluno?.protocolo || protocolo}"
                     class="px-4 py-3 bg-amber-50 hover:bg-amber-100 text-coffee-950 font-bold text-xs sm:text-sm rounded-xl border border-amber-300 transition flex items-center gap-2"
                     title="Ver sua credencial oficial de inscrição com QR Code"
                   >
@@ -285,7 +285,7 @@
               ${aluno?.protocolo ? `<p><strong>Protocolo:</strong> ${aluno.protocolo}</p>` : ''}
               <p><strong>Status de Presença:</strong> ${aluno?.presenca_confirmada ? '✅ Presença Confirmada no Evento' : '⏳ Aguardando confirmação no dia da palestra'}</p>
             </div>
-            <a href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : 'index.html')}" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
+            <a href="${is12 ? '12cafe.html' : (is11 ? '11cafe.html' : '10cafe.html')}" class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-5 bg-stone-900 hover:bg-black text-white font-bold text-xs rounded-xl shadow transition">
               <i data-lucide="arrow-left" class="w-4 h-4"></i>
               <span>Voltar para a Página do Evento</span>
             </a>

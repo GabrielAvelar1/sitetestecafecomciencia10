@@ -55,7 +55,7 @@
     <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4 w-full">
       
       <!-- Logo Oficial do Café com Ciência -->
-      <a href="portal.html" class="flex items-center gap-2 sm:gap-3 group min-w-0" title="Portal Café com Ciência">
+      <a href="index.html" class="flex items-center gap-2 sm:gap-3 group min-w-0" title="Portal Café com Ciência">
         <div class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden shadow-xs bg-white p-1 border border-coffee-200 group-hover:scale-105 transition shrink-0">
           <img src="logo.png" alt="Logo Café com Ciência" class="w-full h-full object-contain" />
         </div>
@@ -504,7 +504,7 @@
             <!-- Rodapé do Card com Ações -->
             <div class="border-t border-stone-100 pt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
               <a 
-                href="index.html" 
+                href="10cafe.html" 
                 class="px-3.5 py-2.5 rounded-xl font-bold text-xs text-stone-700 bg-stone-100 hover:bg-stone-200 active:scale-98 transition inline-flex items-center justify-center gap-1.5 border border-stone-300"
                 title="Acessar a página da palestra para conferir os detalhes"
               >
@@ -610,7 +610,7 @@
         Faculdade Arnaldo · Campus Anchieta · Belo Horizonte - MG
       </p>
       <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-stone-400 pt-1">
-        <a href="index.html" class="hover:text-amber-300 transition">10ª Edição (30/10)</a>
+        <a href="10cafe.html" class="hover:text-amber-300 transition">10ª Edição (30/10)</a>
         <span>·</span>
         <a href="11cafe.html" class="hover:text-amber-300 transition">11ª Edição (13/11)</a>
         <span>·</span>
@@ -764,7 +764,7 @@
 
                       botoes += `
                         <a 
-                          href="${edNum === 11 ? '11cafe.html' : (edNum === 12 ? '12cafe.html' : 'index.html')}?consultar=${item.protocolo}"
+                          href="${edNum === 11 ? '11cafe.html' : (edNum === 12 ? '12cafe.html' : '10cafe.html')}?consultar=${item.protocolo}"
                           class="${pdfLink ? 'px-3.5' : 'flex-1'} py-2.5 bg-coffee-800 hover:bg-coffee-900 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center justify-center gap-1.5"
                           title="Abrir credencial oficial com QR Code e detalhes da inscrição"
                         >
@@ -775,7 +775,7 @@
 
                       botoes += `
                         <a 
-                          href="${edNum === 12 ? '12cafe.html' : (edNum === 11 ? '11cafe.html' : 'index.html')}" 
+                          href="${edNum === 12 ? '12cafe.html' : (edNum === 11 ? '11cafe.html' : '10cafe.html')}" 
                           class="py-2.5 px-3 bg-white border border-stone-300 hover:bg-stone-100 text-stone-700 font-bold text-xs rounded-xl transition flex items-center justify-center gap-1"
                         >
                           <span>Palestra</span>
@@ -807,7 +807,19 @@
     window.fecharModalConsultaPortal = fecharModalConsultaPortal;
     window.executarBuscaPortal = executarBuscaPortal;
 
-    document.addEventListener('DOMContentLoaded', checarAcessoLigaPortal);
+    document.addEventListener('DOMContentLoaded', () => {
+      checarAcessoLigaPortal();
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const termoConsultar = params.get('consultar') || params.get('protocolo');
+        if (termoConsultar) {
+          abrirModalConsultaPortal();
+          const input = document.getElementById('inputBuscaPortal');
+          if (input) input.value = termoConsultar;
+          executarBuscaPortal();
+        }
+      } catch (e) {}
+    });
     window.addEventListener('auth_state_changed', checarAcessoLigaPortal);
   </script>
 
