@@ -2033,8 +2033,8 @@
                     src="https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=https%3A%2F%2Fcafecomciencia.netlify.app%2F&color=2F180E&margin=2" 
                     alt="QR Code Café com Ciência"
                     class="w-48 h-48 sm:w-56 sm:h-56 object-contain rounded-lg transition-transform duration-300"
-                    onload="aoCarregarImagemQrCode(true)"
-                    onerror="aoCarregarImagemQrCode(false)"
+                    onload="window.aoCarregarImagemQrCode && window.aoCarregarImagemQrCode(true)"
+                    onerror="window.aoCarregarImagemQrCode && window.aoCarregarImagemQrCode(false)"
                   />
                   <div id="qrLoadingSpinner" class="absolute inset-0 bg-white/90 backdrop-blur-xs rounded-2xl flex flex-col items-center justify-center gap-2 hidden">
                     <i data-lucide="loader-2" class="w-8 h-8 text-amber-600 animate-spin"></i>
@@ -2355,7 +2355,7 @@
   <script src="js/supabase-client.js?v=15"></script>
   <script src="js/email-service.js?v=15"></script>
   <script src="js/qr-scanner.js?v=15"></script>
-  <script src="js/admin.js?v=15"></script>
+  <script src="js/admin.js?v=16"></script>
 
   <script>
     // Inicialização da Página Dedicada de Admin

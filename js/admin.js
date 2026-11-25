@@ -6,6 +6,9 @@ const ASSINATURA_BASE64_GLOBAL = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA
 
 let inscricoesCache = [];
 let abaAtivaAtual = 'inscricoes';
+const estadoAdmin = {
+  filtroStatusRapido: 'todos'
+};
 
 // Abrir Painel Admin (Navega para a página dedicada admin.html)
 function abrirPainelAdmin(abaInicial = 'inscricoes') {
@@ -488,9 +491,10 @@ function aplicarModoVisualizacao() {
 
 // Filtro Rápido por Chips
 function filtrarRapidoStatus(status) {
+  estadoAdmin.filtroStatusRapido = status || 'todos';
   const selectStatus = document.getElementById('selectFiltroStatusAdmin');
   if (selectStatus) {
-    selectStatus.value = status;
+    selectStatus.value = estadoAdmin.filtroStatusRapido;
   }
 
   ['todos', 'pendentes', 'aprovados', 'presentes'].forEach(s => {
@@ -568,6 +572,7 @@ async function carregarInscricoesAdmin(mostrarLoader = true) {
     inscricoesCache = await window.LigaDB.listarInscricoes();
 
     atualizarMetricasPorEdicao();
+    aplicarModoVisualizacao();
     if (typeof filtrarInscricoesTabelaAdmin === 'function') {
       filtrarInscricoesTabelaAdmin(false);
     }
